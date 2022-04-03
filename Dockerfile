@@ -19,4 +19,4 @@ ENV PORT=8000
 # Allow statements and log messages to immediately appear in the Knative logs
 ENV PYTHONUNBUFFERED=1
 
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:server
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:server

@@ -1,19 +1,27 @@
 from dash import Dash, html, dcc
-import flask
 import plotly.express as px
 import pandas as pd
-import argparse
 
-parser = argparse.ArgumentParser(description="Verifa Metrics Dashboard")
-parser.add_argument(
-    "--debug",
-    action="store_true",
-    # required=False,
-    default=False,
-    help="whether to run in debug mode or not",
+external_scripts = [
+    # Import TailwindCSS
+    "https://tailwindcss.com/",
+    {"src": "https://cdn.tailwindcss.com"},
+]
+external_stylesheets = external_stylesheets = [
+    # Import Outfit Google Font
+    "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap",
+]
+
+app = Dash(
+    __name__,
+    external_scripts=external_scripts,
+    external_stylesheets=external_stylesheets,
 )
 
-app = Dash(__name__)
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
+
+# Setup the server for gunicorn (prod)
 server = app.server
 
 # assume you have a "long-form" data frame
@@ -41,5 +49,4 @@ app.layout = html.Div(
 )
 
 if __name__ == "__main__":
-    args = parser.parse_args()
     app.run_server(debug=True, host="127.0.0.1")

@@ -28,3 +28,6 @@ jobs:
       - name: docker push
         if: github.ref == 'refs/heads/main'
         run: make push
+      - name: deploy
+        if: github.ref == 'refs/heads/main'
+        run: make deploy
