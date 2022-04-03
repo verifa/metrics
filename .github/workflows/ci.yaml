@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: build
+        run: make build
+      - name: gcp auth
+        if: github.ref == 'refs/heads/main'
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GCP_JSON_KEY }}"
+      - name: setup gcloud sdk
+        if: github.ref == 'refs/heads/main'
+        uses: "google-github-actions/setup-gcloud@v0"
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - name: docker login
+        if: github.ref == 'refs/heads/main'
+        run: |
+          gcloud auth configure-docker europe-north1-docker.pkg.dev -q
+      - name: docker push
+        if: github.ref == 'refs/heads/main'
+        run: make push

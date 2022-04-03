@@ -1,0 +1,14 @@
+.git
+.gitignore
+.vscode
+.mypy_cache
+
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache
+
+Dockerfile
+Makefile
+README.md
