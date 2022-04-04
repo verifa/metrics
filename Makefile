@@ -10,6 +10,15 @@ default: build
 help : Makefile
 	@sed -n 's/^##//p' $<
 
+install:
+	poetry install
+
+dev:
+	poetry run python app.py
+
+run: build
+	docker run --rm -ti --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+
 build:
 	docker build -t $(IMAGE):$(TAG) .
 

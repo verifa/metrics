@@ -7,12 +7,13 @@ RUN pip install poetry=="${POETRY_VERSION}" \
     && poetry config virtualenvs.create false
 
 WORKDIR /app
-# Copy poetry files
+# Copy poetry files first - optimization to only do poetry install when config changes
 COPY poetry.lock pyproject.toml ./
 # Install dependencies
 RUN poetry install --no-dev --no-ansi
-# Copy project files
-COPY *.py .
+
+# Copy source code
+COPY . .
 
 # Default port
 ENV PORT=8000
