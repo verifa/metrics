@@ -13,11 +13,11 @@ help : Makefile
 install:
 	poetry install
 
-dev:
+dev: install
 	poetry run python app.py
 
 run: build
-	docker run --rm -ti --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+	docker run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
 
 build:
 	docker build -t $(IMAGE):$(TAG) .
