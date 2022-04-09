@@ -5,28 +5,40 @@ import pandas as pd
 import os
 from tempoapiclient import client
 
+# really wanted this in tempo/tempodata.py but could not convince poetry to accept thi
 tempokey=os.environ.get("TEMPO_KEY")
-
 tempo = client.Tempo(
     auth_token=tempokey,
     base_url="https://api.tempo.io/core/3")
 
-worklogs = tempo.get_worklogs(
-    dateFrom="2022-01-01",
-    dateTo=str(date.today())
-    )
+class TempoData:
 
-rawdata = pd.json_normalize(worklogs)
+    def __init__(self, fromDate, toDate):
+        self.fromDate = fromDate
+        self.toDate = toDate
+        self.logs = tempo.get_worklogs(
+            dateFrom="2022-01-01",
+            dateTo=str(date.today())
+        )
+        self.raw = pd.json_normalize(self.logs)
+        self.data = self.raw[["issue.key", "timeSpentSeconds", "billableSeconds", "startDate", "author.displayName"]]
+        self.data.columns = ["Key", "Time", "Billable", "Date", "User"]
 
-workdata = rawdata[["issue.key", "timeSpentSeconds", "billableSeconds", "startDate", "author.displayName"]]
 
-fig = px.bar(workdata, 
-            x="author.displayName", 
-            y="timeSpentSeconds", 
-            color="issue.key", 
+work = TempoData("2022-01-01", str(date.today()))
+
+
+fig = px.bar(work.data, 
+            x="User", 
+            y="Time", 
+            color="Key", 
             barmode="group", height=600)
 
-fig2 = px.bar(workdata, x="issue.key", y="timeSpentSeconds", color="author.displayName")
+fig2 = px.bar(work.data, 
+            x="Key", 
+            y="Time", 
+            color="User",
+            height=600)
 
 def render() -> html._component:
     """Renders the HTML components for this page"""
