@@ -1,44 +1,62 @@
-from dash import html, dcc
-import plotly.express as px
-from datetime import date
-import pandas as pd
+"""System module."""
 import os
+from datetime import date
+
+import pandas as pd
+import plotly.express as px
+from dash import dcc, html
 from tempoapiclient import client
 
-# really wanted this in tempo/tempodata.py but could not convince poetry to accept thi
-tempokey=os.environ.get("TEMPO_KEY")
+# really wanted this in tempo/tempodata.py but
+# could not convince poetry to accept it
+tempokey = os.environ.get("TEMPO_KEY")
+
 tempo = client.Tempo(
     auth_token=tempokey,
     base_url="https://api.tempo.io/core/3")
 
+
 class TempoData:
+    """Tempo data class."""
 
     def __init__(self, fromDate, toDate):
-        self.fromDate = fromDate
-        self.toDate = toDate
+        self.from_date = fromDate
+        self.to_date = toDate
         self.logs = tempo.get_worklogs(
             dateFrom="2022-01-01",
             dateTo=str(date.today())
         )
         self.raw = pd.json_normalize(self.logs)
-        self.data = self.raw[["issue.key", "timeSpentSeconds", "billableSeconds", "startDate", "author.displayName"]]
-        self.data.columns = ["Key", "Time", "Billable", "Date", "User"]
+        self.data = self.raw[[
+            "issue.key",
+            "timeSpentSeconds",
+            "billableSeconds",
+            "startDate",
+            "author.displayName"]]
+        self.data.columns = [
+            "Key",
+            "Time",
+            "Billable",
+            "Date",
+            "User"]
 
 
 work = TempoData("2022-01-01", str(date.today()))
 
+fig = px.bar(
+    work.data,
+    x="User",
+    y="Time",
+    color="Key",
+    barmode="group", height=600)
 
-fig = px.bar(work.data, 
-            x="User", 
-            y="Time", 
-            color="Key", 
-            barmode="group", height=600)
+fig2 = px.bar(
+    work.data,
+    x="Key",
+    y="Time",
+    color="User",
+    height=600)
 
-fig2 = px.bar(work.data, 
-            x="Key", 
-            y="Time", 
-            color="User",
-            height=600)
 
 def render() -> html._component:
     """Renders the HTML components for this page"""
@@ -52,6 +70,7 @@ def render() -> html._component:
 
 
 def render_summary() -> html._component:
+    """Render summary"""
     return html.Div(
         className="",
         children=[
@@ -109,6 +128,7 @@ def render_summary() -> html._component:
 
 
 def render_chart() -> html._component:
+    """Render chart"""
     return html.Div(
         children=[
             html.P(
