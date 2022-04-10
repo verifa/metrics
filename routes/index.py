@@ -47,22 +47,52 @@ class TempoData:
             self.data.loc[:, ('Time')] -
             self.data.loc[:, ('Billable')])
 
+    def byDay(self):
+        """returns aggregated time and billable time
+        grouped by date, user and issue key
+        """
+        return(
+            self.data.groupby(
+                ['Date', 'User', 'Key'], as_index=False)
+            ['Time', 'Billable'].sum())
 
+
+# Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
+
+time1 = px.bar(
+    work.byDay(),
+    x='Date',
+    y='Time',
+    color='Key',
+    facet_col='User',
+    facet_col_wrap=3,
+    height=800
+)
+
+time2 = px.bar(
+    work.byDay(),
+    x='Date',
+    y='Time',
+    color='Key',
+    height=600
+)
 
 billable = px.bar(
     work.data,
     x="User",
     y="Billable",
     color="Key",
-    barmode="group", height=600)
+    barmode="group",
+    height=600)
 
 unbillable = px.bar(
     work.data,
     x="User",
     y="Unbillable",
     color="Key",
-    barmode="group", height=600)
+    barmode="group",
+    height=600)
 
 fig2 = px.bar(
     work.data,
@@ -152,6 +182,13 @@ def render_chart() -> html._component:
             ),
             dcc.Graph(id="Billable", figure=billable),
             dcc.Graph(id="Unbillable", figure=unbillable),
-            dcc.Graph(id="example-2", figure=fig2)
+            dcc.Graph(id="example-2", figure=fig2),
+            html.P(
+                children="""
+                What do we work on
+                """
+            ),
+            dcc.Graph(id="TimeSeries1", figure=time1),
+            dcc.Graph(id="TimeSeries2", figure=time2)
         ]
     )
