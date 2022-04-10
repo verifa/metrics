@@ -39,14 +39,28 @@ class TempoData:
             "Billable",
             "Date",
             "User"]
+        self.data.loc[:, ('Date')] = pd.to_datetime(
+            self.data.loc[:, ('Date')], format='%Y-%m-%d')
+        self.data.loc[:, ('Time')] = self.data.loc[:, ('Time')]/3600
+        self.data.loc[:, ('Billable')] = self.data.loc[:, ('Billable')]/3600
+        self.data.loc[:, ('Unbillable')] = (
+            self.data.loc[:, ('Time')] -
+            self.data.loc[:, ('Billable')])
 
 
 work = TempoData("2022-01-01", str(date.today()))
 
-fig = px.bar(
+billable = px.bar(
     work.data,
     x="User",
-    y="Time",
+    y="Billable",
+    color="Key",
+    barmode="group", height=600)
+
+unbillable = px.bar(
+    work.data,
+    x="User",
+    y="Unbillable",
     color="Key",
     barmode="group", height=600)
 
@@ -136,7 +150,8 @@ def render_chart() -> html._component:
         Dash: A web application framework for your data.
     """
             ),
-            dcc.Graph(id="example-graph", figure=fig),
+            dcc.Graph(id="Billable", figure=billable),
+            dcc.Graph(id="Unbillable", figure=unbillable),
             dcc.Graph(id="example-2", figure=fig2)
         ]
     )
