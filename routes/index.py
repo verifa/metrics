@@ -56,9 +56,37 @@ class TempoData:
                 ['Date', 'User', 'Key'], as_index=False)
             ['Time', 'Billable'].sum())
 
+    def userRolling7(self):
+        """returns rolling 7 day sums for Billable and non Billable time
+        grouped by user
+        """
+        dailySum = (
+            self.data.groupby(
+                ['Date', 'User'], as_index=False)
+            ['Billable', 'Unbillable'].sum()
+        )
+        rolling7Sum = (
+            dailySum.set_index('Date').groupby(
+                ['User'], as_index=False).rolling('7d')
+            ['Billable', 'Unbillable'].sum()
+        )
+        return(
+            rolling7Sum.reset_index(inplace=False)
+        )
+
 
 # Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
+rolling7 = work.userRolling7()
+
+rollingAll = px.scatter(
+    rolling7,
+    x='Date',
+    y=['Billable', 'Unbillable'],
+    facet_col='User',
+    facet_col_wrap=3,
+    height=800
+)
 
 time1 = px.bar(
     work.byDay(),
@@ -189,6 +217,12 @@ def render_chart() -> html._component:
                 """
             ),
             dcc.Graph(id="TimeSeries1", figure=time1),
-            dcc.Graph(id="TimeSeries2", figure=time2)
+            dcc.Graph(id="TimeSeries2", figure=time2),
+            html.P(
+                children="""
+                Rolling 7 days
+                """
+            ),
+            dcc.Graph(id="Rolling", figure=rollingAll)
         ]
     )
