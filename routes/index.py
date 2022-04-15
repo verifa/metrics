@@ -4,6 +4,7 @@ from datetime import date
 
 import pandas as pd
 import plotly.express as px
+import plotly.figure_factory as ff
 from dash import dcc, html
 from tempoapiclient import client
 
@@ -14,6 +15,22 @@ tempokey = os.environ.get("TEMPO_KEY")
 tempo = client.Tempo(
     auth_token=tempokey,
     base_url="https://api.tempo.io/core/3")
+
+
+class TempoConfig:
+    """TempoConfig data class"""
+    # where to find the config files
+    configPath = os.environ.get("TEMPO_CONFIG_PATH")
+    if configPath is None:
+        # default path
+        configPath = '/tempo'
+    # which config files are possible
+    workingHoursFile = configPath + "/workinghours.json"
+
+    def __init__(self):
+        self.workingHours = pd.DataFrame()
+        if os.path.exists(self.workingHoursFile):
+            self.workingHours = pd.read_json(self.workingHoursFile)
 
 
 class TempoData:
@@ -56,6 +73,23 @@ class TempoData:
                 ['Date', 'User', 'Key'], as_index=False)
             ['Time', 'Billable'].sum())
 
+    def byUser(self, workingHours=None):
+        """returns aggregated time and billable time
+        grouped by user
+        """
+        userData = (
+            self.data.groupby('User', as_index=False)
+            ['Time', 'Billable'].sum()
+        )
+        if not workingHours.empty:
+            print(workingHours)
+            tmpData = pd.merge(userData, workingHours, on="User")
+            userData = tmpData
+
+        return(
+            userData
+        )
+
     def userRolling7(self):
         """returns rolling 7 day sums for Billable and non Billable time
         grouped by user
@@ -75,9 +109,13 @@ class TempoData:
         )
 
 
+# read config files
+tc = TempoConfig()
 # Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
 rolling7 = work.userRolling7()
+
+table1 = ff.create_table(work.byUser(tc.workingHours))
 
 rollingAll = px.scatter(
     rolling7,
@@ -208,6 +246,7 @@ def render_chart() -> html._component:
         Dash: A web application framework for your data.
     """
             ),
+            dcc.Graph(id="Aggregated", figure=table1),
             dcc.Graph(id="Billable", figure=billable),
             dcc.Graph(id="Internal", figure=internal),
             dcc.Graph(id="example-2", figure=fig2),
