@@ -43,7 +43,7 @@ class TempoData:
             self.data.loc[:, ('Date')], format='%Y-%m-%d')
         self.data.loc[:, ('Time')] = self.data.loc[:, ('Time')]/3600
         self.data.loc[:, ('Billable')] = self.data.loc[:, ('Billable')]/3600
-        self.data.loc[:, ('Unbillable')] = (
+        self.data.loc[:, ('Internal')] = (
             self.data.loc[:, ('Time')] -
             self.data.loc[:, ('Billable')])
 
@@ -63,12 +63,12 @@ class TempoData:
         dailySum = (
             self.data.groupby(
                 ['Date', 'User'], as_index=False)
-            ['Billable', 'Unbillable'].sum()
+            ['Billable', 'Internal'].sum()
         )
         rolling7Sum = (
             dailySum.set_index('Date').groupby(
                 ['User'], as_index=False).rolling('7d')
-            ['Billable', 'Unbillable'].sum()
+            ['Billable', 'Internal'].sum()
         )
         return(
             rolling7Sum.reset_index(inplace=False)
@@ -82,7 +82,7 @@ rolling7 = work.userRolling7()
 rollingAll = px.scatter(
     rolling7,
     x='Date',
-    y=['Billable', 'Unbillable'],
+    y=['Billable', 'Internal'],
     facet_col='User',
     facet_col_wrap=3,
     height=800
@@ -114,10 +114,10 @@ billable = px.bar(
     barmode="group",
     height=600)
 
-unbillable = px.bar(
+internal = px.bar(
     work.data,
     x="User",
-    y="Unbillable",
+    y="Internal",
     color="Key",
     barmode="group",
     height=600)
@@ -209,7 +209,7 @@ def render_chart() -> html._component:
     """
             ),
             dcc.Graph(id="Billable", figure=billable),
-            dcc.Graph(id="Unbillable", figure=unbillable),
+            dcc.Graph(id="Internal", figure=internal),
             dcc.Graph(id="example-2", figure=fig2),
             html.P(
                 children="""
