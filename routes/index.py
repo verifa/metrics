@@ -126,7 +126,7 @@ rollingAll = px.scatter(
     height=800
 )
 
-time1 = px.bar(
+time1 = px.histogram(
     work.byDay(),
     x='Date',
     y='Time',
@@ -135,32 +135,32 @@ time1 = px.bar(
     facet_col_wrap=3,
     height=800
 )
+time1.update_layout(bargap=0.1)
 
-time2 = px.bar(
+time2 = px.histogram(
     work.byDay(),
     x='Date',
     y='Time',
     color='Key',
     height=600
 )
+time2.update_layout(bargap=0.1)
 
-billable = px.bar(
+billable = px.histogram(
     work.data,
     x="User",
     y="Billable",
     color="Key",
-    barmode="group",
     height=600)
 
-internal = px.bar(
+internal = px.histogram(
     work.data,
     x="User",
     y="Internal",
     color="Key",
-    barmode="group",
     height=600)
 
-fig2 = px.bar(
+fig2 = px.histogram(
     work.data,
     x="Key",
     y="Time",
