@@ -71,7 +71,7 @@ class TempoData:
         return(
             self.data.groupby(
                 ['Date', 'User', 'Key'], as_index=False)
-            ['Time', 'Billable'].sum())
+            [['Time', 'Billable']].sum())
 
     def byUser(self, workingHours=None):
         """returns aggregated time and billable time
@@ -79,7 +79,7 @@ class TempoData:
         """
         userData = (
             self.data.groupby('User', as_index=False)
-            ['Time', 'Billable'].sum()
+            [['Time', 'Billable']].sum()
         )
         if not workingHours.empty:
             print(workingHours)
@@ -97,12 +97,12 @@ class TempoData:
         dailySum = (
             self.data.groupby(
                 ['Date', 'User'], as_index=False)
-            ['Billable', 'Internal'].sum()
+            [['Billable', 'Internal']].sum()
         )
         rolling7Sum = (
             dailySum.set_index('Date').groupby(
                 ['User'], as_index=False).rolling('7d')
-            ['Billable', 'Internal'].sum()
+            [['Billable', 'Internal']].sum()
         )
         return(
             rolling7Sum.reset_index(inplace=False)
