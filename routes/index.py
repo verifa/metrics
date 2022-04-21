@@ -127,7 +127,7 @@ rollingAll = px.scatter(
 )
 
 time1 = px.histogram(
-    work.byDay(),
+    work.byDay().sort_values("Key"),
     x='Date',
     y='Time',
     color='Key',
@@ -138,7 +138,7 @@ time1 = px.histogram(
 time1.update_layout(bargap=0.1)
 
 time2 = px.histogram(
-    work.byDay(),
+    work.byDay().sort_values("Key"),
     x='Date',
     y='Time',
     color='Key',
@@ -147,18 +147,22 @@ time2 = px.histogram(
 time2.update_layout(bargap=0.1)
 
 billable = px.histogram(
-    work.data,
+    work.data.sort_values("Key"),
     x="User",
     y="Billable",
     color="Key",
     height=600)
 
+billable.update_xaxes(categoryorder='total ascending')
+
 internal = px.histogram(
-    work.data,
+    work.data.sort_values("Key"),
     x="User",
     y="Internal",
     color="Key",
     height=600)
+
+internal.update_xaxes(categoryorder='total descending')
 
 fig2 = px.histogram(
     work.data,
@@ -166,6 +170,8 @@ fig2 = px.histogram(
     y="Time",
     color="User",
     height=600)
+
+fig2.update_xaxes(categoryorder='total ascending')
 
 
 def render() -> html._component:
