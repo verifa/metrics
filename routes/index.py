@@ -2,6 +2,7 @@
 import os
 from datetime import date
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
@@ -56,6 +57,10 @@ class TempoData:
             "Billable",
             "Date",
             "User"]
+        df = pd.DataFrame(
+            self.data.loc[:, ('Key')].str.split('-', 1).tolist(),
+            columns=['Group', 'Number'])
+        self.data.loc[:, ('Group')] = df['Group']
         self.data.loc[:, ('Date')] = pd.to_datetime(
             self.data.loc[:, ('Date')], format='%Y-%m-%d')
         self.data.loc[:, ('Time')] = self.data.loc[:, ('Time')]/3600
@@ -63,6 +68,26 @@ class TempoData:
         self.data.loc[:, ('Internal')] = (
             self.data.loc[:, ('Time')] -
             self.data.loc[:, ('Billable')])
+
+    def byGroup(self):
+        """returns aggregated time and billable time
+        grouped by date, user and group
+        """
+        return(
+            self.data.groupby(
+                ['Date', 'User', 'Group'], as_index=False)
+            [['Time', 'Billable']].sum())
+
+    def byTotalGroup(self):
+        """returns aggregated billable time
+        grouped by issue key group
+        """
+        df = (self.data.groupby(
+            ['Group'], as_index=False)
+            [['Billable']].sum())
+        df['Billable'].replace(0, np.nan, inplace=True)
+        df.dropna(subset=['Billable'], inplace=True)
+        return df
 
     def byDay(self):
         """returns aggregated time and billable time
@@ -145,6 +170,35 @@ time2 = px.histogram(
     height=600
 )
 time2.update_layout(bargap=0.1)
+
+time3 = px.histogram(
+    work.byGroup().sort_values("Group"),
+    x='Date',
+    y='Time',
+    color='Group',
+    facet_col='User',
+    facet_col_wrap=3,
+    height=800
+)
+time3.update_layout(bargap=0.1)
+
+time4 = px.histogram(
+    work.byGroup().sort_values("Group"),
+    x='Date',
+    y='Time',
+    color='Group',
+    height=600
+)
+time4.update_layout(bargap=0.1)
+
+eggbaskets = px.histogram(
+    work.byTotalGroup().sort_values("Billable"),
+    x='Group',
+    y='Billable',
+    color='Group',
+    height=600
+)
+eggbaskets.update_layout(bargap=0.1)
 
 billable = px.histogram(
     work.data.sort_values("Key"),
@@ -263,6 +317,14 @@ def render_chart() -> html._component:
             ),
             dcc.Graph(id="TimeSeries1", figure=time1),
             dcc.Graph(id="TimeSeries2", figure=time2),
+            dcc.Graph(id="TimeSeries3", figure=time3),
+            dcc.Graph(id="TimeSeries4", figure=time4),
+            html.P(
+                children="""
+                Baskets for our eggs
+                """
+            ),
+            dcc.Graph(id="EggBaskets", figure=eggbaskets),
             html.P(
                 children="""
                 Rolling 7 days
