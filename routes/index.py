@@ -1,4 +1,5 @@
 """System module."""
+import json
 import os
 from datetime import date
 
@@ -27,11 +28,35 @@ class TempoConfig:
         configPath = '/tempo'
     # which config files are possible
     workingHoursFile = configPath + "/workinghours"
+    ratesFile = configPath + "/rates"
 
     def __init__(self):
         self.workingHours = pd.DataFrame()
         if os.path.exists(self.workingHoursFile):
             self.workingHours = pd.read_json(self.workingHoursFile)
+            print("Loaded " + self.workingHoursFile)
+        if os.path.exists(self.ratesFile):
+            ratesData = json.load(open(self.ratesFile))
+            print("Loaded " + self.ratesFile)
+            self.rates = pd.json_normalize(ratesData, record_path='Default')
+            # When we get the list of users in a different way,
+            # workingHoursFile isn't needed
+            if os.path.exists(self.workingHoursFile):
+                self.rates['User'] = [
+                    self.workingHours['User'].values.tolist()
+                    for _ in range(len(self.rates))]
+                self.rates = self.rates.explode('User')
+                exceptions = pd.json_normalize(
+                    ratesData,
+                    record_path='Exceptions')
+                self.rates = self.rates.merge(
+                    exceptions,
+                    on=['Key', 'User'],
+                    how="left")
+                rcol = self.rates['Rate_y'].fillna(self.rates['Rate_x'])
+                self.rates['Rate'] = rcol
+                self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
+                print(self.rates)
 
 
 class TempoData:
