@@ -80,10 +80,10 @@ class TempoData:
 
     def byTotalGroup(self):
         """returns aggregated billable time
-        grouped by issue key group
+        grouped by issue key group and user
         """
         df = (self.data.groupby(
-            ['Group'], as_index=False)
+            ['Group', 'User'], as_index=False)
             [['Billable']].sum())
         df['Billable'].replace(0, np.nan, inplace=True)
         df.dropna(subset=['Billable'], inplace=True)
@@ -192,13 +192,14 @@ time4 = px.histogram(
 time4.update_layout(bargap=0.1)
 
 eggbaskets = px.histogram(
-    work.byTotalGroup().sort_values("Billable"),
+    work.byTotalGroup(),
     x='Group',
     y='Billable',
-    color='Group',
+    color='User',
     height=600
 )
 eggbaskets.update_layout(bargap=0.1)
+eggbaskets.update_xaxes(categoryorder='total ascending')
 
 billable = px.histogram(
     work.data.sort_values("Key"),
