@@ -30,33 +30,35 @@ class TempoConfig:
     workingHoursFile = configPath + "/workinghours"
     ratesFile = configPath + "/rates"
 
-    def __init__(self):
+    def __init__(self, users):
         self.workingHours = pd.DataFrame()
         if os.path.exists(self.workingHoursFile):
             self.workingHours = pd.read_json(self.workingHoursFile)
             print("Loaded " + self.workingHoursFile)
+        else:
+            self.workingHours = {}
         if os.path.exists(self.ratesFile):
             ratesData = json.load(open(self.ratesFile))
             print("Loaded " + self.ratesFile)
             self.rates = pd.json_normalize(ratesData, record_path='Default')
-            # When we get the list of users in a different way,
-            # workingHoursFile isn't needed
-            if os.path.exists(self.workingHoursFile):
-                self.rates['User'] = [
-                    self.workingHours['User'].values.tolist()
-                    for _ in range(len(self.rates))]
-                self.rates = self.rates.explode('User')
-                exceptions = pd.json_normalize(
-                    ratesData,
-                    record_path='Exceptions')
-                self.rates = self.rates.merge(
-                    exceptions,
-                    on=['Key', 'User'],
-                    how="left")
-                rcol = self.rates['Rate_y'].fillna(self.rates['Rate_x'])
-                self.rates['Rate'] = rcol
-                self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
-                print(self.rates)
+            self.rates['User'] = [
+                users.values.tolist()
+                for _ in range(len(self.rates))]
+            self.rates = self.rates.explode('User')
+            exceptions = pd.json_normalize(
+                ratesData,
+                record_path='Exceptions')
+            self.rates = self.rates.merge(
+                exceptions,
+                on=['Key', 'User'],
+                how="left")
+            rcol = self.rates['Rate_y'].fillna(self.rates['Rate_x'])
+            self.rates['Rate'] = rcol
+            self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
+            self.rates = self.rates.astype({'Rate':'int'})
+            print(self.rates)
+        else:
+            self.rates = {}
 
 
 class TempoData:
@@ -94,6 +96,11 @@ class TempoData:
             self.data.loc[:, ('Time')] -
             self.data.loc[:, ('Billable')])
 
+    def getUsers(self):
+        """returns list of users
+        """
+        return (self.data['User'].drop_duplicates())
+
     def byGroup(self):
         """returns aggregated time and billable time
         grouped by date, user and group
@@ -112,6 +119,22 @@ class TempoData:
             [['Billable']].sum())
         df['Billable'].replace(0, np.nan, inplace=True)
         df.dropna(subset=['Billable'], inplace=True)
+        return df
+
+    def byTotalGroupRates(self, rates, daysBack):
+        """returns aggregated billable income
+        grouped by issue key group and user
+        """
+        daysAgo = pd.Timestamp('today').floor('D') - pd.offsets.Day(daysBack)
+        upRated = self.data[self.data['Date'] > daysAgo]
+        upRated = upRated.merge(rates,on=['Key','User'],how="left")
+        upRated['Rate'] = upRated.apply(lambda x: x['Rate']/10 if x['Currency']=='SEK' else x['Rate'], axis=1)
+        upRated['Income'] = upRated['Rate'] * upRated['Billable']
+        df = (upRated.groupby(
+            ['Group', 'User'], as_index=False)
+            [['Income']].sum())
+        df['Income'].replace(0, np.nan, inplace=True)
+        df.dropna(subset=['Income'], inplace=True)
         return df
 
     def byDay(self):
@@ -159,10 +182,12 @@ class TempoData:
         )
 
 
-# read config files
-tc = TempoConfig()
 # Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
+
+# read config files
+tc = TempoConfig(work.getUsers())
+
 rolling7 = work.userRolling7()
 
 table1 = ff.create_table(work.byUser(tc.workingHours))
@@ -216,15 +241,30 @@ time4 = px.histogram(
 )
 time4.update_layout(bargap=0.1)
 
-eggbaskets = px.histogram(
-    work.byTotalGroup(),
-    x='Group',
-    y='Billable',
-    color='User',
-    height=600
-)
-eggbaskets.update_layout(bargap=0.1)
-eggbaskets.update_xaxes(categoryorder='total ascending')
+if (len(tc.rates) != 0):
+    daysAgo = 90
+    eggbaskets = px.histogram(
+        work.byTotalGroupRates(tc.rates, daysAgo),
+        x='Group',
+        y='Income',
+        color='User',
+        height=600
+    )
+    eggbaskets.update_layout(bargap=0.1)
+    eggbaskets.update_layout(yaxis_title="Sum of Income (Euro)")
+    eggbaskets.update_layout(title="Baskets for our eggs (" + str(daysAgo) + " days back)")
+    eggbaskets.update_xaxes(categoryorder='total ascending')
+else:
+    eggbaskets = px.histogram(
+        work.byTotalGroup(),
+        x='Group',
+        y='Billable',
+        color='User',
+        height=600
+    )
+    eggbaskets.update_layout(bargap=0.1)
+    eggbaskets.update_xaxes(categoryorder='total ascending')
+
 
 billable = px.histogram(
     work.data.sort_values("Key"),
@@ -345,11 +385,6 @@ def render_chart() -> html._component:
             dcc.Graph(id="TimeSeries2", figure=time2),
             dcc.Graph(id="TimeSeries3", figure=time3),
             dcc.Graph(id="TimeSeries4", figure=time4),
-            html.P(
-                children="""
-                Baskets for our eggs
-                """
-            ),
             dcc.Graph(id="EggBaskets", figure=eggbaskets),
             html.P(
                 children="""
