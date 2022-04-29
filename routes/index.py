@@ -66,8 +66,8 @@ class TempoData:
         self.from_date = fromDate
         self.to_date = toDate
         self.logs = tempo.get_worklogs(
-            dateFrom="2022-01-01",
-            dateTo=str(date.today())
+            dateFrom=self.from_date,
+            dateTo=self.to_date
         )
         self.raw = pd.json_normalize(self.logs)
         self.data = self.raw[[
@@ -258,68 +258,8 @@ def render() -> html._component:
     """Renders the HTML components for this page"""
     return html.Div(
         children=[
-            html.Section(html.H1(children="Verifa Metrics Dashboard")),
-            html.Section(render_summary()),
             html.Section(render_chart()),
         ]
-    )
-
-
-def render_summary() -> html._component:
-    """Render summary"""
-    return html.Div(
-        className="",
-        children=[
-            html.H3("Last 30 Days"),
-            html.Div(
-                children=[
-                    html.Dl(
-                        className="grid  grid-cols-1 gap-5 sm:grid-cols-3",
-                        children=[
-                            html.Div(
-                                className="px-4 py-5 bg-white",
-                                children=[
-                                    html.Dt(
-                                        className="text-v-pink truncate",
-                                        children="Some value",
-                                    ),
-                                    html.Dd(
-                                        className="text-3xl text-v-black",
-                                        children="123",
-                                    ),
-                                ],
-                            ),
-                            html.Div(
-                                className="px-4 py-5 bg-white",
-                                children=[
-                                    html.Dt(
-                                        className="text-v-pink truncate",
-                                        children="Some value",
-                                    ),
-                                    html.Dd(
-                                        className="text-3xl text-v-black",
-                                        children="123",
-                                    ),
-                                ],
-                            ),
-                            html.Div(
-                                className="px-4 py-5 bg-white",
-                                children=[
-                                    html.Dt(
-                                        className="text-v-pink truncate",
-                                        children="Some value",
-                                    ),
-                                    html.Dd(
-                                        className="text-3xl text-v-black",
-                                        children="123",
-                                    ),
-                                ],
-                            ),
-                        ],
-                    )
-                ]
-            ),
-        ],
     )
 
 
@@ -327,11 +267,10 @@ def render_chart() -> html._component:
     """Render chart"""
     return html.Div(
         children=[
-            html.P(
-                children="""
-        Dash: A web application framework for your data.
-    """
-            ),
+            dcc.Markdown('# Verifa Metrics Dashboard'),
+            dcc.Markdown(f'''
+            ### For data between {work.from_date} and {work.to_date}
+            '''),
             dcc.Graph(id="Aggregated", figure=table1),
             dcc.Graph(id="Billable", figure=billable),
             dcc.Graph(id="Internal", figure=internal),
