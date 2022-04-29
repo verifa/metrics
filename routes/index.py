@@ -30,33 +30,32 @@ class TempoConfig:
     workingHoursFile = configPath + "/workinghours"
     ratesFile = configPath + "/rates"
 
-    def __init__(self):
+    def __init__(self, users):
         self.workingHours = pd.DataFrame()
         if os.path.exists(self.workingHoursFile):
             self.workingHours = pd.read_json(self.workingHoursFile)
             print("Loaded " + self.workingHoursFile)
+        self.rates = pd.DataFrame()
         if os.path.exists(self.ratesFile):
             ratesData = json.load(open(self.ratesFile))
             print("Loaded " + self.ratesFile)
             self.rates = pd.json_normalize(ratesData, record_path='Default')
-            # When we get the list of users in a different way,
-            # workingHoursFile isn't needed
-            if os.path.exists(self.workingHoursFile):
-                self.rates['User'] = [
-                    self.workingHours['User'].values.tolist()
-                    for _ in range(len(self.rates))]
-                self.rates = self.rates.explode('User')
-                exceptions = pd.json_normalize(
-                    ratesData,
-                    record_path='Exceptions')
-                self.rates = self.rates.merge(
-                    exceptions,
-                    on=['Key', 'User'],
-                    how="left")
-                rcol = self.rates['Rate_y'].fillna(self.rates['Rate_x'])
-                self.rates['Rate'] = rcol
-                self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
-                print(self.rates)
+            self.rates['User'] = [
+                users.values.tolist()
+                for _ in range(len(self.rates))]
+            self.rates = self.rates.explode('User')
+            exceptions = pd.json_normalize(
+                ratesData,
+                record_path='Exceptions')
+            self.rates = self.rates.merge(
+                exceptions,
+                on=['Key', 'User'],
+                how="left")
+            rcol = self.rates['Rate_y'].fillna(self.rates['Rate_x'])
+            self.rates['Rate'] = rcol
+            self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
+            self.rates = self.rates.astype({'Rate': 'int'})
+            print(self.rates)
 
 
 class TempoData:
@@ -94,6 +93,11 @@ class TempoData:
             self.data.loc[:, ('Time')] -
             self.data.loc[:, ('Billable')])
 
+    def getUsers(self):
+        """returns list of users
+        """
+        return self.data['User'].drop_duplicates()
+
     def byGroup(self):
         """returns aggregated time and billable time
         grouped by date, user and group
@@ -103,15 +107,51 @@ class TempoData:
                 ['Date', 'User', 'Group'], as_index=False)
             [['Time', 'Billable']].sum())
 
-    def byTotalGroup(self):
+    def byTotalGroup(self, daysBack):
         """returns aggregated billable time
         grouped by issue key group and user
         """
-        df = (self.data.groupby(
+        lookBack = pd.Timestamp('today').floor('D') - pd.offsets.Day(daysBack)
+        timedData = self.data[self.data['Date'] > lookBack]
+        df = (timedData.groupby(
             ['Group', 'User'], as_index=False)
             [['Billable']].sum())
         df['Billable'].replace(0, np.nan, inplace=True)
         df.dropna(subset=['Billable'], inplace=True)
+        return df
+
+    def byEggBaskets(self, rates):
+        """returns aggregated billable income
+        grouped by issue key group, user and time box (30, 60, 90)
+        """
+        lookBack30 = pd.Timestamp('today').floor('D') - pd.offsets.Day(30)
+        lookBack60 = pd.Timestamp('today').floor('D') - pd.offsets.Day(60)
+        lookBack90 = pd.Timestamp('today').floor('D') - pd.offsets.Day(90)
+
+        baskets = self.data
+        baskets['TimeBasket'] = '0'
+        baskets.loc[
+            baskets['Date'] > lookBack90,
+            'TimeBasket'] = '60-90 days ago'
+        baskets.loc[
+            baskets['Date'] > lookBack60,
+            'TimeBasket'] = '30-60 days ago'
+        baskets.loc[
+            baskets['Date'] > lookBack30,
+            'TimeBasket'] = '0-30 days ago'
+        baskets['TimeBasket'].replace('0', np.nan, inplace=True)
+        baskets.dropna(subset=['TimeBasket'], inplace=True)
+
+        upRated = baskets.merge(rates, on=['Key', 'User'], how="left")
+        upRated['Rate'] = upRated.apply(
+            lambda x: x['Rate']/10 if x['Currency'] == 'SEK' else x['Rate'],
+            axis=1)
+        upRated['Income'] = upRated['Rate'] * upRated['Billable']
+        df = (upRated.groupby(
+            ['Group', 'User', 'TimeBasket'], as_index=False)
+            [['Income']].sum())
+        df['Income'].replace(0, np.nan, inplace=True)
+        df.dropna(subset=['Income'], inplace=True)
         return df
 
     def byDay(self):
@@ -159,10 +199,12 @@ class TempoData:
         )
 
 
-# read config files
-tc = TempoConfig()
 # Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
+
+# read config files
+tc = TempoConfig(work.getUsers())
+
 rolling7 = work.userRolling7()
 
 table1 = ff.create_table(work.byUser(tc.workingHours))
@@ -216,15 +258,36 @@ time4 = px.histogram(
 )
 time4.update_layout(bargap=0.1)
 
-eggbaskets = px.histogram(
-    work.byTotalGroup(),
-    x='Group',
-    y='Billable',
-    color='User',
-    height=600
-)
-eggbaskets.update_layout(bargap=0.1)
-eggbaskets.update_xaxes(categoryorder='total ascending')
+daysAgo = 90
+if tc.rates.empty:
+    yAxisTitle = "Sum of billable time"
+    eggbaskets = px.histogram(
+        work.byTotalGroup(daysAgo),
+        x='Group',
+        y='Billable',
+        color='User'
+    )
+    eggbaskets.update_xaxes(categoryorder='total ascending')
+else:
+    yAxisTitle = "Sum of Income (Euro)"
+    eggbaskets = px.histogram(
+        work.byEggBaskets(tc.rates),
+        x='Group',
+        y='Income',
+        color='User',
+        facet_col='TimeBasket',
+        facet_col_wrap=3,
+        category_orders={
+            "TimeBasket": [
+                "60-90 days ago",
+                "30-60 days ago",
+                "0-30 days ago"]}
+    )
+eggbaskets.update_layout(
+    height=600,
+    yaxis_title=yAxisTitle,
+    bargap=0.1,
+    title="Baskets for our eggs (" + str(daysAgo) + " days back)")
 
 billable = px.histogram(
     work.data.sort_values("Key"),
@@ -284,11 +347,6 @@ def render_chart() -> html._component:
             dcc.Graph(id="TimeSeries2", figure=time2),
             dcc.Graph(id="TimeSeries3", figure=time3),
             dcc.Graph(id="TimeSeries4", figure=time4),
-            html.P(
-                children="""
-                Baskets for our eggs
-                """
-            ),
             dcc.Graph(id="EggBaskets", figure=eggbaskets),
             html.P(
                 children="""
