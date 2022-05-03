@@ -198,6 +198,10 @@ class TempoData:
             rolling7Sum.reset_index(inplace=False)
         )
 
+#
+# =========================================================
+#
+
 
 # Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
@@ -217,6 +221,7 @@ rollingAll = px.scatter(
     facet_col_wrap=3,
     height=800
 )
+rollingAll.update_layout(title="Rolling 7 days")
 
 time1 = px.histogram(
     work.byDay().sort_values("Key"),
@@ -227,7 +232,9 @@ time1 = px.histogram(
     facet_col_wrap=3,
     height=800
 )
-time1.update_layout(bargap=0.1)
+time1.update_layout(
+    bargap=0.1,
+    title="What do we work on")
 
 time2 = px.histogram(
     work.byDay().sort_values("Key"),
@@ -236,7 +243,9 @@ time2 = px.histogram(
     color='Key',
     height=600
 )
-time2.update_layout(bargap=0.1)
+time2.update_layout(
+    bargap=0.1,
+    title="What do we work on")
 
 time3 = px.histogram(
     work.byGroup().sort_values("Group"),
@@ -247,7 +256,9 @@ time3 = px.histogram(
     facet_col_wrap=3,
     height=800
 )
-time3.update_layout(bargap=0.1)
+time3.update_layout(
+    bargap=0.1,
+    title="What do we work on")
 
 time4 = px.histogram(
     work.byGroup().sort_values("Group"),
@@ -256,7 +267,9 @@ time4 = px.histogram(
     color='Group',
     height=600
 )
-time4.update_layout(bargap=0.1)
+time4.update_layout(
+    bargap=0.1,
+    title="What do we work on")
 
 daysAgo = 90
 if tc.rates.empty:
@@ -316,43 +329,48 @@ fig2 = px.histogram(
 
 fig2.update_xaxes(categoryorder='total ascending')
 
+#
+# =========================================================
+#
 
-def render() -> html._component:
-    """Renders the HTML components for this page"""
+tabStructure = dcc.Tabs(id="tabs-graph", value='table1', children=[
+    dcc.Tab(label='Aggregated', value='table1'),
+    dcc.Tab(label='Billable', value='billable'),
+    dcc.Tab(label='Internal', value='internal'),
+    dcc.Tab(label='example-2', value='fig2'),
+    dcc.Tab(label='TimeSeries1', value='time1'),
+    dcc.Tab(label='TimeSeries2', value='time2'),
+    dcc.Tab(label='TimeSeries3', value='time3'),
+    dcc.Tab(label='TimeSeries4', value='time4'),
+    dcc.Tab(label='EggBaskets', value='eggbaskets'),
+    dcc.Tab(label='Rolling', value='rollingAll')
+    ])
+
+pageheader = html.Div([
+    dcc.Markdown('## Verifa Metrics Dashboard'),
+    dcc.Markdown(f'''
+    #### For data between {work.from_date} and {work.to_date}
+    # ''')
+    ])
+
+
+tabDict = {
+    'table1': table1,
+    'billable': billable,
+    'internal': internal,
+    'fig2': fig2,
+    'time1': time1,
+    'time2': time2,
+    'time3': time3,
+    'time4': time4,
+    'eggbaskets': eggbaskets,
+    'rollingAll': rollingAll
+    }
+
+
+def render_content(tab):
     return html.Div(
-        children=[
-            html.Section(render_chart()),
-        ]
-    )
-
-
-def render_chart() -> html._component:
-    """Render chart"""
-    return html.Div(
-        children=[
-            dcc.Markdown('# Verifa Metrics Dashboard'),
-            dcc.Markdown(f'''
-            ### For data between {work.from_date} and {work.to_date}
-            '''),
-            dcc.Graph(id="Aggregated", figure=table1),
-            dcc.Graph(id="Billable", figure=billable),
-            dcc.Graph(id="Internal", figure=internal),
-            dcc.Graph(id="example-2", figure=fig2),
-            html.P(
-                children="""
-                What do we work on
-                """
-            ),
-            dcc.Graph(id="TimeSeries1", figure=time1),
-            dcc.Graph(id="TimeSeries2", figure=time2),
-            dcc.Graph(id="TimeSeries3", figure=time3),
-            dcc.Graph(id="TimeSeries4", figure=time4),
-            dcc.Graph(id="EggBaskets", figure=eggbaskets),
-            html.P(
-                children="""
-                Rolling 7 days
-                """
-            ),
-            dcc.Graph(id="Rolling", figure=rollingAll)
-        ]
+        html.Section(children=[
+            dcc.Graph(id="plot", figure=tabDict[tab])
+        ])
     )

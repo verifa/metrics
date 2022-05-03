@@ -1,4 +1,5 @@
 from dash import Dash, html, dcc
+from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 
@@ -26,7 +27,18 @@ app.scripts.config.serve_locally = True
 # Setup the server for gunicorn (prod)
 server = app.server
 
-app.layout = html.Main(index.render())
+app.layout = html.Div(children = [
+    index.pageheader,
+    index.tabStructure,
+    html.Div(id='tabs-content-graph')
+])
+
+
+@app.callback(
+    Output('tabs-content-graph', 'children'),
+    Input('tabs-graph', 'value'))
+def render_content(tab):
+    return index.render_content(tab)
 
 if __name__ == "__main__":
     app.run_server(debug=True, host="127.0.0.1")
