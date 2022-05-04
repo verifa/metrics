@@ -27,8 +27,8 @@ class TempoConfig:
         # default path
         configPath = '/tempo'
     # which config files are possible
-    workingHoursFile = configPath + "/workinghours"
-    ratesFile = configPath + "/rates"
+    workingHoursFile = configPath + "/workinghours.json"
+    ratesFile = configPath + "/rates.json"
 
     def __init__(self, users):
         self.workingHours = pd.DataFrame()
