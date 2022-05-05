@@ -337,13 +337,13 @@ tabStructure = dcc.Tabs(id="tabs-graph", value='table1', children=[
     dcc.Tab(label='Aggregated', value='table1'),
     dcc.Tab(label='Billable', value='billable'),
     dcc.Tab(label='Internal', value='internal'),
-    dcc.Tab(label='example-2', value='fig2'),
-    dcc.Tab(label='TimeSeries1', value='time1'),
-    dcc.Tab(label='TimeSeries2', value='time2'),
-    dcc.Tab(label='TimeSeries3', value='time3'),
-    dcc.Tab(label='TimeSeries4', value='time4'),
+    dcc.Tab(label='Popular keys', value='fig2'),
+    dcc.Tab(label='Keys Personal', value='time1'),
+    dcc.Tab(label='Keys Team', value='time2'),
+    dcc.Tab(label='Projects Personal', value='time3'),
+    dcc.Tab(label='Projects Team', value='time4'),
     dcc.Tab(label='EggBaskets', value='eggbaskets'),
-    dcc.Tab(label='Rolling', value='rollingAll')
+    dcc.Tab(label='Rolling individual', value='rollingAll')
     ])
 
 pageheader = html.Div([
