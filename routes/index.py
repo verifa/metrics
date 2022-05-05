@@ -203,6 +203,28 @@ class TempoData:
 #
 
 
+def teamRollingAverage7(r7):
+    dailyAverage = (
+        r7.groupby(
+            ['Date'])
+        [['Billable', 'Internal']].mean()
+    )
+    return dailyAverage.reset_index(inplace=False)
+
+
+def rollingAverage30(dailyData):
+    monthlyAvg = (
+        dailyData.set_index('Date').rolling('30d')
+        [['Billable', 'Internal']].mean()
+    )
+    return monthlyAvg.reset_index(inplace=False)
+
+
+#
+# =========================================================
+#
+
+
 # Fetch the data from tempo
 work = TempoData("2022-01-01", str(date.today()))
 
@@ -222,6 +244,25 @@ rollingAll = px.scatter(
     height=800
 )
 rollingAll.update_layout(title="Rolling 7 days")
+
+teamRollingAverage7 = teamRollingAverage7(rolling7)
+teamRollingAverage30 = rollingAverage30(teamRollingAverage7)
+teamRollingAverage30.columns = ["Date", "Billable30", "Internal30"]
+teamRollingAverage30 = teamRollingAverage30.merge(
+    teamRollingAverage7,
+    on=['Date'])
+rollingTeamAverage = px.scatter(
+    teamRollingAverage30,
+    x='Date',
+    y=['Billable', 'Billable30', 'Internal', 'Internal30'],
+    color_discrete_sequence=[
+        '#8FBC8F',
+        '#006400',
+        '#FF7F50',
+        '#A52A2A'],
+    height=600
+)
+rollingTeamAverage.update_layout(title="Team average, rolling 7 days")
 
 time1 = px.histogram(
     work.byDay().sort_values("Key"),
@@ -343,7 +384,8 @@ tabStructure = dcc.Tabs(id="tabs-graph", value='table1', children=[
     dcc.Tab(label='Projects Personal', value='time3'),
     dcc.Tab(label='Projects Team', value='time4'),
     dcc.Tab(label='EggBaskets', value='eggbaskets'),
-    dcc.Tab(label='Rolling individual', value='rollingAll')
+    dcc.Tab(label='Rolling individual', value='rollingAll'),
+    dcc.Tab(label='Rolling team', value='rollingTeamAverage')
     ])
 
 pageheader = html.Div([
@@ -364,7 +406,8 @@ tabDict = {
     'time3': time3,
     'time4': time4,
     'eggbaskets': eggbaskets,
-    'rollingAll': rollingAll
+    'rollingAll': rollingAll,
+    'rollingTeamAverage': rollingTeamAverage
     }
 
 
