@@ -21,6 +21,15 @@ tempo = client.Tempo(
 startDate = "2022-01-01"
 
 
+def weekdays(from_date, to_date):
+    """ Returns the number of weekdays between the dates
+        using numpy
+    """
+    begin = from_date
+    end = to_date
+    return 1 + np.busday_count(begin, end, weekmask='1111100')
+
+
 class TempoConfig:
     """TempoConfig data class"""
     # where to find the config files
@@ -57,7 +66,7 @@ class TempoConfig:
             self.rates['Rate'] = rcol
             self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
             self.rates = self.rates.astype({'Rate': 'int'})
-            print(self.rates)
+            # print(self.rates)
 
 
 class TempoData:
@@ -175,10 +184,44 @@ class TempoData:
             self.data.groupby('User', as_index=False)
             [['Time', 'Billable']].sum()
         )
+        # Find the first time entry for each user
+        userFirst = (
+            self.data.groupby('User', as_index=False)
+            ['Date'].min()
+        )
+        # Add a unique comumn name
+        userFirst.columns = ['User', 'First']
+        # Convert fime stamp to just date
+        userFirst['First'] = [x.date() for x in userFirst['First']]
+        # add the column to the user data
+        userData = pd.merge(
+            userData,
+            userFirst,
+            on='User'
+        )
+        userLast = (
+            self.data.groupby('User', as_index=False)
+            ['Date'].max()
+        )
+        userLast.columns = ['User', 'Last']
+        userLast['Last'] = [x.date() for x in userLast['Last']]
+        userData = pd.merge(
+            userData,
+            userLast,
+            on='User'
+        )
+        userData['Days'] = [
+            weekdays(f, t) for f, t in zip(
+                userData['First'],
+                userData['Last'])]
         if not workingHours.empty:
-            print(workingHours)
+            # print(workingHours)
             tmpData = pd.merge(userData, workingHours, on="User")
             userData = tmpData
+            userData['Expected'] = [d * d2 for d, d2 in zip(
+                userData['Daily'], userData['Days'])]
+            userData['Delta'] = [t - e for t, e in zip(
+                userData['Time'], userData['Expected'])]
 
         return(
             userData
