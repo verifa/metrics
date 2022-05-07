@@ -29,7 +29,6 @@ def weekdays(from_date, to_date):
     end = to_date
     return 1 + np.busday_count(begin, end, weekmask='1111100')
 
-
 class TempoConfig:
     """TempoConfig data class"""
     # where to find the config files
