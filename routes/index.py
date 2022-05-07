@@ -120,7 +120,15 @@ class TempoData:
         df.dropna(subset=['Billable'], inplace=True)
         return df
 
-    def byEggBaskets(self, rates):
+    def uprateWork(self, rates):
+        upRated = self.data.merge(rates, on=['Key', 'User'], how="left")
+        upRated['Rate'] = upRated.apply(
+            lambda x: x['Rate']/10 if x['Currency'] == 'SEK' else x['Rate'],
+            axis=1)
+        upRated['Income'] = upRated['Rate'] * upRated['Billable']
+        work.data = upRated
+
+    def byEggBaskets(self):
         """returns aggregated billable income
         grouped by issue key group, user and time box (30, 60, 90)
         """
@@ -141,13 +149,7 @@ class TempoData:
             'TimeBasket'] = '0-30 days ago'
         baskets['TimeBasket'].replace('0', np.nan, inplace=True)
         baskets.dropna(subset=['TimeBasket'], inplace=True)
-
-        upRated = baskets.merge(rates, on=['Key', 'User'], how="left")
-        upRated['Rate'] = upRated.apply(
-            lambda x: x['Rate']/10 if x['Currency'] == 'SEK' else x['Rate'],
-            axis=1)
-        upRated['Income'] = upRated['Rate'] * upRated['Billable']
-        df = (upRated.groupby(
+        df = (baskets.groupby(
             ['Group', 'User', 'TimeBasket'], as_index=False)
             [['Income']].sum())
         df['Income'].replace(0, np.nan, inplace=True)
@@ -180,45 +182,62 @@ class TempoData:
             userData
         )
 
-    def userRolling7(self):
+    def userRolling7(self, tosum):
         """returns rolling 7 day sums for Billable and non Billable time
         grouped by user
         """
         dailySum = (
             self.data.groupby(
                 ['Date', 'User'], as_index=False)
-            [['Billable', 'Internal']].sum()
+            [tosum].sum()
         )
         rolling7Sum = (
             dailySum.set_index('Date').groupby(
                 ['User'], as_index=False).rolling('7d')
-            [['Billable', 'Internal']].sum()
+            [tosum].sum()
         )
         return(
             rolling7Sum.reset_index(inplace=False)
         )
+
+    def teamRolling7(self, tosum):
+        """returns rolling 7 day sums for Billable and non Billable time
+        grouped by user
+        """
+        dailySum = (
+            self.data.groupby(
+                ['Date'], as_index=False)
+            [tosum].sum()
+        )
+        rolling7Sum = (
+            dailySum.set_index('Date').rolling('7d')
+            [tosum].sum()
+        )
+        return(
+            rolling7Sum.reset_index(inplace=False)
+        )
+
 
 #
 # =========================================================
 #
 
 
-def teamRollingAverage7(r7):
+def teamRollingAverage7(r7, tomean):
     dailyAverage = (
         r7.groupby(
             ['Date'])
-        [['Billable', 'Internal']].mean()
+        [tomean].mean()
     )
     return dailyAverage.reset_index(inplace=False)
 
 
-def rollingAverage30(dailyData):
+def rollingAverage30(dailyData, tomean):
     monthlyAvg = (
         dailyData.set_index('Date').rolling('30d')
-        [['Billable', 'Internal']].mean()
+        [tomean].mean()
     )
     return monthlyAvg.reset_index(inplace=False)
-
 
 #
 # =========================================================
@@ -231,10 +250,12 @@ work = TempoData("2022-01-01", str(date.today()))
 # read config files
 tc = TempoConfig(work.getUsers())
 
-rolling7 = work.userRolling7()
+# add rate info to data
+work.uprateWork(tc.rates)
 
 table1 = ff.create_table(work.byUser(tc.workingHours))
 
+rolling7 = work.userRolling7(['Billable', 'Internal'])
 rollingAll = px.scatter(
     rolling7,
     x='Date',
@@ -245,11 +266,13 @@ rollingAll = px.scatter(
 )
 rollingAll.update_layout(title="Rolling 7 days")
 
-teamRollingAverage7 = teamRollingAverage7(rolling7)
-teamRollingAverage30 = rollingAverage30(teamRollingAverage7)
+rollingAverage7 = teamRollingAverage7(rolling7, ['Billable', 'Internal'])
+teamRollingAverage30 = rollingAverage30(
+    rollingAverage7,
+    ['Billable', 'Internal'])
 teamRollingAverage30.columns = ["Date", "Billable30", "Internal30"]
 teamRollingAverage30 = teamRollingAverage30.merge(
-    teamRollingAverage7,
+    rollingAverage7,
     on=['Date'])
 rollingTeamAverage = px.scatter(
     teamRollingAverage30,
@@ -262,7 +285,57 @@ rollingTeamAverage = px.scatter(
         '#A52A2A'],
     height=600
 )
-rollingTeamAverage.update_layout(title="Team average, rolling 7 days")
+rollingTeamAverage.update_layout(
+    title="Team average, rolling 7 days, based on time")
+
+rollingIncome7 = work.userRolling7('Income')
+rollingAllIncome = px.scatter(
+    rollingIncome7,
+    x='Date',
+    y='Income',
+    facet_col='User',
+    facet_col_wrap=3,
+    height=800
+)
+rollingAllIncome.update_layout(title="Rolling 7 days (income)")
+
+rollingAverage7 = teamRollingAverage7(rollingIncome7, 'Income')
+teamRollingAverage30 = rollingAverage30(rollingAverage7, 'Income')
+teamRollingAverage30.columns = ["Date", "Income30"]
+teamRollingAverage30 = teamRollingAverage30.merge(
+    rollingAverage7,
+    on=['Date'])
+rollingTeamAverageIncome = px.scatter(
+    teamRollingAverage30,
+    x='Date',
+    y=['Income', 'Income30'],
+    color_discrete_sequence=[
+        '#8FBC8F',
+        '#006400'],
+    height=600
+)
+rollingTeamAverageIncome.update_layout(
+    yaxis_title="Income (euro)",
+    title="Team average, rolling 7 days, based on income")
+
+rollingIncome7 = work.teamRolling7('Income')
+teamRollingAverage30 = rollingAverage30(rollingIncome7, 'Income')
+teamRollingAverage30.columns = ["Date", "Income30"]
+teamRollingAverage30 = teamRollingAverage30.merge(
+    rollingIncome7,
+    on=['Date'])
+rollingAllIncomeTotal = px.scatter(
+    teamRollingAverage30,
+    x='Date',
+    y=['Income', 'Income30'],
+    color_discrete_sequence=[
+        '#8FBC8F',
+        '#006400'],
+    height=600
+)
+rollingAllIncomeTotal.update_layout(
+    yaxis_title="Income (euro)",
+    title="Weekly income")
 
 time1 = px.histogram(
     work.byDay().sort_values("Key"),
@@ -325,7 +398,7 @@ if tc.rates.empty:
 else:
     yAxisTitle = "Sum of Income (Euro)"
     eggbaskets = px.histogram(
-        work.byEggBaskets(tc.rates),
+        work.byEggBaskets(),
         x='Group',
         y='Income',
         color='User',
@@ -384,8 +457,11 @@ tabStructure = dcc.Tabs(id="tabs-graph", value='table1', children=[
     dcc.Tab(label='Projects Personal', value='time3'),
     dcc.Tab(label='Projects Team', value='time4'),
     dcc.Tab(label='EggBaskets', value='eggbaskets'),
-    dcc.Tab(label='Rolling individual', value='rollingAll'),
-    dcc.Tab(label='Rolling team', value='rollingTeamAverage')
+    dcc.Tab(label='Rolling individual (time)', value='rollingAll'),
+    dcc.Tab(label='Rolling team (time)', value='rollingTeamAverage'),
+    dcc.Tab(label='Rolling individual (income)', value='rollingAllIncome'),
+    dcc.Tab(label='Rolling team (income)', value='rollingTeamAverageIncome'),
+    dcc.Tab(label='Weekly income', value='rollingAllIncomeTotal')
     ])
 
 pageheader = html.Div([
@@ -407,7 +483,10 @@ tabDict = {
     'time4': time4,
     'eggbaskets': eggbaskets,
     'rollingAll': rollingAll,
-    'rollingTeamAverage': rollingTeamAverage
+    'rollingTeamAverage': rollingTeamAverage,
+    'rollingAllIncome': rollingAllIncome,
+    'rollingTeamAverageIncome': rollingTeamAverageIncome,
+    'rollingAllIncomeTotal': rollingAllIncomeTotal
     }
 
 
