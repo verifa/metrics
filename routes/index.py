@@ -229,13 +229,19 @@ class TempoData:
 
     def ratesTable(self):
         rateData = self.data[self.data["Billable"] > 0]
-        rateData = rateData.groupby('Key', as_index=False).agg(
-            Hours=('Billable', np.sum),
-            Rate=('Rate', np.mean))
+        rateData = rateData.groupby(
+            ['Key', 'Rate'],
+            dropna=False,
+            as_index=False).agg(
+                Hours=('Billable', np.sum),
+                Users=('User', ', '.join))
+        rateData['Rate'].replace(np.nan, "<b>nan</b>", inplace=True)
+        rateData['Users'] = rateData[
+            'Users'].str.split(", ").map(set).str.join(", ")
         return(
             rateData.sort_values(
-                by=["Rate", "Hours"],
-                ascending=[True, False],
+                by=["Key", "Rate", "Hours"],
+                ascending=[True, True, False],
                 na_position="first")
         )
 
