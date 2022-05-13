@@ -317,6 +317,7 @@ plotDaysAgo = pd.Timestamp('today').floor('D') - pd.offsets.Day(180)
 
 # Fetch the data from tempo
 work = TempoData(startDate, str(date.today()))
+work.data['Year'] = work.data['Date'].dt.year
 
 # read config files
 tc = TempoConfig(work.getUsers())
@@ -345,6 +346,7 @@ rollingAll = px.scatter(
     height=800
 )
 rollingAll.update_layout(title="Rolling 7 days")
+rollingAll.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
 # Rolling team (time)
 rollingAverage7 = teamRollingAverage7(rolling7, ['Billable', 'Internal'])
@@ -387,6 +389,9 @@ rollingAllIncome = px.scatter(
     height=800
 )
 rollingAllIncome.update_layout(title="Rolling 7 days (income)")
+rollingAllIncome.for_each_annotation(
+    lambda a: a.update(text=a.text.split("=")[-1])
+)
 
 # Rolling team (income)
 rollingAverage7 = teamRollingAverage7(rollingIncome7, 'Income')
@@ -469,6 +474,8 @@ time3 = px.histogram(
 time3.update_layout(
     bargap=0.1,
     title="What do we work on")
+time3.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
 
 # Projects team
 time4data = work.byGroup().sort_values("Group")
@@ -489,9 +496,12 @@ billable = px.histogram(
     x="User",
     y="Billable",
     color="Key",
+    facet_col='Year',
     height=600)
 
 billable.update_xaxes(categoryorder='total ascending')
+# billable.update_xaxes(matches=None)
+billable.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
 # Internal time
 internal = px.histogram(
@@ -499,9 +509,13 @@ internal = px.histogram(
     x="User",
     y="Internal",
     color="Key",
+    facet_col='Year',
     height=600)
 
-internal.update_xaxes(categoryorder='total descending')
+internal.update_xaxes(categoryorder='total ascending')
+# internal.update_xaxes(matches=None)
+internal.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
 
 # Popular projects
 fig3 = px.histogram(
@@ -509,9 +523,13 @@ fig3 = px.histogram(
     x="Group",
     y="Time",
     color="User",
+    facet_col='Year',
     height=600)
 
-fig3.update_xaxes(categoryorder='total ascending')
+fig3.update_xaxes(categoryorder='category ascending')
+# fig3.update_yaxes(matches=None)
+fig3.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
 
 # Eggs and baskets
 daysAgo = 90
@@ -523,7 +541,7 @@ if tc.rates.empty:
         y='Billable',
         color='User'
     )
-    eggbaskets.update_xaxes(categoryorder='total ascending')
+    eggbaskets.update_xaxes(categoryorder='category ascending')
 else:
     yAxisTitle = "Sum of Income (Euro)"
     eggbaskets = px.histogram(
