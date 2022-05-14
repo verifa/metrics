@@ -555,13 +555,10 @@ tabStructure = dcc.Tabs(id="tabs-graph", value='table1', children=[
     dcc.Tab(label='Billable', value='billable'),
     dcc.Tab(label='Internal', value='internal'),
     dcc.Tab(label='Popular projects', value='fig3'),
-    dcc.Tab(label='Projects Personal', value='time3'),
-    dcc.Tab(label='Projects Team', value='time4'),
+    dcc.Tab(label='Projects', value='projects'),
     dcc.Tab(label='Egg Baskets', value='eggbaskets'),
-    dcc.Tab(label='Rolling individual (time)', value='rollingAll'),
-    dcc.Tab(label='Rolling team (time)', value='rollingTeamAverage'),
-    dcc.Tab(label='Rolling individual (income)', value='rollingAllIncome'),
-    dcc.Tab(label='Rolling team (income)', value='rollingTeamAverageIncome'),
+    dcc.Tab(label='Rolling time', value='RollingTime'),
+    dcc.Tab(label='Rolling income', value='rollingIncome'),
     dcc.Tab(label='Company weekly income', value='rollingAllIncomeTotal')
     ])
 
@@ -574,25 +571,21 @@ pageheader = html.Div([
 
 
 tabDict = {
-    'table1': table1,
-    'table2': table2,
-    'billable': billable,
-    'internal': internal,
-    'fig3': fig3,
-    'time3': time3,
-    'time4': time4,
-    'eggbaskets': eggbaskets,
-    'rollingAll': rollingAll,
-    'rollingTeamAverage': rollingTeamAverage,
-    'rollingAllIncome': rollingAllIncome,
-    'rollingTeamAverageIncome': rollingTeamAverageIncome,
-    'rollingAllIncomeTotal': rollingAllIncomeTotal
+    'table1': [table1],
+    'table2': [table2],
+    'billable': [billable],
+    'internal': [internal],
+    'fig3': [fig3],
+    'projects': [time4, time3],
+    'eggbaskets': [eggbaskets],
+    'RollingTime': [rollingTeamAverage, rollingAll],
+    'rollingIncome': [rollingTeamAverageIncome, rollingAllIncome],
+    'rollingAllIncomeTotal': [rollingAllIncomeTotal]
     }
 
 
 def render_content(tab):
+    sections = [dcc.Graph(id="plot", figure=x) for x in tabDict[tab]]
     return html.Div(
-        html.Section(children=[
-            dcc.Graph(id="plot", figure=tabDict[tab])
-        ])
+        html.Section(children=sections)
     )
