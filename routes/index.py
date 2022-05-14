@@ -29,6 +29,7 @@ def weekdays(from_date, to_date):
     end = to_date
     return 1 + np.busday_count(begin, end, weekmask='1111100')
 
+
 class TempoConfig:
     """TempoConfig data class"""
     # where to find the config files
@@ -454,34 +455,6 @@ rollingAllIncomeTotal.update_layout(
     xaxis_range=[plotDaysAgo, str(date.today())]
 )
 
-# Keys personal
-time1data = work.byDay().sort_values("Key")
-time1 = px.histogram(
-    time1data[time1data["Date"] > plotDaysAgo],
-    x='Date',
-    y='Time',
-    color='Key',
-    facet_col='User',
-    facet_col_wrap=3,
-    height=800
-)
-time1.update_layout(
-    bargap=0.1,
-    title="What do we work on")
-
-# Keys team
-time2data = work.byDay().sort_values("Key")
-time2 = px.histogram(
-    time2data[time2data["Date"] > plotDaysAgo],
-    x='Date',
-    y='Time',
-    color='Key',
-    height=600
-)
-time2.update_layout(
-    bargap=0.1,
-    title="What do we work on")
-
 # Projects personal
 time3data = work.byGroup().sort_values("Group")
 time3 = px.histogram(
@@ -529,16 +502,6 @@ internal = px.histogram(
     height=600)
 
 internal.update_xaxes(categoryorder='total descending')
-
-# Popular keys
-fig2 = px.histogram(
-    work.data,
-    x="Key",
-    y="Time",
-    color="User",
-    height=600)
-
-fig2.update_xaxes(categoryorder='total ascending')
 
 # Popular projects
 fig3 = px.histogram(
@@ -591,10 +554,7 @@ tabStructure = dcc.Tabs(id="tabs-graph", value='table1', children=[
     dcc.Tab(label='Rates', value='table2'),
     dcc.Tab(label='Billable', value='billable'),
     dcc.Tab(label='Internal', value='internal'),
-    dcc.Tab(label='Popular keys', value='fig2'),
     dcc.Tab(label='Popular projects', value='fig3'),
-    dcc.Tab(label='Keys Personal', value='time1'),
-    dcc.Tab(label='Keys Team', value='time2'),
     dcc.Tab(label='Projects Personal', value='time3'),
     dcc.Tab(label='Projects Team', value='time4'),
     dcc.Tab(label='Egg Baskets', value='eggbaskets'),
@@ -618,10 +578,7 @@ tabDict = {
     'table2': table2,
     'billable': billable,
     'internal': internal,
-    'fig2': fig2,
     'fig3': fig3,
-    'time1': time1,
-    'time2': time2,
     'time3': time3,
     'time4': time4,
     'eggbaskets': eggbaskets,
