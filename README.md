@@ -25,6 +25,8 @@ make run
 # Browse http://localhost:8000
 ```
 
+*Note:* To use `podman`, you can set the `DOCKER` variable to `podman`, e.g. `make DOCKER=podman dev`
+
 ## Runtime environment
 
 ### TEMPO_KEY

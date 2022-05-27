@@ -4,6 +4,8 @@ IMAGE := $(REPO)/metrics-dashboard
 
 CLOUDRUN_SERVICE=metrics-dashboard
 
+DOCKER := docker
+
 default: build
 
 .PHONY : help
@@ -17,15 +19,15 @@ dev: install
 	poetry run python app.py
 
 run: build
-	docker run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
 
 build:
-	docker build -t $(IMAGE):$(TAG) .
+	$(DOCKER) build -t $(IMAGE):$(TAG) .
 
 push: build
-	docker push $(IMAGE):$(TAG)
-	docker tag $(IMAGE):$(TAG) $(IMAGE):latest
-	docker push $(IMAGE):latest
+	$(DOCKER) push $(IMAGE):$(TAG)
+	$(DOCKER) tag $(IMAGE):$(TAG) $(IMAGE):latest
+	$(DOCKER) push $(IMAGE):latest
 
 deploy:
 	gcloud run deploy $(CLOUDRUN_SERVICE) --image $(IMAGE):$(TAG) --region europe-north1
