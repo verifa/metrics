@@ -1,3 +1,14 @@
+[tool.black]
+line-length = 120
+target-version = ['py37']
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = "C0103, E0401, W0212, R0903, C0116"
+max-line-length = 120
+
 [tool.poetry]
 name = "metrics"
 version = "0.1.0"
