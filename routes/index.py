@@ -6,9 +6,15 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 from dash import dcc, html
+from routes.date_utils import lookAhead, lookBack
 from routes.tempo import TempoConfig, TempoData
 
-startDate = "2021-01-01"
+START_DATE = pd.Timestamp('2021-01-01')
+FIRST_WEEK = lookAhead(7, START_DATE)
+FIRST_MONTH = lookAhead(30, START_DATE)
+FIRST_QUARTER = lookAhead(90, START_DATE)
+FIRST_YEAR = lookAhead(365, START_DATE)
+ROLLING_DATE = lookBack(180)
 
 #
 # =========================================================
@@ -32,20 +38,12 @@ def rollingAverage(dailyData, tomean, days):
     return monthlyAvg.reset_index(inplace=False)
 
 
-firstDays7 = pd.Timestamp(startDate).floor('D') + pd.offsets.Day(7)
-firstDays30 = pd.Timestamp(startDate).floor('D') + pd.offsets.Day(30)
-firstDays90 = pd.Timestamp(startDate).floor('D') + pd.offsets.Day(90)
-firstDays365 = pd.Timestamp(startDate).floor('D') + pd.offsets.Day(365)
-
-plotDaysAgo = pd.Timestamp('today').floor('D') - pd.offsets.Day(180)
-
 #
 # =========================================================
 #
 
-
 # Fetch the data from tempo
-work = TempoData(startDate, str(date.today()))
+work = TempoData(START_DATE, str(date.today()))
 
 # read config files
 tc = TempoConfig(work.getUsers())
@@ -62,11 +60,11 @@ table2 = ff.create_table(work.ratesTable())
 # Rolling individual (time)
 rolling7 = work.userRolling7(['Billable', 'Internal'])
 rolling7.loc[
-    rolling7['Date'] < firstDays7, 'Billable'] = np.nan
+    rolling7['Date'] < FIRST_WEEK, 'Billable'] = np.nan
 rolling7.loc[
-    rolling7['Date'] < firstDays7, 'Internal'] = np.nan
+    rolling7['Date'] < FIRST_WEEK, 'Internal'] = np.nan
 rollingAll = px.scatter(
-    rolling7[rolling7["Date"] > plotDaysAgo],
+    rolling7[rolling7["Date"] > ROLLING_DATE],
     x='Date',
     y=['Billable', 'Internal'],
     facet_col='User',
@@ -81,9 +79,9 @@ teamRollingAverage30 = rollingAverage(
     rollingAverage7, ['Billable', 'Internal'], 30)
 teamRollingAverage30.columns = ["Date", "Billable30", "Internal30"]
 teamRollingAverage30.loc[
-    teamRollingAverage30['Date'] < firstDays30, 'Billable30'] = np.nan
+    teamRollingAverage30['Date'] < FIRST_MONTH, 'Billable30'] = np.nan
 teamRollingAverage30.loc[
-    teamRollingAverage30['Date'] < firstDays30, 'Internal30'] = np.nan
+    teamRollingAverage30['Date'] < FIRST_MONTH, 'Internal30'] = np.nan
 teamRollingAverage30 = teamRollingAverage30.merge(
     rollingAverage7, on=['Date'])
 rollingTeamAverage = px.scatter(
@@ -100,15 +98,15 @@ rollingTeamAverage = px.scatter(
 rollingTeamAverage.update_layout(
     title="Team average, rolling 7 days, based on time",
     xaxis_rangeslider_visible=True,
-    xaxis_range=[plotDaysAgo, str(date.today())]
+    xaxis_range=[ROLLING_DATE, str(date.today())]
 )
 
 # Rolling individual (income)
 rollingIncome7 = work.userRolling7('Income')
 rolling7.loc[
-    rolling7['Date'] < firstDays7, 'Income'] = np.nan
+    rolling7['Date'] < FIRST_WEEK, 'Income'] = np.nan
 rollingAllIncome = px.scatter(
-    rollingIncome7[rollingIncome7["Date"] > plotDaysAgo],
+    rollingIncome7[rollingIncome7["Date"] > ROLLING_DATE],
     x='Date',
     y='Income',
     facet_col='User',
@@ -122,7 +120,7 @@ rollingAverage7 = teamRollingAverage7(rollingIncome7, 'Income')
 teamRollingAverage30 = rollingAverage(rollingAverage7, 'Income', 30)
 teamRollingAverage30.columns = ["Date", "Income30"]
 teamRollingAverage30.loc[
-    teamRollingAverage30['Date'] < firstDays30, 'Income30'] = np.nan
+    teamRollingAverage30['Date'] < FIRST_MONTH, 'Income30'] = np.nan
 teamRollingAverage30 = teamRollingAverage30.merge(
     rollingAverage7, on=['Date'])
 rollingTeamAverageIncome = px.scatter(
@@ -138,7 +136,7 @@ rollingTeamAverageIncome.update_layout(
     yaxis_title="Income (euro)",
     title="Team average, rolling 7 days, based on income",
     xaxis_rangeslider_visible=True,
-    xaxis_range=[plotDaysAgo, str(date.today())]
+    xaxis_range=[ROLLING_DATE, str(date.today())]
 )
 
 # Weekly income
@@ -158,13 +156,13 @@ teamRollingAverage365 = teamRollingAverage365.merge(
 
 teamRollingAverage = teamRollingAverage365
 teamRollingAverage.loc[
-    teamRollingAverage['Date'] < firstDays7, 'Income'] = np.nan
+    teamRollingAverage['Date'] < FIRST_WEEK, 'Income'] = np.nan
 teamRollingAverage.loc[
-    teamRollingAverage['Date'] < firstDays30, 'Income30'] = np.nan
+    teamRollingAverage['Date'] < FIRST_MONTH, 'Income30'] = np.nan
 teamRollingAverage.loc[
-    teamRollingAverage['Date'] < firstDays90, 'Income90'] = np.nan
+    teamRollingAverage['Date'] < FIRST_QUARTER, 'Income90'] = np.nan
 teamRollingAverage.loc[
-    teamRollingAverage['Date'] < firstDays365, 'Income365'] = np.nan
+    teamRollingAverage['Date'] < FIRST_YEAR, 'Income365'] = np.nan
 
 rollingAllIncomeTotal = px.scatter(
     teamRollingAverage,
@@ -181,13 +179,13 @@ rollingAllIncomeTotal.update_layout(
     yaxis_title="Income (euro)",
     title="Weekly income",
     xaxis_rangeslider_visible=True,
-    xaxis_range=[plotDaysAgo, str(date.today())]
+    xaxis_range=[ROLLING_DATE, str(date.today())]
 )
 
 # Projects personal
 time3data = work.byGroup().sort_values("Group")
 time3 = px.histogram(
-    time3data[time3data["Date"] > plotDaysAgo],
+    time3data[time3data["Date"] > ROLLING_DATE],
     x='Date',
     y='Time',
     color='Group',
@@ -202,7 +200,7 @@ time3.update_layout(
 # Projects team
 time4data = work.byGroup().sort_values("Group")
 time4 = px.histogram(
-    time4data[time4data["Date"] > plotDaysAgo],
+    time4data[time4data["Date"] > ROLLING_DATE],
     x='Date',
     y='Time',
     color='Group',

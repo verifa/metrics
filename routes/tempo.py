@@ -5,14 +5,8 @@ import sys
 
 import pandas
 import numpy
+from routes.date_utils import lookBack, weekdays
 from tempoapiclient import client
-
-
-def weekdays(from_date, to_date):
-    """Returns the number of weekdays between the dates using numpy"""
-    begin = from_date
-    end = to_date
-    return 1 + numpy.busday_count(begin, end, weekmask="1111100")
 
 
 class TempoConfig:
@@ -82,8 +76,7 @@ class TempoData:
 
     def byTotalGroup(self, daysBack):
         """returns aggregated billable time grouped by issue key group and user"""
-        lookBack = pandas.Timestamp("today").floor("D") - pandas.offsets.Day(daysBack)
-        timedData = self.data[self.data["Date"] > lookBack]
+        timedData = self.data[self.data["Date"] > lookBack(daysBack)]
         df = timedData.groupby(["Group", "User"], as_index=False)[["Billable"]].sum()
         df["Billable"].replace(0, numpy.nan, inplace=True)
         df.dropna(subset=["Billable"], inplace=True)
@@ -97,15 +90,12 @@ class TempoData:
 
     def byEggBaskets(self):
         """returns aggregated billable income grouped by issue key group, user and time box (30, 60, 90)"""
-        lookBack30 = pandas.Timestamp("today").floor("D") - pandas.offsets.Day(30)
-        lookBack60 = pandas.Timestamp("today").floor("D") - pandas.offsets.Day(60)
-        lookBack90 = pandas.Timestamp("today").floor("D") - pandas.offsets.Day(90)
 
         baskets = self.data
         baskets["TimeBasket"] = "0"
-        baskets.loc[baskets["Date"] > lookBack90, "TimeBasket"] = "60-90 days ago"
-        baskets.loc[baskets["Date"] > lookBack60, "TimeBasket"] = "30-60 days ago"
-        baskets.loc[baskets["Date"] > lookBack30, "TimeBasket"] = "0-30 days ago"
+        baskets.loc[baskets["Date"] > lookBack(90), "TimeBasket"] = "60-90 days ago"
+        baskets.loc[baskets["Date"] > lookBack(60), "TimeBasket"] = "30-60 days ago"
+        baskets.loc[baskets["Date"] > lookBack(30), "TimeBasket"] = "0-30 days ago"
         baskets["TimeBasket"].replace("0", numpy.nan, inplace=True)
         baskets.dropna(subset=["TimeBasket"], inplace=True)
         df = baskets.groupby(["Group", "User", "TimeBasket"], as_index=False)[["Income"]].sum()
