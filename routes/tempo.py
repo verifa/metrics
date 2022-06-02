@@ -50,7 +50,7 @@ class TempoData:
     def __init__(self, fromDate: str = "1970-01-01", toDate: str = str(date.today()), tempoKey: str = None):
         tempoKey = tempoKey or os.environ.get("TEMPO_KEY")
         if tempoKey is None:
-            sys.exit('Tempo key not provided or TEMPO_KEY not set')
+            sys.exit("Tempo key not provided or TEMPO_KEY not set")
         tempo = client.Tempo(auth_token=tempoKey, base_url="https://api.tempo.io/core/3")
 
         self.from_date = fromDate
