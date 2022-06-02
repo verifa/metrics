@@ -8,6 +8,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 from dash import dcc, html
+from routes.tempo import TempoConfig
 from tempoapiclient import client
 
 # really wanted this in tempo/tempodata.py but
@@ -28,45 +29,6 @@ def weekdays(from_date, to_date):
     begin = from_date
     end = to_date
     return 1 + np.busday_count(begin, end, weekmask='1111100')
-
-
-class TempoConfig:
-    """TempoConfig data class"""
-    # where to find the config files
-    configPath = os.environ.get("TEMPO_CONFIG_PATH")
-    if configPath is None:
-        # default path
-        configPath = '/tempo'
-    # which config files are possible
-    workingHoursFile = configPath + "/workinghours.json"
-    ratesFile = configPath + "/rates.json"
-
-    def __init__(self, users):
-        self.workingHours = pd.DataFrame()
-        if os.path.exists(self.workingHoursFile):
-            self.workingHours = pd.read_json(self.workingHoursFile)
-            print("Loaded " + self.workingHoursFile)
-        self.rates = pd.DataFrame()
-        if os.path.exists(self.ratesFile):
-            ratesData = json.load(open(self.ratesFile))
-            print("Loaded " + self.ratesFile)
-            self.rates = pd.json_normalize(ratesData, record_path='Default')
-            self.rates['User'] = [
-                users.values.tolist()
-                for _ in range(len(self.rates))]
-            self.rates = self.rates.explode('User')
-            exceptions = pd.json_normalize(
-                ratesData,
-                record_path='Exceptions')
-            self.rates = self.rates.merge(
-                exceptions,
-                on=['Key', 'User'],
-                how="left")
-            rcol = self.rates['Rate_y'].fillna(self.rates['Rate_x'])
-            self.rates['Rate'] = rcol
-            self.rates = self.rates.drop(columns=['Rate_x', 'Rate_y'])
-            self.rates = self.rates.astype({'Rate': 'int'})
-            # print(self.rates)
 
 
 class TempoData:
