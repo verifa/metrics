@@ -1,12 +1,14 @@
-from datetime import date
+"""Tempo related functions and classes"""
 import json
 import os
 import sys
+from datetime import date
 
-import pandas
 import numpy
-from routes.date_utils import lookBack, weekdays
+import pandas
 from tempoapiclient import client
+
+from routes.date_utils import lookBack, weekdays
 
 
 class TempoConfig:
@@ -15,7 +17,7 @@ class TempoConfig:
     workingHours: pandas.DataFrame
     rates: pandas.DataFrame
 
-    def __init__(self, users: range = [], workingHoursPath: str = None, ratesPath: str = None) -> None:
+    def __init__(self, users: pandas.Series, workingHoursPath: str = None, ratesPath: str = None) -> None:
         # Read paths from environments if missing
         if workingHoursPath is None or ratesPath is None:
             configPath = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"

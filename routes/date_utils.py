@@ -1,3 +1,4 @@
+"""Various date utility functions"""
 import numpy
 import pandas
 

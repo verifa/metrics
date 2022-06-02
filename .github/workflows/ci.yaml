@@ -13,9 +13,9 @@ jobs:
       - uses: ricardochaves/python-lint@v1.4.0
         with:
           python-root-list: "routes"
-          use-black: false
-          extra-pylint-options: "--disable=C0103,E0401,W0212,R0903,C0116"
           extra-mypy-options: "--ignore-missing-imports"
+          use-pycodestyle: false
+          use-flake8: false
 
   ci:
     needs: lint
