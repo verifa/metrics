@@ -81,19 +81,19 @@ class TempoData:
         """returns aggregated time and billable time grouped by date, user and group"""
         return self.data.groupby(["Date", "User", "Group"], as_index=False)[["Time", "Billable"]].sum()
 
-    def byTotalGroup(self, daysBack):
+    def byTotalGroup(self, days_back):
         """returns aggregated billable time grouped by issue key group and user"""
-        timedData = self.data[self.data["Date"] > lookBack(daysBack)]
-        df = timedData.groupby(["Group", "User"], as_index=False)[["Billable"]].sum()
+        timed_data = self.data[self.data["Date"] > lookBack(days_back)]
+        df = timed_data.groupby(["Group", "User"], as_index=False)[["Billable"]].sum()
         df["Billable"].replace(0, numpy.nan, inplace=True)
         df.dropna(subset=["Billable"], inplace=True)
         return df
 
-    def uprateWork(self, rates):
-        upRated = self.data.merge(rates, on=["Key", "User"], how="left")
-        upRated["Rate"] = upRated.apply(lambda x: x["Rate"] / 10 if x["Currency"] == "SEK" else x["Rate"], axis=1)
-        upRated["Income"] = upRated["Rate"] * upRated["Billable"]
-        self.data = upRated
+    def uprate(self, rates):
+        uprated = self.data.merge(rates, on=["Key", "User"], how="left")
+        uprated["Rate"] = uprated.apply(lambda x: x["Rate"] / 10 if x["Currency"] == "SEK" else x["Rate"], axis=1)
+        uprated["Income"] = uprated["Rate"] * uprated["Billable"]
+        self.data = uprated
 
     def byEggBaskets(self):
         """returns aggregated billable income grouped by issue key group, user and time box (30, 60, 90)"""
@@ -114,48 +114,47 @@ class TempoData:
         """returns aggregated time and billable time grouped by date, user and issue key"""
         return self.data.groupby(["Date", "User", "Key"], as_index=False)[["Time", "Billable"]].sum()
 
-    def byUser(self, workingHours=None):
+    def byUser(self, working_hours=None):
         """returns aggregated time and billable time grouped by user"""
-        userData = self.data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
+        user_data = self.data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
         # Find the first time entry for each user
-        userFirst = self.data.groupby("User", as_index=False)["Date"].min()
+        user_first = self.data.groupby("User", as_index=False)["Date"].min()
         # Add a unique comumn name
-        userFirst.columns = ["User", "First"]
+        user_first.columns = ["User", "First"]
         # Convert fime stamp to just date
-        userFirst["First"] = [x.date() for x in userFirst["First"]]
+        user_first["First"] = [x.date() for x in user_first["First"]]
         # add the column to the user data
-        userData = pandas.merge(userData, userFirst, on="User")
-        userLast = self.data.groupby("User", as_index=False)["Date"].max()
-        userLast.columns = ["User", "Last"]
-        userLast["Last"] = [x.date() for x in userLast["Last"]]
-        userData = pandas.merge(userData, userLast, on="User")
-        userData["Days"] = [weekdays(f, t) for f, t in zip(userData["First"], userData["Last"])]
-        if not workingHours.empty:
-            # print(workingHours)
-            tmpData = pandas.merge(userData, workingHours, on="User")
-            userData = tmpData
-            userData["Expected"] = [d * d2 for d, d2 in zip(userData["Daily"], userData["Days"])]
-            userData["Delta"] = [t - e for t, e in zip(userData["Time"], userData["Expected"])]
+        user_data = pandas.merge(user_data, user_first, on="User")
+        user_last = self.data.groupby("User", as_index=False)["Date"].max()
+        user_last.columns = ["User", "Last"]
+        user_last["Last"] = [x.date() for x in user_last["Last"]]
+        user_data = pandas.merge(user_data, user_last, on="User")
+        user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
+        if not working_hours.empty:
+            tmp_data = pandas.merge(user_data, working_hours, on="User")
+            user_data = tmp_data
+            user_data["Expected"] = [d * d2 for d, d2 in zip(user_data["Daily"], user_data["Days"])]
+            user_data["Delta"] = [t - e for t, e in zip(user_data["Time"], user_data["Expected"])]
 
-        return userData
+        return user_data
 
     def ratesTable(self):
-        rateData = self.data[self.data["Billable"] > 0]
-        rateData = rateData.groupby(["Key", "Rate"], dropna=False, as_index=False).agg(
+        rate_data = self.data[self.data["Billable"] > 0]
+        rate_data = rate_data.groupby(["Key", "Rate"], dropna=False, as_index=False).agg(
             Hours=("Billable", numpy.sum), Users=("User", ", ".join)
         )
-        rateData["Rate"].replace(numpy.nan, "<b>nan</b>", inplace=True)
-        rateData["Users"] = rateData["Users"].str.split(", ").map(set).str.join(", ")
-        return rateData.sort_values(by=["Key", "Rate", "Hours"], ascending=[True, True, False], na_position="first")
+        rate_data["Rate"].replace(numpy.nan, "<b>nan</b>", inplace=True)
+        rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
+        return rate_data.sort_values(by=["Key", "Rate", "Hours"], ascending=[True, True, False], na_position="first")
 
-    def userRolling7(self, tosum):
+    def userRolling7(self, to_sum):
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        dailySum = self.data.groupby(["Date", "User"], as_index=False)[tosum].sum()
-        rolling7Sum = dailySum.set_index("Date").groupby(["User"], as_index=False).rolling("7d")[tosum].sum()
-        return rolling7Sum.reset_index(inplace=False)
+        daily_sum = self.data.groupby(["Date", "User"], as_index=False)[to_sum].sum()
+        rolling_sum_7d = daily_sum.set_index("Date").groupby(["User"], as_index=False).rolling("7d")[to_sum].sum()
+        return rolling_sum_7d.reset_index(inplace=False)
 
-    def teamRolling7(self, tosum):
+    def teamRolling7(self, to_sum):
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        dailySum = self.data.groupby(["Date"], as_index=False)[tosum].sum()
-        rolling7Sum = dailySum.set_index("Date").rolling("7d")[tosum].sum()
-        return rolling7Sum.reset_index(inplace=False)
+        daily_sum = self.data.groupby(["Date"], as_index=False)[to_sum].sum()
+        rolling_sum_7d = daily_sum.set_index("Date").rolling("7d")[to_sum].sum()
+        return rolling_sum_7d.reset_index(inplace=False)
