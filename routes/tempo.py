@@ -58,6 +58,8 @@ class TempoData:
     client: Client
     raw: pandas.DataFrame
     data: pandas.DataFrame
+    this_year: int
+    last_year: int
 
     def __init__(self, base_url: str = "https://api.tempo.io/core/3", tempo_key: str = None) -> None:
         tempo_key = tempo_key or os.environ.get("TEMPO_KEY")
@@ -79,6 +81,9 @@ class TempoData:
         self.data.loc[:, ("Time")] = self.data.loc[:, ("Time")] / 3600
         self.data.loc[:, ("Billable")] = self.data.loc[:, ("Billable")] / 3600
         self.data.loc[:, ("Internal")] = self.data.loc[:, ("Time")] - self.data.loc[:, ("Billable")]
+        self.data.loc[:, ("Year")] = self.data.loc[:, ("Date")].dt.year
+        self.this_year = self.data["Year"].unique().max()
+        self.last_year = self.this_year - 1
 
     def injectRates(self, rates: pandas.DataFrame) -> None:
         """Modify data by merging in the given rates data"""
@@ -176,3 +181,11 @@ class TempoData:
         daily_sum = self.data.groupby(["Date"], as_index=False)[to_sum].sum()
         rolling_sum_7d = daily_sum.set_index("Date").rolling("7d")[to_sum].sum()
         return rolling_sum_7d.reset_index(inplace=False)
+
+    def thisYear(self) -> pandas.DataFrame:
+        """ returns a dataFrame with entries for the current year"""
+        return self.data[self.data["Year"] == float(self.this_year)]
+
+    def lastYear(self) -> pandas.DataFrame:
+        """ returns a dataFrame with entries for the previous year"""
+        return self.data[self.data["Year"] == float(self.last_year)]

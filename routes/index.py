@@ -225,10 +225,31 @@ figure_projects_team.update_layout(bargap=0.1, title="What do we work on")
 # Figure: Billable time
 # =========================================================
 
+# a figure for this year
+figure_billable_this_year = px.histogram(
+    data.thisYear().sort_values("Key"),
+    x="User",
+    y="Billable",
+    color="Key",
+    height=600,
+    title=f"Billable entries for {data.this_year}",
+)
 
-figure_billable = px.histogram(data.data.sort_values("Key"), x="User", y="Billable", color="Key", height=600)
+figure_billable_this_year.update_xaxes(categoryorder="total ascending")
+figure_billable_this_year.update_layout(yaxis_title="Billable entries [h]")
 
-figure_billable.update_xaxes(categoryorder="total ascending")
+# a figure for last year
+figure_billable_last_year = px.histogram(
+    data.lastYear().sort_values("Key"),
+    x="User",
+    y="Billable",
+    color="Key",
+    height=600,
+    title=f"Billable entries for {data.last_year}",
+)
+
+figure_billable_last_year.update_xaxes(categoryorder="total ascending")
+figure_billable_last_year.update_layout(yaxis_title="Billable entries [h]")
 
 
 # =========================================================
@@ -236,9 +257,29 @@ figure_billable.update_xaxes(categoryorder="total ascending")
 # =========================================================
 
 
-figure_internal = px.histogram(data.data.sort_values("Key"), x="User", y="Internal", color="Key", height=600)
+figure_internal_this_year = px.histogram(
+    data.thisYear().sort_values("Key"),
+    x="User",
+    y="Internal",
+    color="Key",
+    height=600,
+    title=f"Internal entries for {data.this_year}",
+)
 
-figure_internal.update_xaxes(categoryorder="total descending")
+figure_internal_this_year.update_xaxes(categoryorder="total descending")
+figure_internal_this_year.update_layout(yaxis_title="Internal entries [h]")
+
+figure_internal_last_year = px.histogram(
+    data.lastYear().sort_values("Key"),
+    x="User",
+    y="Internal",
+    color="Key",
+    height=600,
+    title=f"Internal entries for {data.last_year}",
+)
+
+figure_internal_last_year.update_xaxes(categoryorder="total descending")
+figure_internal_last_year.update_layout(yaxis_title="Internal entries [h]")
 
 
 # =========================================================
@@ -311,8 +352,8 @@ pageheader = html.Div(
 figure_tabs = {
     "working_hours": [table_working_hours],
     "rates": [table_rates],
-    "billable": [figure_billable],
-    "internal": [figure_internal],
+    "billable": [figure_billable_this_year, figure_billable_last_year],
+    "internal": [figure_internal_this_year, figure_internal_last_year],
     "popular_projects": [figure_popular_projects],
     "projects": [figure_projects_team, figure_projects_individual],
     "eggbaskets": [figure_eggbaskets],
