@@ -72,11 +72,11 @@ table_rates = ff.create_table(data.ratesTable())
 # =========================================================
 
 
-d_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-d_user_time_rolling.loc[d_user_time_rolling["Date"] < FIRST_WEEK, "Billable"] = np.nan
-d_user_time_rolling.loc[d_user_time_rolling["Date"] < FIRST_WEEK, "Internal"] = np.nan
+df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
+df_user_time_rolling.loc[df_user_time_rolling["Date"] < FIRST_WEEK, "Billable"] = np.nan
+df_user_time_rolling.loc[df_user_time_rolling["Date"] < FIRST_WEEK, "Internal"] = np.nan
 figure_rolling_time_individual = px.scatter(
-    d_user_time_rolling[d_user_time_rolling["Date"] > ROLLING_DATE],
+    df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
     x="Date",
     y=["Billable", "Internal"],
     facet_col="User",
@@ -91,14 +91,14 @@ figure_rolling_time_individual.update_layout(title="Rolling 7 days")
 # =========================================================
 
 
-d_team_time_rolling_7 = teamRollingAverage7(d_user_time_rolling, ["Billable", "Internal"])
-d_team_time_rolling_30 = rollingAverage(d_team_time_rolling_7, ["Billable", "Internal"], 30)
-d_team_time_rolling_30.columns = ["Date", "Billable30", "Internal30"]
-d_team_time_rolling_30.loc[d_team_time_rolling_30["Date"] < FIRST_MONTH, "Billable30"] = np.nan
-d_team_time_rolling_30.loc[d_team_time_rolling_30["Date"] < FIRST_MONTH, "Internal30"] = np.nan
-d_team_time_rolling_30 = d_team_time_rolling_30.merge(d_team_time_rolling_7, on=["Date"])
+df_team_time_rolling_7 = teamRollingAverage7(df_user_time_rolling, ["Billable", "Internal"])
+df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, ["Billable", "Internal"], 30)
+df_team_time_rolling_30.columns = ["Date", "Billable30", "Internal30"]
+df_team_time_rolling_30.loc[df_team_time_rolling_30["Date"] < FIRST_MONTH, "Billable30"] = np.nan
+df_team_time_rolling_30.loc[df_team_time_rolling_30["Date"] < FIRST_MONTH, "Internal30"] = np.nan
+df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
 figure_rolling_time_team = px.scatter(
-    d_team_time_rolling_30,
+    df_team_time_rolling_30,
     x="Date",
     y=["Billable", "Billable30", "Internal", "Internal30"],
     color_discrete_sequence=["#8FBC8F", "#006400", "#FF7F50", "#A52A2A"],
@@ -116,10 +116,10 @@ figure_rolling_time_team.update_layout(
 # =========================================================
 
 
-d_user_time_rolling = data.userRolling7("Income")
-d_user_time_rolling.loc[d_user_time_rolling["Date"] < FIRST_WEEK, "Income"] = np.nan
+df_user_time_rolling = data.userRolling7("Income")
+df_user_time_rolling.loc[df_user_time_rolling["Date"] < FIRST_WEEK, "Income"] = np.nan
 figure_rolling_income_individual = px.scatter(
-    d_user_time_rolling[d_user_time_rolling["Date"] > ROLLING_DATE],
+    df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
     x="Date",
     y="Income",
     facet_col="User",
@@ -134,13 +134,13 @@ figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
 # =========================================================
 
 
-d_team_time_rolling_7 = teamRollingAverage7(d_user_time_rolling, "Income")
-d_team_time_rolling_30 = rollingAverage(d_team_time_rolling_7, "Income", 30)
-d_team_time_rolling_30.columns = ["Date", "Income30"]
-d_team_time_rolling_30.loc[d_team_time_rolling_30["Date"] < FIRST_MONTH, "Income30"] = np.nan
-d_team_time_rolling_30 = d_team_time_rolling_30.merge(d_team_time_rolling_7, on=["Date"])
+df_team_time_rolling_7 = teamRollingAverage7(df_user_time_rolling, "Income")
+df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, "Income", 30)
+df_team_time_rolling_30.columns = ["Date", "Income30"]
+df_team_time_rolling_30.loc[df_team_time_rolling_30["Date"] < FIRST_MONTH, "Income30"] = np.nan
+df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
 figure_rolling_income_team = px.scatter(
-    d_team_time_rolling_30,
+    df_team_time_rolling_30,
     x="Date",
     y=["Income", "Income30"],
     color_discrete_sequence=["#8FBC8F", "#006400"],
@@ -159,25 +159,25 @@ figure_rolling_income_team.update_layout(
 # =========================================================
 
 
-d_user_time_rolling = data.teamRolling7("Income")
-d_team_time_rolling_30 = rollingAverage(d_user_time_rolling, "Income", 30)
-d_team_time_rolling_30.columns = ["Date", "Income30"]
-d_team_time_rolling_30 = d_team_time_rolling_30.merge(d_user_time_rolling, on=["Date"])
-d_team_rolling_total_90 = rollingAverage(d_user_time_rolling, "Income", 90)
-d_team_rolling_total_90.columns = ["Date", "Income90"]
-d_team_rolling_total_90 = d_team_rolling_total_90.merge(d_team_time_rolling_30, on=["Date"])
-d_team_rolling_total_365 = rollingAverage(d_user_time_rolling, "Income", 365)
-d_team_rolling_total_365.columns = ["Date", "Income365"]
-d_team_rolling_total_365 = d_team_rolling_total_365.merge(d_team_rolling_total_90, on=["Date"])
+df_user_time_rolling = data.teamRolling7("Income")
+df_team_time_rolling_30 = rollingAverage(df_user_time_rolling, "Income", 30)
+df_team_time_rolling_30.columns = ["Date", "Income30"]
+df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_user_time_rolling, on=["Date"])
+df_team_rolling_total_90 = rollingAverage(df_user_time_rolling, "Income", 90)
+df_team_rolling_total_90.columns = ["Date", "Income90"]
+df_team_rolling_total_90 = df_team_rolling_total_90.merge(df_team_time_rolling_30, on=["Date"])
+df_team_rolling_total_365 = rollingAverage(df_user_time_rolling, "Income", 365)
+df_team_rolling_total_365.columns = ["Date", "Income365"]
+df_team_rolling_total_365 = df_team_rolling_total_365.merge(df_team_rolling_total_90, on=["Date"])
 
-d_team_rolling_total = d_team_rolling_total_365
-d_team_rolling_total.loc[d_team_rolling_total["Date"] < FIRST_WEEK, "Income"] = np.nan
-d_team_rolling_total.loc[d_team_rolling_total["Date"] < FIRST_MONTH, "Income30"] = np.nan
-d_team_rolling_total.loc[d_team_rolling_total["Date"] < FIRST_QUARTER, "Income90"] = np.nan
-d_team_rolling_total.loc[d_team_rolling_total["Date"] < FIRST_YEAR, "Income365"] = np.nan
+df_team_rolling_total = df_team_rolling_total_365
+df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_WEEK, "Income"] = np.nan
+df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_MONTH, "Income30"] = np.nan
+df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_QUARTER, "Income90"] = np.nan
+df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_YEAR, "Income365"] = np.nan
 
 figure_rolling_total = px.scatter(
-    d_team_rolling_total,
+    df_team_rolling_total,
     x="Date",
     y=["Income", "Income30", "Income90", "Income365"],
     color_discrete_sequence=["#C8E6C9", "#81C784", "#388E3C", "#1B5E20"],
@@ -196,9 +196,9 @@ figure_rolling_total.update_layout(
 # =========================================================
 
 
-d_by_group = data.byGroup().sort_values("Group")
+df_by_group = data.byGroup().sort_values("Group")
 figure_projects_individual = px.histogram(
-    d_by_group[d_by_group["Date"] > ROLLING_DATE],
+    df_by_group[df_by_group["Date"] > ROLLING_DATE],
     x="Date",
     y="Time",
     color="Group",
@@ -214,9 +214,9 @@ figure_projects_individual.update_layout(bargap=0.1, title="What do we work on")
 # =========================================================
 
 
-d_by_group = data.byGroup().sort_values("Group")
+df_by_group = data.byGroup().sort_values("Group")
 figure_projects_team = px.histogram(
-    d_by_group[d_by_group["Date"] > ROLLING_DATE], x="Date", y="Time", color="Group", height=600
+    df_by_group[df_by_group["Date"] > ROLLING_DATE], x="Date", y="Time", color="Group", height=600
 )
 figure_projects_team.update_layout(bargap=0.1, title="What do we work on")
 
