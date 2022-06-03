@@ -303,7 +303,7 @@ tabStructure = dcc.Tabs(
 pageheader = html.Div(
     [
         dcc.Markdown("## Verifa Metrics Dashboard"),
-        dcc.Markdown(f"#### For data between {START_DATE} and {TODAY}"),
+        dcc.Markdown(f"""#### {START_DATE.strftime("%b %d, %Y")} ➜ {TODAY.strftime("%b %d, %Y")}"""),
     ]
 )
 
