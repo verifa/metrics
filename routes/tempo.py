@@ -14,36 +14,42 @@ from routes.date_utils import lookBack, weekdays
 class SupplementaryData:
     """SupplementaryData data class"""
 
-    working_hours: pandas.DataFrame
+    rates_path: str
     rates: pandas.DataFrame
+    working_hours_path: str
+    working_hours: pandas.DataFrame
 
-    def __init__(self, users: pandas.Series, working_hours_path: str = None, rates_path: str = None) -> None:
+    def __init__(self, working_hours_path: str = None, rates_path: str = None) -> None:
         # Read paths from environment if missing
         if working_hours_path is None or rates_path is None:
             config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
-            working_hours_path = working_hours_path or (config_path + "/workinghours.json")
-            rates_path = rates_path or (config_path + "/rates.json")
+            self.working_hours_path = working_hours_path or (config_path + "/workinghours.json")
+            self.rates_path = rates_path or (config_path + "/rates.json")
+        self.rates = pandas.DataFrame()
+        self.working_hours = pandas.DataFrame()
 
-        if not os.path.exists(working_hours_path):
-            sys.exit("Working hours file path does not exist: " + working_hours_path)
-        if not os.path.exists(rates_path):
-            sys.exit("Rates file path does not exist: " + rates_path)
+    def load(self, users: pandas.Series) -> None:
+        if not os.path.exists(self.working_hours_path):
+            print("[WARNING] Working hours file path does not exist: " + self.working_hours_path)
+        else:
+            self.working_hours = pandas.read_json(self.working_hours_path)
+            print("Loaded " + self.working_hours_path)
 
-        self.working_hours = pandas.read_json(working_hours_path)
-        print("Loaded " + working_hours_path)
+        if not os.path.exists(self.rates_path):
+            sys.exit("[WARNING] Rates file path does not exist: " + self.rates_path)
+        else:
+            rates_data = json.load(open(self.rates_path))
+            self.rates = pandas.json_normalize(rates_data, record_path="Default")
+            print("Loaded " + self.rates_path)
 
-        rates_data = json.load(open(rates_path))
-        self.rates = pandas.json_normalize(rates_data, record_path="Default")
-        print("Loaded " + rates_path)
-
-        self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
-        self.rates = self.rates.explode("User")
-        exceptions = pandas.json_normalize(rates_data, record_path="Exceptions")
-        self.rates = self.rates.merge(exceptions, on=["Key", "User"], how="left")
-        rcol = self.rates["Rate_y"].fillna(self.rates["Rate_x"])
-        self.rates["Rate"] = rcol
-        self.rates = self.rates.drop(columns=["Rate_x", "Rate_y"])
-        self.rates = self.rates.astype({"Rate": "int"})
+            self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
+            self.rates = self.rates.explode("User")
+            exceptions = pandas.json_normalize(rates_data, record_path="Exceptions")
+            self.rates = self.rates.merge(exceptions, on=["Key", "User"], how="left")
+            rcol = self.rates["Rate_y"].fillna(self.rates["Rate_x"])
+            self.rates["Rate"] = rcol
+            self.rates = self.rates.drop(columns=["Rate_x", "Rate_y"])
+            self.rates = self.rates.astype({"Rate": "int"})
 
 
 class TempoData:

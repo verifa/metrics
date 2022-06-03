@@ -45,7 +45,9 @@ def rollingAverage(frame, to_mean, days):
 data = TempoData()
 data.load(from_date=START_DATE, to_date=TODAY)
 
-supplementary_data = SupplementaryData(data.getUsers())
+supplementary_data = SupplementaryData()
+supplementary_data.load(data.getUsers())
+
 data.injectRates(supplementary_data.rates)
 
 
