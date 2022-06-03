@@ -11,34 +11,34 @@ from tempoapiclient import client as Client
 from routes.date_utils import lookBack, weekdays
 
 
-class TempoConfig:
-    """TempoConfig data class"""
+class SupplementaryData:
+    """SupplementaryData data class"""
 
-    workingHours: pandas.DataFrame
+    working_hours: pandas.DataFrame
     rates: pandas.DataFrame
 
-    def __init__(self, users: pandas.Series, workingHoursPath: str = None, ratesPath: str = None) -> None:
-        # Read paths from environments if missing
-        if workingHoursPath is None or ratesPath is None:
-            configPath = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
-            workingHoursPath = workingHoursPath or (configPath + "/workinghours.json")
-            ratesPath = ratesPath or (configPath + "/rates.json")
+    def __init__(self, users: pandas.Series, working_hours_path: str = None, rates_path: str = None) -> None:
+        # Read paths from environment if missing
+        if working_hours_path is None or rates_path is None:
+            config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
+            working_hours_path = working_hours_path or (config_path + "/workinghours.json")
+            rates_path = rates_path or (config_path + "/rates.json")
 
-        if not os.path.exists(workingHoursPath):
-            sys.exit("Working hours file path does not exist: " + workingHoursPath)
-        if not os.path.exists(ratesPath):
-            sys.exit("Rates file path does not exist: " + ratesPath)
+        if not os.path.exists(working_hours_path):
+            sys.exit("Working hours file path does not exist: " + working_hours_path)
+        if not os.path.exists(rates_path):
+            sys.exit("Rates file path does not exist: " + rates_path)
 
-        self.workingHours = pandas.read_json(workingHoursPath)
-        print("Loaded " + workingHoursPath)
+        self.working_hours = pandas.read_json(working_hours_path)
+        print("Loaded " + working_hours_path)
 
-        ratesData = json.load(open(ratesPath))
-        self.rates = pandas.json_normalize(ratesData, record_path="Default")
-        print("Loaded " + ratesPath)
+        rates_data = json.load(open(rates_path))
+        self.rates = pandas.json_normalize(rates_data, record_path="Default")
+        print("Loaded " + rates_path)
 
         self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
         self.rates = self.rates.explode("User")
-        exceptions = pandas.json_normalize(ratesData, record_path="Exceptions")
+        exceptions = pandas.json_normalize(rates_data, record_path="Exceptions")
         self.rates = self.rates.merge(exceptions, on=["Key", "User"], how="left")
         rcol = self.rates["Rate_y"].fillna(self.rates["Rate_x"])
         self.rates["Rate"] = rcol
@@ -53,7 +53,7 @@ class TempoData:
     raw: pandas.DataFrame
     data: pandas.DataFrame
 
-    def __init__(self, tempo_key: str = None, base_url: str = "https://api.tempo.io/core/3") -> None:
+    def __init__(self, base_url: str = "https://api.tempo.io/core/3", tempo_key: str = None) -> None:
         tempo_key = tempo_key or os.environ.get("TEMPO_KEY")
         if tempo_key is None:
             sys.exit("Tempo key not provided or TEMPO_KEY not set")

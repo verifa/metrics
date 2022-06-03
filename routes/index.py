@@ -8,7 +8,7 @@ import plotly.figure_factory as ff
 from dash import dcc, html
 
 from routes.date_utils import lookAhead, lookBack
-from routes.tempo import TempoConfig, TempoData
+from routes.tempo import SupplementaryData, TempoData
 
 START_DATE = pd.Timestamp("2021-01-01")
 TODAY = pd.Timestamp("today")
@@ -42,13 +42,13 @@ work = TempoData()
 work.load(from_date=START_DATE, to_date=TODAY)
 
 # read config files
-tc = TempoConfig(work.getUsers())
+sd = SupplementaryData(work.getUsers())
 
 # add rate info to data
-work.uprateWork(tc.rates)
+work.uprateWork(sd.rates)
 
 # create aggregated table with all users
-table1 = ff.create_table(work.byUser(tc.workingHours))
+table1 = ff.create_table(work.byUser(sd.working_hours))
 
 # create table with all rates
 table2 = ff.create_table(work.ratesTable())
@@ -183,7 +183,7 @@ fig3.update_xaxes(categoryorder="total ascending")
 
 # Eggs and baskets
 daysAgo = 90
-if tc.rates.empty:
+if sd.rates.empty:
     yAxisTitle = "Sum of billable time"
     eggbaskets = px.histogram(work.byTotalGroup(daysAgo), x="Group", y="Billable", color="User")
     eggbaskets.update_xaxes(categoryorder="total ascending")
