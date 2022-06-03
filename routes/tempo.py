@@ -133,7 +133,7 @@ class TempoData:
             delta_start = working_hours.groupby("User", as_index=False)["Delta_start"].min()
             delta_start = pandas.merge(user_first, delta_start, on="User")
             delta_start.loc[delta_start["Delta_start"] != "*", "First"] = delta_start["Delta_start"]
-            user_first["First"] = delta_start["First"]
+            user_first = delta_start.drop("Delta_start", axis="columns")
         # Convert fime stamp to just date
         user_first["First"] = [x.date() for x in user_first["First"]]
         # remove all user/dates that are older than First
@@ -149,10 +149,10 @@ class TempoData:
         user_data = pandas.merge(user_data, user_last, on="User")
         user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
         if not working_hours.empty:
-            tmp_data = pandas.merge(user_data, working_hours, on="User")
-            user_data = tmp_data
+            user_data = pandas.merge(user_data, working_hours, on="User")
             user_data["Expected"] = [d * d2 for d, d2 in zip(user_data["Daily"], user_data["Days"])]
             user_data["Delta"] = [t - e for t, e in zip(user_data["Time"], user_data["Expected"])]
+            user_data = user_data.drop("Delta_start", axis="columns")
 
         return user_data
 
