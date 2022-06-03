@@ -118,13 +118,23 @@ class TempoData:
 
     def byUser(self, working_hours: pandas.DataFrame) -> pandas.DataFrame:
         """returns aggregated time and billable time grouped by user"""
-        user_data = self.data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
         # Find the first time entry for each user
         user_first = self.data.groupby("User", as_index=False)["Date"].min()
-        # Add a unique comumn name
+        # Add a unique column name
         user_first.columns = ["User", "First"]
+        if not working_hours.empty:
+            # Modify the first time entry if there is a different start delta entry
+            delta_start = working_hours.groupby("User", as_index=False)["Delta_start"].min()
+            delta_start = pandas.merge(user_first, delta_start, on="User")
+            delta_start.loc[delta_start["Delta_start"] != "*", "First"] = delta_start["Delta_start"]
+            user_first["First"] = delta_start["First"]
         # Convert fime stamp to just date
         user_first["First"] = [x.date() for x in user_first["First"]]
+        # remove all user/dates that are older than First
+        user_data = pandas.merge(self.data, user_first, on="User")
+        user_data = user_data[user_data["Date"] >= user_data["First"]]
+        # summarize time and billable
+        user_data = user_data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
         # add the column to the user data
         user_data = pandas.merge(user_data, user_first, on="User")
         user_last = self.data.groupby("User", as_index=False)["Date"].max()
