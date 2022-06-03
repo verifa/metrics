@@ -11,6 +11,7 @@ from routes.date_utils import lookAhead, lookBack
 from routes.tempo import TempoConfig, TempoData
 
 START_DATE = pd.Timestamp("2021-01-01")
+TODAY = pd.Timestamp("today")
 FIRST_WEEK = lookAhead(7, START_DATE)
 FIRST_MONTH = lookAhead(30, START_DATE)
 FIRST_QUARTER = lookAhead(90, START_DATE)
@@ -37,7 +38,8 @@ def rollingAverage(dailyData, tomean, days):
 #
 
 # Fetch the data from tempo
-work = TempoData(START_DATE, str(date.today()))
+work = TempoData()
+work.load(from_date=START_DATE, to_date=TODAY)
 
 # read config files
 tc = TempoConfig(work.getUsers())
@@ -226,7 +228,7 @@ pageheader = html.Div(
         dcc.Markdown("## Verifa Metrics Dashboard"),
         dcc.Markdown(
             f"""
-    #### For data between {work.from_date} and {work.to_date}
+    #### For data between {START_DATE} and {TODAY}
     # """
         ),
     ]

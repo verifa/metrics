@@ -6,7 +6,7 @@ from datetime import date
 
 import numpy
 import pandas
-from tempoapiclient import client
+from tempoapiclient import client as Client
 
 from routes.date_utils import lookBack, weekdays
 
@@ -49,16 +49,21 @@ class TempoConfig:
 class TempoData:
     """Tempo data class."""
 
-    def __init__(self, fromDate: str = "1970-01-01", toDate: str = str(date.today()), tempoKey: str = None):
-        tempoKey = tempoKey or os.environ.get("TEMPO_KEY")
-        if tempoKey is None:
-            sys.exit("Tempo key not provided or TEMPO_KEY not set")
-        tempo = client.Tempo(auth_token=tempoKey, base_url="https://api.tempo.io/core/3")
+    client: Client
+    raw: pandas.DataFrame
+    data: pandas.DataFrame
 
-        self.from_date = fromDate
-        self.to_date = toDate
-        self.logs = tempo.get_worklogs(dateFrom=self.from_date, dateTo=self.to_date)
-        self.raw = pandas.json_normalize(self.logs)
+    def __init__(self, tempo_key: str = None, base_url: str = "https://api.tempo.io/core/3") -> None:
+        tempo_key = tempo_key or os.environ.get("TEMPO_KEY")
+        if tempo_key is None:
+            sys.exit("Tempo key not provided or TEMPO_KEY not set")
+        self.client = Client.Tempo(auth_token=tempo_key, base_url=base_url)
+        self.raw = pandas.DataFrame()
+        self.data = pandas.DataFrame()
+
+    def load(self, from_date: str = "1970-01-01", to_date: str = str(date.today())):
+        logs = self.client.get_worklogs(dateFrom=from_date, dateTo=to_date)
+        self.raw = pandas.json_normalize(logs)
         self.data = self.raw[["issue.key", "timeSpentSeconds", "billableSeconds", "startDate", "author.displayName"]]
         self.data.columns = ["Key", "Time", "Billable", "Date", "User"]
         df = pandas.DataFrame(self.data.loc[:, ("Key")].str.split("-", 1).tolist(), columns=["Group", "Number"])
