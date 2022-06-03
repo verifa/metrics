@@ -46,7 +46,7 @@ data = TempoData()
 data.load(from_date=START_DATE, to_date=TODAY)
 
 supplementary_data = SupplementaryData(data.getUsers())
-data.uprate(supplementary_data.rates)
+data.injectRates(supplementary_data.rates)
 
 
 # =========================================================
