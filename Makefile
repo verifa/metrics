@@ -15,6 +15,10 @@ help : Makefile
 install:
 	poetry install
 
+.PHONY: tests
+tests: install
+	$(foreach testfile, $(wildcard ./tests/*.py), poetry run python $(testfile);)
+
 dev: install
 	poetry run python app.py
 
