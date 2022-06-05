@@ -150,9 +150,10 @@ class TempoData:
         user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
         if not working_hours.empty:
             user_data = pandas.merge(user_data, working_hours, on="User")
+            user_data = user_data[user_data["Show"]]
             user_data["Expected"] = [d * d2 for d, d2 in zip(user_data["Daily"], user_data["Days"])]
             user_data["Delta"] = [t - e for t, e in zip(user_data["Time"], user_data["Expected"])]
-            user_data = user_data.drop("Delta_start", axis="columns")
+            user_data = user_data.drop(["Delta_start", "Show"], axis="columns")
 
         return user_data
 
