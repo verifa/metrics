@@ -171,9 +171,34 @@ class TempoData:
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
         return rate_data.sort_values(by=["Key", "Rate", "Hours"], ascending=[True, True, False], na_position="first")
 
+    def paddedData(self) -> pandas.DataFrame:
+        """
+        returns the self.data padded with zero data
+        for each User, an entry for the ZP group will be added for each date >= min(Date) && <= max(Date)
+        Key: ZP-1, Time: 0, Billable: 0, Group: ZP, Internal: 0, Currency: EUR, Rate: 0, Income: 0
+        """
+        padded_data = self.data
+        for user in self.data["User"].unique():
+            df_user = pandas.DataFrame()
+            start = self.data[self.data["User"] == user]["Date"].min()
+            stop = self.data[self.data["User"] == user]["Date"].max()
+            df_user["Date"] = pandas.date_range(start, stop)
+            df_user["User"] = user
+            df_user["Key"] = "ZP-1"
+            df_user["Time"] = 0.0
+            df_user["Billable"] = 0.0
+            df_user["Group"] = "ZP"
+            df_user["Internal"] = 0.0
+            df_user["Year"] = df_user.loc[:, ("Date")].dt.year
+            df_user["Currency"] = "EUR"
+            df_user["Rate"] = 0
+            df_user["Income"] = 0
+            padded_data = pandas.concat([padded_data, df_user])
+        return padded_data
+
     def userRolling7(self, to_sum) -> pandas.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        daily_sum = self.data.groupby(["Date", "User"], as_index=False)[to_sum].sum()
+        daily_sum = self.paddedData().groupby(["Date", "User"], as_index=False)[to_sum].sum()
         rolling_sum_7d = daily_sum.set_index("Date").groupby(["User"], as_index=False).rolling("7d")[to_sum].sum()
         return rolling_sum_7d.reset_index(inplace=False)
 
@@ -184,9 +209,9 @@ class TempoData:
         return rolling_sum_7d.reset_index(inplace=False)
 
     def thisYear(self) -> pandas.DataFrame:
-        """ returns a dataFrame with entries for the current year"""
+        """returns a dataFrame with entries for the current year"""
         return self.data[self.data["Year"] == float(self.this_year)]
 
     def lastYear(self) -> pandas.DataFrame:
-        """ returns a dataFrame with entries for the previous year"""
+        """returns a dataFrame with entries for the previous year"""
         return self.data[self.data["Year"] == float(self.last_year)]
