@@ -148,7 +148,9 @@ class TempoData:
         user_data = user_data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
         # add the column to the user data
         user_data = pandas.merge(user_data, user_first, on="User")
-        user_last = self.data.groupby("User", as_index=False)["Date"].max()
+        # remove today
+        user_last = self.data[self.data["Date"] < pandas.Timestamp("today").strftime("%b %d, %Y")]
+        user_last = user_last.groupby("User", as_index=False)["Date"].max()
         user_last.columns = ["User", "Last"]
         user_last["Last"] = [x.date() for x in user_last["Last"]]
         user_data = pandas.merge(user_data, user_last, on="User")
