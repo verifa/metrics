@@ -1,8 +1,10 @@
 import unittest
 import numpy
 
+
 class TestBusday(unittest.TestCase):
     """some simple tests for numpy.busday"""
+
     def test_one_day_weekend(self):
         self.assertEqual(numpy.busday_count("2022-01-01", "2022-01-02", weekmask="1111100"), 0, "Should be 0")
 
@@ -16,6 +18,5 @@ class TestBusday(unittest.TestCase):
         self.assertEqual(numpy.busday_count("2022-01-01", "2022-01-14", weekmask="1111100"), 9, "Should be 9")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
