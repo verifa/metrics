@@ -19,7 +19,16 @@ install:
 tests: install
 	$(foreach testfile, $(wildcard ./tests/*.py), poetry run python $(testfile);)
 
-dev: install
+.PHONY: black-check
+black-check:
+	black --check .
+	echo ${?}
+
+.PHONY: black
+black:
+	black .
+
+dev: install black-check
 	poetry run python app.py
 
 run: build
