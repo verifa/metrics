@@ -25,7 +25,9 @@ app.scripts.config.serve_locally = True
 # Setup the server for gunicorn (prod)
 server = app.server
 
-app.layout = html.Div(className="px-8", children=[index.pageheader, index.tabStructure, html.Div(id="tabs-content-graph")])
+app.layout = html.Div(
+    className="px-8", children=[index.pageheader, index.tabStructure, html.Div(id="tabs-content-graph")]
+)
 
 
 @app.callback(Output("tabs-content-graph", "children"), Input("tabs-graph", "value"))

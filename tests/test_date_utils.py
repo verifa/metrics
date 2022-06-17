@@ -9,13 +9,16 @@ def load_module(file_name, module_name):
     spec.loader.exec_module(module)
     return module
 
-load_module('routes/date_utils.py', 'date_utils')
+
+load_module("routes/date_utils.py", "date_utils")
 from date_utils import *
 import unittest
 import numpy
 
+
 class TestWeekdays(unittest.TestCase):
     """some simple tests for the weekdays() function"""
+
     def test_one_day(self):
         self.assertEqual(weekdays("2022-01-01", "2022-01-02"), 0, "Should be 0")
 
@@ -49,11 +52,13 @@ class TestWeekdays(unittest.TestCase):
     def test_two_weeks(self):
         self.assertEqual(weekdays("2022-01-01", "2022-01-14"), 10, "Should be 10")
 
+
 class TestLookAhead(unittest.TestCase):
     "tests for the lookAhead() function"
+
     def test_increament_one(self):
         self.assertEqual(str(lookAhead(1, "2022-01-01").date()), "2022-01-02", "Should be 2022-01-02")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

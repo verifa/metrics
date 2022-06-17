@@ -105,7 +105,6 @@ figure_rolling_time_team = px.scatter(
     height=600,
 )
 figure_rolling_time_team.update_layout(
-    title="Team average, rolling 7 days, based on time",
     xaxis_rangeslider_visible=True,
     xaxis_range=[ROLLING_DATE, str(date.today())],
 )
@@ -148,7 +147,6 @@ figure_rolling_income_team = px.scatter(
 )
 figure_rolling_income_team.update_layout(
     yaxis_title="Income (euro)",
-    title="Team average, rolling 7 days, based on income",
     xaxis_rangeslider_visible=True,
     xaxis_range=[ROLLING_DATE, str(date.today())],
 )
@@ -185,7 +183,6 @@ figure_rolling_total = px.scatter(
 )
 figure_rolling_total.update_layout(
     yaxis_title="Income (euro)",
-    title="Weekly income",
     xaxis_rangeslider_visible=True,
     xaxis_range=[ROLLING_DATE, str(date.today())],
 )
@@ -206,7 +203,7 @@ figure_projects_individual = px.histogram(
     facet_col_wrap=3,
     height=800,
 )
-figure_projects_individual.update_layout(bargap=0.1, title="What do we work on")
+figure_projects_individual.update_layout(bargap=0.1)
 
 
 # =========================================================
@@ -218,7 +215,7 @@ df_by_group = data.byGroup().sort_values("Group")
 figure_projects_team = px.histogram(
     df_by_group[df_by_group["Date"] > ROLLING_DATE], x="Date", y="Time", color="Group", height=600
 )
-figure_projects_team.update_layout(bargap=0.1, title="What do we work on")
+figure_projects_team.update_layout(bargap=0.1)
 
 
 # =========================================================
@@ -297,10 +294,10 @@ figure_popular_projects.update_xaxes(categoryorder="total ascending")
 # =========================================================
 
 
-days_ago = 90
+eggs_days_ago = 90
 if supplementary_data.rates.empty:
     yAxisTitle = "Sum of billable time"
-    figure_eggbaskets = px.histogram(data.byTotalGroup(days_ago), x="Group", y="Billable", color="User")
+    figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="Group", y="Billable", color="User")
     figure_eggbaskets.update_xaxes(categoryorder="total ascending")
 else:
     yAxisTitle = "Sum of Income (Euro)"
@@ -315,7 +312,7 @@ else:
     )
 
 figure_eggbaskets.update_layout(
-    height=600, yaxis_title=yAxisTitle, bargap=0.1, title="Baskets for our eggs (" + str(days_ago) + " days back)"
+    height=600, yaxis_title=yAxisTitle, bargap=0.1, title="Baskets for our eggs (" + str(eggs_days_ago) + " days back)"
 )
 
 
@@ -326,18 +323,16 @@ figure_eggbaskets.update_layout(
 
 tabStructure = dcc.Tabs(
     id="tabs-graph",
-    value="working_hours",
+    value="start_page",
     children=[
-        dcc.Tab(label="Our hours", value="working_hours"),
+        dcc.Tab(label="Main", value="start_page"),
         dcc.Tab(label="Rates", value="rates"),
         dcc.Tab(label="Billable", value="billable"),
         dcc.Tab(label="Internal", value="internal"),
         dcc.Tab(label="Popular projects", value="popular_projects"),
         dcc.Tab(label="Projects", value="projects"),
-        dcc.Tab(label="Egg Baskets", value="eggbaskets"),
         dcc.Tab(label="Rolling time", value="rolling_time"),
         dcc.Tab(label="Rolling income", value="rolling_income"),
-        dcc.Tab(label="Company weekly income", value="rolling_total"),
     ],
 )
 
@@ -350,19 +345,26 @@ pageheader = html.Div(
 
 
 figure_tabs = {
-    "working_hours": [table_working_hours],
-    "rates": [table_rates],
-    "billable": [figure_billable_this_year, figure_billable_last_year],
-    "internal": [figure_internal_this_year, figure_internal_last_year],
-    "popular_projects": [figure_popular_projects],
-    "projects": [figure_projects_team, figure_projects_individual],
-    "eggbaskets": [figure_eggbaskets],
-    "rolling_time": [figure_rolling_time_team, figure_rolling_time_individual],
-    "rolling_income": [figure_rolling_income_team, figure_rolling_income_individual],
-    "rolling_total": [figure_rolling_total],
+    "start_page": ("Main", [table_working_hours, figure_rolling_total, figure_eggbaskets]),
+    "rates": ("Rates", [table_rates]),
+    "billable": ("Billable work", [figure_billable_this_year, figure_billable_last_year]),
+    "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
+    "popular_projects": ("Popular projects", [figure_popular_projects]),
+    "projects": ("What we work on", [figure_projects_team, figure_projects_individual]),
+    "rolling_time": (
+        "Team average, rolling 7 days, based on time",
+        [figure_rolling_time_team, figure_rolling_time_individual],
+    ),
+    "rolling_income": (
+        "Team average, rolling 7 days, based on income",
+        [figure_rolling_income_team, figure_rolling_income_individual],
+    ),
 }
 
 
 def render_content(tab):
-    sections = [dcc.Graph(id="plot", figure=figure) for figure in figure_tabs[tab]]
+    (head, plots) = figure_tabs[tab]
+    sections = [dcc.Graph(id="plot", figure=figure) for figure in plots]
+    sections.insert(0, dcc.Markdown("### " + head))
+    # sections = dcc.Markdown("## " + head)
     return html.Div(html.Section(children=sections))
