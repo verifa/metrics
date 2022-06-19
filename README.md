@@ -27,6 +27,12 @@ make run
 
 *Note:* To use `podman`, you can set the `DOCKER` variable to `podman`, e.g. `make DOCKER=podman dev`
 
+For more details about the different make target
+
+```bash
+make help
+```
+
 ## Runtime environment
 
 ### TEMPO_KEY
