@@ -201,13 +201,15 @@ class TempoData:
     def userRolling7(self, to_sum) -> pandas.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
         daily_sum = self.paddedData().groupby(["Date", "User"], as_index=False)[to_sum].sum()
-        rolling_sum_7d = daily_sum.set_index("Date").groupby(["User"], as_index=False).rolling("7d")[to_sum].sum()
+        rolling_sum_7d = (
+            daily_sum.set_index("Date").groupby(["User"], as_index=False).rolling("7d", min_periods=7)[to_sum].sum()
+        )
         return rolling_sum_7d.reset_index(inplace=False)
 
     def teamRolling7(self, to_sum) -> pandas.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        daily_sum = self.data.groupby(["Date"], as_index=False)[to_sum].sum()
-        rolling_sum_7d = daily_sum.set_index("Date").rolling("7d")[to_sum].sum()
+        daily_sum = self.paddedData().groupby(["Date"], as_index=False)[to_sum].sum()
+        rolling_sum_7d = daily_sum.set_index("Date").rolling("7d", min_periods=7)[to_sum].sum()
         return rolling_sum_7d.reset_index(inplace=False)
 
     def thisYear(self) -> pandas.DataFrame:
