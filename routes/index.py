@@ -1,13 +1,12 @@
 """System module."""
 from datetime import date
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 from dash import dcc, html
 
-from routes.date_utils import lookAhead, lookBack
+from routes.date_utils import lookBack
 from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
@@ -17,10 +16,6 @@ from routes.tempo import SupplementaryData, TempoData
 
 START_DATE = pd.Timestamp("2021-01-01")
 TODAY = pd.Timestamp("today")
-FIRST_WEEK = lookAhead(7, START_DATE)
-FIRST_MONTH = lookAhead(30, START_DATE)
-FIRST_QUARTER = lookAhead(90, START_DATE)
-FIRST_YEAR = lookAhead(365, START_DATE)
 ROLLING_DATE = lookBack(180)
 
 
@@ -33,8 +28,13 @@ def teamRollingAverage7(frame, to_mean):
     return frame.groupby(["Date"])[to_mean].mean().reset_index(inplace=False)
 
 
-def rollingAverage(frame, to_mean, days):
-    return frame.set_index("Date").rolling(str(days) + "d")[to_mean].mean().reset_index(inplace=False)
+def rollingAverage(frame, to_mean, days, offset=7):
+    return (
+        frame.set_index("Date")
+        .rolling(str(days) + "d", min_periods=days - offset)[to_mean]
+        .mean()
+        .reset_index(inplace=False)
+    )
 
 
 # =========================================================
@@ -73,8 +73,6 @@ table_rates = ff.create_table(data.ratesTable())
 
 
 df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-df_user_time_rolling.loc[df_user_time_rolling["Date"] < FIRST_WEEK, "Billable"] = np.nan
-df_user_time_rolling.loc[df_user_time_rolling["Date"] < FIRST_WEEK, "Internal"] = np.nan
 figure_rolling_time_individual = px.scatter(
     df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
     x="Date",
@@ -94,8 +92,6 @@ figure_rolling_time_individual.update_layout(title="Rolling 7 days")
 df_team_time_rolling_7 = teamRollingAverage7(df_user_time_rolling, ["Billable", "Internal"])
 df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, ["Billable", "Internal"], 30)
 df_team_time_rolling_30.columns = ["Date", "Billable30", "Internal30"]
-df_team_time_rolling_30.loc[df_team_time_rolling_30["Date"] < FIRST_MONTH, "Billable30"] = np.nan
-df_team_time_rolling_30.loc[df_team_time_rolling_30["Date"] < FIRST_MONTH, "Internal30"] = np.nan
 df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
 figure_rolling_time_team = px.scatter(
     df_team_time_rolling_30,
@@ -116,7 +112,6 @@ figure_rolling_time_team.update_layout(
 
 
 df_user_time_rolling = data.userRolling7("Income")
-df_user_time_rolling.loc[df_user_time_rolling["Date"] < FIRST_WEEK, "Income"] = np.nan
 figure_rolling_income_individual = px.scatter(
     df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
     x="Date",
@@ -136,7 +131,6 @@ figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
 df_team_time_rolling_7 = teamRollingAverage7(df_user_time_rolling, "Income")
 df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, "Income", 30)
 df_team_time_rolling_30.columns = ["Date", "Income30"]
-df_team_time_rolling_30.loc[df_team_time_rolling_30["Date"] < FIRST_MONTH, "Income30"] = np.nan
 df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
 figure_rolling_income_team = px.scatter(
     df_team_time_rolling_30,
@@ -167,12 +161,7 @@ df_team_rolling_total_90 = df_team_rolling_total_90.merge(df_team_time_rolling_3
 df_team_rolling_total_365 = rollingAverage(df_user_time_rolling, "Income", 365)
 df_team_rolling_total_365.columns = ["Date", "Income365"]
 df_team_rolling_total_365 = df_team_rolling_total_365.merge(df_team_rolling_total_90, on=["Date"])
-
 df_team_rolling_total = df_team_rolling_total_365
-df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_WEEK, "Income"] = np.nan
-df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_MONTH, "Income30"] = np.nan
-df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_QUARTER, "Income90"] = np.nan
-df_team_rolling_total.loc[df_team_rolling_total["Date"] < FIRST_YEAR, "Income365"] = np.nan
 
 figure_rolling_total = px.scatter(
     df_team_rolling_total,
