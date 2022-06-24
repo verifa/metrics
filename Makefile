@@ -5,6 +5,8 @@ REPO := $(REGION)-docker.pkg.dev/verifa-metrics/docker
 TAG := $(shell git describe --tags --always --dirty=-dev)
 IMAGE := $(REPO)/metrics-dashboard
 DOCKER := docker
+PIP := pip3
+
 # Static
 CLOUDRUN_SERVICE=metrics-dashboard
 
@@ -51,6 +53,7 @@ tests: install
 ##
 .PHONY: black-check
 black-check:
+	$(PIP) install black > black-install.log
 	black --check .
 
 ## black:
@@ -58,14 +61,43 @@ black-check:
 ##
 .PHONY: black
 black:
+	$(PIP) install black > black-install.log
 	black .
+
+## isort
+##	uses isort to check the import declarations
+.PHONY: isort
+isort:
+	$(PIP) install black > black-install.log
+	isort . -c --diff
+
+## mypy
+##	uses mypy to check the project
+.PHONY: mypy
+mypy:
+	$(PIP) install mypy > mypy-install.log
+	mypy .
+
+## pylint
+##	uses pylint to lint the files
+##
+.PHONY: pylint
+pylint:
+	$(PIP) install pylint > pylint-install.log
+	pylint .
+
+## lint:
+##	a PHONY rule to run all linters
+##
+.PHONY: lint
+lint: black-check pylint mypy isort
 
 ## dev:
 ##	runs app.py locally using poetry
 ##
 ##	dependes on install: and black-check:
 ##
-dev: install black-check
+dev: install lint
 	poetry run python app.py
 
 ## run:
