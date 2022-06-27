@@ -1,6 +1,5 @@
 import importlib.util
 import sys
-import unittest
 
 
 def load_module(file_name, module_name):
@@ -13,6 +12,8 @@ def load_module(file_name, module_name):
 
 load_module("routes/date_utils.py", "date_utils")
 from date_utils import *
+import unittest
+import numpy
 
 
 class TestWeekdays(unittest.TestCase):
@@ -42,10 +43,10 @@ class TestWeekdays(unittest.TestCase):
     def test_eight_days(self):
         self.assertEqual(weekdays("2022-01-01", "2022-01-09"), 5, "Should be 5")
 
-    def test_nine_days(self):
+    def test_six_days(self):
         self.assertEqual(weekdays("2022-01-01", "2022-01-10"), 6, "Should be 6")
 
-    def test_ten_days(self):
+    def test_six_days(self):
         self.assertEqual(weekdays("2022-01-01", "2022-01-11"), 7, "Should be 7")
 
     def test_two_weeks(self):

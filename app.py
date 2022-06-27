@@ -1,7 +1,7 @@
 from dash import Dash, html
 from dash.dependencies import Input, Output
 
-from metrics.routes import index
+from routes import index
 
 external_scripts = [
     # Import TailwindCSS
