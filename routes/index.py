@@ -6,8 +6,8 @@ import plotly.express as px
 import plotly.figure_factory as ff
 from dash import dcc, html
 
-from metrics.routes.date_utils import lookBack
-from metrics.routes.tempo import SupplementaryData, TempoData
+from routes.date_utils import lookBack
+from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
 # Constants

@@ -106,8 +106,16 @@ dev: install lint
 ##	depends on build:
 ##	uses $(DOCKER), $(TEMPO_KEY), $(IMAGE) and $(TAG)
 ##
+ifneq ($(TEMPO_CONFIG_PATH),)
+  vmounts=-v $(TEMPO_CONFIG_PATH):/tempo
+else
+  vmounts=
+endif
+
+
 run: build
-	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+	$(info Additional docker mounts: $(vmounts))
+	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} $(vmounts) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
 
 ## build:
 ##	builds the metrics-dashboard image
