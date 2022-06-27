@@ -11,3 +11,6 @@ __pycache__
 
 # config files for development
 config/
+
+# log files
+*.log
