@@ -4,6 +4,8 @@ target-version = ['py37']
 
 [tool.mypy]
 ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = "C0103, E0401, W0212, R0903, C0116"
