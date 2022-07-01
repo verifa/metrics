@@ -37,6 +37,23 @@ def rollingAverage(frame, to_mean, days, offset=7):
     )
 
 
+def normaliseUserRolling7(frame):
+    result = frame.merge(supplementary_data.working_hours[["User", "Daily"]], on=["User"])
+    result["%-billable"] = 100 * (result["Billable"] / (5 * result["Daily"]))
+    result["%-internal"] = 100 * (result["Internal"] / (5 * result["Daily"]))
+
+    return result
+
+
+def normaliseTeamAverage(frame):
+    df_norm = teamRollingAverage7(frame, ["%-billable", "%-internal"])
+    df_norm_30 = rollingAverage(df_norm, ["%-billable", "%-internal"], 30)
+    df_norm_30.columns = ["Date", "%-billable30", "%-internal30"]
+    df_norm = df_norm.merge(df_norm_30, on=["Date"])
+
+    return df_norm
+
+
 # =========================================================
 # Fetch data
 # =========================================================
@@ -68,39 +85,39 @@ table_rates = ff.create_table(data.ratesTable().round(1))
 
 
 # =========================================================
-# Figure: Rolling time (individual)
+# Figure: Normalised time (individual)
 # =========================================================
 
 
 df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-figure_rolling_time_individual = px.scatter(
-    df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
+df_user_normalised = normaliseUserRolling7(df_user_time_rolling)
+figure_normalised_individual = px.scatter(
+    df_user_normalised[df_user_normalised["Date"] > ROLLING_DATE],
     x="Date",
-    y=["Billable", "Internal"],
+    y=["%-billable", "%-internal"],
     facet_col="User",
-    facet_col_wrap=3,
+    facet_col_wrap=2,
+    color_discrete_sequence=["#8FBC8F", "#FF7F50"],
+    height=1200,
+)
+figure_normalised_individual.update_layout(title="Normalised data, rolling 7 days", yaxis_title="Work time [%]")
+
+
+# =========================================================
+# Figure: Normalised time (team)
+# =========================================================
+
+
+df_team_normalised = normaliseTeamAverage(df_user_normalised)
+figure_normalised_team = px.scatter(
+    df_team_normalised,
+    x="Date",
+    y=["%-billable", "%-internal", "%-billable30", "%-internal30"],
+    color_discrete_sequence=["#8FBC8F", "#FF7F50", "#006400", "#A52A2A"],
     height=800,
 )
-figure_rolling_time_individual.update_layout(title="Rolling 7 days")
-
-
-# =========================================================
-# Figure: Rolling time (team)
-# =========================================================
-
-
-df_team_time_rolling_7 = teamRollingAverage7(df_user_time_rolling, ["Billable", "Internal"])
-df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, ["Billable", "Internal"], 30)
-df_team_time_rolling_30.columns = ["Date", "Billable30", "Internal30"]
-df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
-figure_rolling_time_team = px.scatter(
-    df_team_time_rolling_30,
-    x="Date",
-    y=["Billable", "Billable30", "Internal", "Internal30"],
-    color_discrete_sequence=["#8FBC8F", "#006400", "#FF7F50", "#A52A2A"],
-    height=600,
-)
-figure_rolling_time_team.update_layout(
+figure_normalised_team.update_layout(title="Normalised team data", yaxis_title="Work time [%]")
+figure_normalised_team.update_layout(
     xaxis_rangeslider_visible=True,
     xaxis_range=[ROLLING_DATE, str(date.today())],
 )
@@ -349,7 +366,7 @@ tabStructure = dcc.Tabs(
         dcc.Tab(label="Internal", value="internal"),
         dcc.Tab(label="Popular projects", value="popular_projects"),
         dcc.Tab(label="Projects", value="projects"),
-        dcc.Tab(label="Rolling time", value="rolling_time"),
+        dcc.Tab(label="Normalised Work Time", value="normalised_worktime"),
         dcc.Tab(label="Rolling income", value="rolling_income"),
     ],
 )
@@ -376,9 +393,12 @@ figure_tabs = {
     "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
     "popular_projects": ("Popular projects", [figure_popular_projects]),
     "projects": ("What we work on", [figure_projects_team, figure_projects_individual]),
-    "rolling_time": (
-        "Team average, rolling 7 days, based on time",
-        [figure_rolling_time_team, figure_rolling_time_individual],
+    "normalised_worktime": (
+        "Normalised Work Time",
+        [
+            figure_normalised_team,
+            figure_normalised_individual,
+        ],
     ),
     "rolling_income": (
         "Rolling income",
