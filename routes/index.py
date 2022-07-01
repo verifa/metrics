@@ -56,7 +56,7 @@ data.injectRates(supplementary_data.rates)
 # =========================================================
 
 
-table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours))
+table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours).round(1))
 
 
 # =========================================================
@@ -64,7 +64,7 @@ table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hou
 # =========================================================
 
 
-table_rates = ff.create_table(data.ratesTable())
+table_rates = ff.create_table(data.ratesTable().round(1))
 
 
 # =========================================================
@@ -355,5 +355,4 @@ def render_content(tab):
     (head, plots) = figure_tabs[tab]
     sections = [dcc.Graph(id="plot", figure=figure) for figure in plots]
     sections.insert(0, dcc.Markdown("### " + head))
-    # sections = dcc.Markdown("## " + head)
     return html.Div(html.Section(children=sections))
