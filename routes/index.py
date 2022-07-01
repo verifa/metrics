@@ -140,9 +140,8 @@ figure_rolling_income_team = px.scatter(
     height=600,
 )
 figure_rolling_income_team.update_layout(
+    title="Rolling income (average/person)",
     yaxis_title="Income (euro)",
-    xaxis_rangeslider_visible=True,
-    xaxis_range=[ROLLING_DATE, str(date.today())],
 )
 
 
@@ -171,10 +170,40 @@ figure_rolling_total = px.scatter(
     height=600,
 )
 figure_rolling_total.update_layout(
+    title="Rolling income (total)",
     yaxis_title="Income (euro)",
-    xaxis_rangeslider_visible=True,
-    xaxis_range=[ROLLING_DATE, str(date.today())],
 )
+
+
+# =========================================================
+# Figure: Rolling Income vs. Cost
+# =========================================================
+
+if not (supplementary_data.costs.empty):
+    df_team_earn_rolling = data.teamRolling7Relative(supplementary_data.costs)
+    df_team_earn_rolling_30 = rollingAverage(df_team_earn_rolling, "Diff", 30)
+    df_team_earn_rolling_30.columns = ["Date", "Diff30"]
+    df_team_earn_rolling_30 = df_team_earn_rolling_30.merge(df_team_earn_rolling, on=["Date"])
+    df_team_earn_rolling_90 = rollingAverage(df_team_earn_rolling, "Diff", 90)
+    df_team_earn_rolling_90.columns = ["Date", "Diff90"]
+    df_team_earn_rolling_90 = df_team_earn_rolling_90.merge(df_team_earn_rolling_30, on=["Date"])
+    df_team_earn_rolling_365 = rollingAverage(df_team_earn_rolling, "Diff", 365)
+    df_team_earn_rolling_365.columns = ["Date", "Diff365"]
+    df_team_earn_rolling_365 = df_team_earn_rolling_365.merge(df_team_earn_rolling_90, on=["Date"])
+    df_team_rolling_total = df_team_earn_rolling_365
+
+    figure_rolling_earnings = px.scatter(
+        df_team_rolling_total,
+        x="Date",
+        y=["Diff", "Diff30", "Diff90", "Diff365"],
+        color_discrete_sequence=["#C8E6C9", "#81C784", "#388E3C", "#1B5E20"],
+        height=600,
+    )
+    figure_rolling_earnings.add_hline(y=1, fillcolor="indigo")
+    figure_rolling_earnings.update_layout(
+        title="Income normalized with cost",
+        yaxis_title="Income / Cost",
+    )
 
 
 # =========================================================
@@ -334,7 +363,14 @@ pageheader = html.Div(
 
 
 figure_tabs = {
-    "start_page": ("Main", [table_working_hours, figure_rolling_total, figure_eggbaskets]),
+    "start_page": (
+        "Main",
+        [
+            table_working_hours,
+            figure_rolling_earnings if not (supplementary_data.costs.empty) else figure_rolling_total,
+            figure_eggbaskets,
+        ],
+    ),
     "rates": ("Rates", [table_rates]),
     "billable": ("Billable work", [figure_billable_this_year, figure_billable_last_year]),
     "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
@@ -345,8 +381,8 @@ figure_tabs = {
         [figure_rolling_time_team, figure_rolling_time_individual],
     ),
     "rolling_income": (
-        "Team average, rolling 7 days, based on income",
-        [figure_rolling_income_team, figure_rolling_income_individual],
+        "Rolling income",
+        [figure_rolling_total, figure_rolling_income_team, figure_rolling_income_individual],
     ),
 }
 

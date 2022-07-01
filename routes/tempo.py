@@ -18,15 +18,19 @@ class SupplementaryData:
     rates: pandas.DataFrame
     working_hours_path: str
     working_hours: pandas.DataFrame
+    costs_path: str
+    costs: pandas.DataFrame
 
-    def __init__(self, working_hours_path: str = None, rates_path: str = None) -> None:
+    def __init__(self, working_hours_path: str = None, rates_path: str = None, costs_path: str = None) -> None:
         # Read paths from environment if missing
         if working_hours_path is None or rates_path is None:
             config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
             self.working_hours_path = working_hours_path or (config_path + "/workinghours.json")
             self.rates_path = rates_path or (config_path + "/rates.json")
+            self.costs_path = costs_path or (config_path + "/costs.json")
         self.rates = pandas.DataFrame()
         self.working_hours = pandas.DataFrame()
+        self.costs = pandas.DataFrame()
 
     def load(self, users: pandas.Series) -> None:
         if not os.path.exists(self.working_hours_path):
@@ -34,6 +38,28 @@ class SupplementaryData:
         else:
             self.working_hours = pandas.read_json(self.working_hours_path)
             print("Loaded " + self.working_hours_path)
+
+        if not os.path.exists(self.costs_path):
+            print("[WARNING] Costs file path does not exist: " + self.costs_path)
+        else:
+            self.costs = pandas.read_json(self.costs_path)
+            self.costs.index.name = "Month"
+            self.costs.index = self.costs["Month"]
+            self.costs.index = self.costs.index.map(str)
+            self.costs.index = self.costs.index.str[0:4] + "-" + self.costs.index.str[-2:]
+            self.costs.index = pandas.period_range(
+                start=self.costs.index.values[0], periods=len(self.costs.index.values), freq="m"
+            )
+            self.costs = self.costs.resample("D").ffill()
+            daily = self.costs.groupby(pandas.Grouper(freq="M")).count()
+            daily = daily.iloc[:, 0]
+            daily = daily.resample("D").ffill().rename("days_in_month")
+            self.costs = self.costs.join(daily)
+            self.costs["Cost"] = self.costs["Cost"] / self.costs["days_in_month"]
+            self.costs["Date"] = self.costs.index
+            self.costs = self.costs.drop("days_in_month", axis=1)
+            self.costs = self.costs.drop("Month", axis=1)
+            print("Loaded " + self.costs_path)
 
         if not os.path.exists(self.rates_path):
             sys.exit("[WARNING] Rates file path does not exist: " + self.rates_path)
@@ -210,6 +236,22 @@ class TempoData:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
         daily_sum = self.paddedData().groupby(["Date"], as_index=False)[to_sum].sum()
         rolling_sum_7d = daily_sum.set_index("Date").rolling("7d", min_periods=7)[to_sum].sum()
+        return rolling_sum_7d.reset_index(inplace=False)
+
+    def teamRolling7Relative(self, costs: pandas.Series) -> pandas.DataFrame:
+        """returns rolling 7 day sums for Billable and non Billable time grouped by user, relative to the costs"""
+        daily_sum = self.paddedData().groupby(["Date"], as_index=False)["Income"].sum()
+        daily_cost = costs
+        daily_cost["Date"] = daily_cost["Date"].astype("datetime64[M]")
+
+        daily_relative = pandas.merge(daily_sum, daily_cost, on=["Date"], how="outer")
+        daily_relative = daily_relative.dropna()
+
+        rolling_sum_7d = pandas.DataFrame()
+        rolling_sum_7d["sumIncome"] = daily_relative.set_index("Date").rolling("7d", min_periods=7)["Income"].sum()
+        rolling_sum_7d["sumCost"] = daily_relative.set_index("Date").rolling("7d", min_periods=7)["Cost"].sum()
+
+        rolling_sum_7d["Diff"] = rolling_sum_7d["sumIncome"] / rolling_sum_7d["sumCost"]
         return rolling_sum_7d.reset_index(inplace=False)
 
     def thisYear(self) -> pandas.DataFrame:
