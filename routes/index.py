@@ -45,8 +45,8 @@ def normaliseUserRolling7(frame):
     return result
 
 
-def normaliseTeamAverage(frame):
-    df_norm = teamRollingAverage7(frame, ["%-billable", "%-internal"])
+def normaliseTeamAverage(frame, last):
+    df_norm = teamRollingAverage7(frame[frame["Date"] <= last], ["%-billable", "%-internal"])
     df_norm_30 = rollingAverage(df_norm, ["%-billable", "%-internal"], 30)
     df_norm_30.columns = ["Date", "%-billable30", "%-internal30"]
     df_norm = df_norm.merge(df_norm_30, on=["Date"])
@@ -74,6 +74,8 @@ data.injectRates(supplementary_data.rates)
 
 
 table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours).round(1))
+last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
+print(f"Last common day: {last_reported}")
 
 
 # =========================================================
@@ -108,7 +110,7 @@ figure_normalised_individual.update_layout(title="Normalised data, rolling 7 day
 # =========================================================
 
 
-df_team_normalised = normaliseTeamAverage(df_user_normalised)
+df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
 figure_normalised_team = px.scatter(
     df_team_normalised,
     x="Date",
@@ -145,7 +147,9 @@ figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
 # =========================================================
 
 
-df_team_time_rolling_7 = teamRollingAverage7(df_user_time_rolling, "Income")
+df_team_time_rolling_7 = teamRollingAverage7(
+    df_user_time_rolling[df_user_time_rolling["Date"] <= last_reported], "Income"
+)
 df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, "Income", 30)
 df_team_time_rolling_30.columns = ["Date", "Income30"]
 df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
