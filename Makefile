@@ -46,7 +46,7 @@ install:
 ##
 .PHONY: tests
 tests: install
-	$(foreach testfile, $(wildcard ./tests/*.py), poetry run python $(testfile);)
+	poetry run python -m unittest discover
 
 ## black-check:
 ##	checks if black would reformat any file
