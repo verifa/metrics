@@ -100,22 +100,38 @@ lint: black-check pylint mypy isort
 dev: install lint
 	poetry run python app.py
 
+## run-dev:
+##	uses $(DOCKER) to run the metrics-dashboard image in a local container
+##
+##	depends on build:
+##	uses $(DOCKER), $(TEMPO_KEY), $(IMAGE) and $(TAG)
+##	only if ${TEMPO_CONFIG_PATH} is set, that path is mounted to /tempo-config
+##
+ifneq ($(TEMPO_CONFIG_PATH),)
+  vmounts=-v $(TEMPO_CONFIG_PATH):$(TEMPO_CONFIG_PATH)
+# else
+#   vmounts=
+# endif
+
+run-dev: build
+	$(info Additional docker mounts: $(vmounts))
+	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} -e TEMPO_CONFIG_PATH=$(TEMPO_CONFIG_PATH) $(vmounts) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+
+endif
 ## run:
 ##	uses $(DOCKER) to run the metrics-dashboard image in a local container
 ##
 ##	depends on build:
 ##	uses $(DOCKER), $(TEMPO_KEY), $(IMAGE) and $(TAG)
+## 	unsets TEMPO_CONFIG_PATH and adds
+##	TEMPO_CONFIG_REPO, TEMPO_CONFIG_USER and TEMPO_CONFIG_PASSWD
+##	that are used to clone the config repo to /tempo-config
 ##
-ifneq ($(TEMPO_CONFIG_PATH),)
-  vmounts=-v $(TEMPO_CONFIG_PATH):/tempo
-else
-  vmounts=
-endif
-
+config_env=-e TEMPO_CONFIG_REPO=$(TEMPO_CONFIG_REPO) -e TEMPO_CONFIG_USER=$(TEMPO_CONFIG_USER) -e TEMPO_CONFIG_PASSWD=$(TEMPO_CONFIG_PASSWD)
 
 run: build
-	$(info Additional docker mounts: $(vmounts))
-	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} $(vmounts) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+	unset TEMPO_CONFIG_PATH && $(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} $(config_env) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+
 
 ## build:
 ##	builds the metrics-dashboard image

@@ -21,13 +21,25 @@ class SupplementaryData:
     costs_path: str
     costs: pandas.DataFrame
 
-    def __init__(self, working_hours_path: str = None, rates_path: str = None, costs_path: str = None) -> None:
-        # Read paths from environment if missing
-        if working_hours_path is None or rates_path is None:
-            config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
-            self.working_hours_path = working_hours_path or (config_path + "/workinghours.json")
-            self.rates_path = rates_path or (config_path + "/rates.json")
-            self.costs_path = costs_path or (config_path + "/costs.json")
+    def __init__(self) -> None:
+
+        config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo-config"
+        print(config_path)
+        if config_path == "/tempo-config":
+            config_repo = os.environ.get("TEMPO_CONFIG_REPO")
+            config_user = os.environ.get("TEMPO_CONFIG_USER")
+            config_pass = os.environ.get("TEMPO_CONFIG_PASSWD")
+            if (
+                os.system(
+                    f"./config.sh -path /tempo-config -repo {config_repo} -user {config_user} -passwd {config_pass}"
+                )
+                != 0
+            ):
+                print("config.sh failed to fetch the configuration")
+                os._exit(1)
+        self.working_hours_path = config_path + "/workinghours.json"
+        self.rates_path = config_path + "/rates.json"
+        self.costs_path = config_path + "/costs.json"
         self.rates = pandas.DataFrame()
         self.working_hours = pandas.DataFrame()
         self.costs = pandas.DataFrame()

@@ -1,5 +1,5 @@
 
-FROM python:3.10-slim AS build-env
+FROM python:3.10 AS build-env
 
 # Install and configure poetry
 ARG POETRY_VERSION=1.1.13
