@@ -21,13 +21,10 @@ class SupplementaryData:
     costs_path: str
     costs: pandas.DataFrame
 
-    def __init__(self, working_hours_path: str = None, rates_path: str = None, costs_path: str = None) -> None:
-        # Read paths from environment if missing
-        if working_hours_path is None or rates_path is None:
-            config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
-            self.working_hours_path = working_hours_path or (config_path + "/workinghours/data.json")
-            self.rates_path = rates_path or (config_path + "/rates/data.json")
-            self.costs_path = costs_path or (config_path + "/costs/data.json")
+    def __init__(self, config_path: str) -> None:
+        self.working_hours_path = config_path + "/workinghours/data.json"
+        self.rates_path = config_path + "/rates/data.json"
+        self.costs_path = config_path + "/costs/data.json"
         self.rates = pandas.DataFrame()
         self.working_hours = pandas.DataFrame()
         self.costs = pandas.DataFrame()
