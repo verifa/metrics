@@ -25,9 +25,9 @@ class SupplementaryData:
         # Read paths from environment if missing
         if working_hours_path is None or rates_path is None:
             config_path = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
-            self.working_hours_path = working_hours_path or (config_path + "/workinghours.json")
-            self.rates_path = rates_path or (config_path + "/rates.json")
-            self.costs_path = costs_path or (config_path + "/costs.json")
+            self.working_hours_path = working_hours_path or (config_path + "/workinghours/data.json")
+            self.rates_path = rates_path or (config_path + "/rates/data.json")
+            self.costs_path = costs_path or (config_path + "/costs/data.json")
         self.rates = pandas.DataFrame()
         self.working_hours = pandas.DataFrame()
         self.costs = pandas.DataFrame()

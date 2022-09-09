@@ -47,7 +47,7 @@ For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides 
 
 ### Configuration files
 
-#### workinghours.json
+#### Working hours JSON file
 
 a simple json file with username and expected daily hours of work.
 ```json
