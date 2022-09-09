@@ -140,4 +140,4 @@ push: build
 ##	deploys the built image to google cloud
 ##
 deploy:
-	gcloud run deploy $(CLOUDRUN_SERVICE) --image $(IMAGE):$(TAG) --region $(REGION)
+	gcloud run deploy $(CLOUDRUN_SERVICE) --image $(IMAGE):$(TAG) --region $(REGION) --labels=version=$(TAG)
