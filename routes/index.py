@@ -1,4 +1,5 @@
 """System module."""
+import os
 from datetime import date
 
 import pandas as pd
@@ -17,6 +18,7 @@ from routes.tempo import SupplementaryData, TempoData
 START_DATE = pd.Timestamp("2021-01-01")
 TODAY = pd.Timestamp("today")
 ROLLING_DATE = lookBack(180)
+TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
 
 
 # =========================================================
@@ -62,7 +64,7 @@ def normaliseTeamAverage(frame, last):
 data = TempoData()
 data.load(from_date=START_DATE, to_date=TODAY)
 
-supplementary_data = SupplementaryData()
+supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH)
 supplementary_data.load(data.getUsers())
 
 data.injectRates(supplementary_data.rates)
