@@ -39,8 +39,12 @@ def rollingAverage(frame, to_mean, days, offset=7):
     )
 
 
-def normaliseUserRolling7(frame):
-    result = frame.merge(supplementary_data.working_hours[["User", "Daily"]], on=["User"])
+def normaliseUserRolling7(frame, working_hours):
+    if working_hours.empty:
+        result = frame
+        result["Daily"] = 8
+    else:
+        result = frame.merge(working_hours[["User", "Daily"]], on=["User"])
     result["%-billable"] = 100 * (result["Billable"] / (5 * result["Daily"]))
     result["%-internal"] = 100 * (result["Internal"] / (5 * result["Daily"]))
 
@@ -69,6 +73,8 @@ supplementary_data.load(data.getUsers())
 
 data.injectRates(supplementary_data.rates)
 
+data.padTheData(supplementary_data.working_hours)
+
 
 # =========================================================
 # Table: User working hours
@@ -94,7 +100,7 @@ table_rates = ff.create_table(data.ratesTable().round(1))
 
 
 df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-df_user_normalised = normaliseUserRolling7(df_user_time_rolling)
+df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
 figure_normalised_individual = px.scatter(
     df_user_normalised[df_user_normalised["Date"] > ROLLING_DATE],
     x="Date",

@@ -28,6 +28,7 @@ class SupplementaryData:
         self.rates = pandas.DataFrame()
         self.working_hours = pandas.DataFrame()
         self.costs = pandas.DataFrame()
+        self.padding = pandas.DataFrame()
 
     def load(self, users: pandas.Series) -> None:
         if not os.path.exists(self.working_hours_path):
@@ -81,6 +82,7 @@ class TempoData:
     client: Client
     raw: pandas.DataFrame
     data: pandas.DataFrame
+    padded_data: pandas.DataFrame
     this_year: int
     last_year: int
 
@@ -150,40 +152,68 @@ class TempoData:
         """returns aggregated time and billable time grouped by date, user and issue key"""
         return self.data.groupby(["Date", "User", "Key"], as_index=False)[["Time", "Billable"]].sum()
 
+    def firstEntry(self, user, start) -> pandas.Timestamp:
+        if start == "*":
+            first = self.data[self.data["User"] == user]["Date"].min()
+        else:
+            first = start
+
+        return pandas.Timestamp(first)
+
+    def lastEntry(self, user, stop) -> pandas.Timestamp:
+        if stop == "*":
+            last = self.data[self.data["User"] == user]["Date"].max()
+        else:
+            last = stop
+
+        return pandas.Timestamp(last)
+
+    def totalHours(self, user, start):
+        data = self.data[self.data["User"] == user]
+        data = data[data["Date"] >= pandas.to_datetime(start)]
+        total = data[data["Date"] < pandas.to_datetime("today")]["Time"].sum()
+
+        return total
+
     def byUser(self, working_hours: pandas.DataFrame) -> pandas.DataFrame:
         """returns aggregated time and billable time grouped by user"""
-        # Find the first time entry for each user
-        user_first = self.data.groupby("User", as_index=False)["Date"].min()
-        # Add a unique column name
-        user_first.columns = ["User", "First"]
+        user_data = pandas.DataFrame()
         if not working_hours.empty:
-            # Modify the first time entry if there is a different start delta entry
-            delta_start = working_hours.groupby("User", as_index=False)["Delta_start"].min()
-            delta_start = pandas.merge(user_first, delta_start, on="User")
-            delta_start.loc[delta_start["Delta_start"] != "*", "First"] = delta_start["Delta_start"]
-            user_first = delta_start.drop("Delta_start", axis="columns")
-        # Convert fime stamp to just date
-        user_first["First"] = [x.date() for x in user_first["First"]]
-        # remove all user/dates that are older than First
-        user_data = pandas.merge(self.data, user_first, on="User")
-        user_data = user_data[user_data["Date"] >= user_data["First"]]
-        # summarize time and billable
-        user_data = user_data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
-        # add the column to the user data
-        user_data = pandas.merge(user_data, user_first, on="User")
-        # remove today
-        user_last = self.data[self.data["Date"] < pandas.Timestamp("today").strftime("%b %d, %Y")]
-        user_last = user_last.groupby("User", as_index=False)["Date"].max()
-        user_last.columns = ["User", "Last"]
-        user_last["Last"] = [x.date() for x in user_last["Last"]]
-        user_data = pandas.merge(user_data, user_last, on="User")
-        user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
-        if not working_hours.empty:
-            user_data = pandas.merge(user_data, working_hours, on="User")
-            user_data = user_data[user_data["Show"]]
-            user_data["Expected"] = [d * d2 for d, d2 in zip(user_data["Daily"], user_data["Days"])]
-            user_data["Delta"] = [t - e for t, e in zip(user_data["Time"], user_data["Expected"])]
-            user_data = user_data.drop(["Delta_start", "Show"], axis="columns")
+            user_data = working_hours[working_hours["Stop"] == "*"]
+            user_data["First"] = [self.firstEntry(u, s).date() for u, s in zip(user_data["User"], user_data["Start"])]
+            user_data["Last"] = [self.lastEntry(u, s).date() for u, s in zip(user_data["User"], user_data["Stop"])]
+            user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
+            user_data["Expected"] = [days * daily for days, daily in zip(user_data["Days"], user_data["Daily"])]
+
+            user_data["Total"] = [
+                self.totalHours(user, start) for user, start in zip(user_data["User"], user_data["First"])
+            ]
+            user_data["Delta"] = user_data["Delta"] + [
+                tot - exp for tot, exp in zip(user_data["Total"], user_data["Expected"])
+            ]
+            user_data = user_data.drop(["Start", "Stop"], axis="columns")
+
+        else:
+            # Find the first time entry for each user
+            user_first = self.data.groupby("User", as_index=False)["Date"].min()
+            # Add a unique column name
+            user_first.columns = ["User", "First"]
+            # Convert fime stamp to just date
+            user_first["First"] = [x.date() for x in user_first["First"]]
+            # remove all user/dates that are older than First
+            user_data = pandas.merge(self.data, user_first, on="User")
+            user_data = user_data[user_data["Date"] >= user_data["First"]]
+            # summarize time and billable
+            user_data = user_data.groupby("User", as_index=False)[["Time", "Billable"]].sum()
+            # add the column to the user data
+            user_data = pandas.merge(user_data, user_first, on="User")
+            # remove today
+            user_last = self.data[self.data["Date"] < pandas.Timestamp("today").strftime("%b %d, %Y")]
+            user_last = user_last.groupby("User", as_index=False)["Date"].max()
+            user_last.columns = ["User", "Last"]
+            user_last["Last"] = [x.date() for x in user_last["Last"]]
+            user_data = pandas.merge(user_data, user_last, on="User")
+            user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
 
         return user_data
 
@@ -196,34 +226,59 @@ class TempoData:
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
         return rate_data.sort_values(by=["Key", "Rate", "Hours"], ascending=[True, True, False], na_position="first")
 
-    def paddedData(self) -> pandas.DataFrame:
+    def padTheData(self, working_hours: pandas.DataFrame) -> None:
         """
-        returns the self.data padded with zero data
+        creates the self.padded_data padded with zero data
         for each User, an entry for the ZP group will be added for each date >= min(Date) && <= max(Date)
         Key: ZP-1, Time: 0, Billable: 0, Group: ZP, Internal: 0, Currency: EUR, Rate: 0, Income: 0
         """
-        padded_data = self.data
-        for user in self.data["User"].unique():
-            df_user = pandas.DataFrame()
-            start = self.data[self.data["User"] == user]["Date"].min()
-            stop = self.data[self.data["User"] == user]["Date"].max()
-            df_user["Date"] = pandas.date_range(start, stop)
-            df_user["User"] = user
-            df_user["Key"] = "ZP-1"
-            df_user["Time"] = 0.0
-            df_user["Billable"] = 0.0
-            df_user["Group"] = "ZP"
-            df_user["Internal"] = 0.0
-            df_user["Year"] = df_user.loc[:, ("Date")].dt.year
-            df_user["Currency"] = "EUR"
-            df_user["Rate"] = 0
-            df_user["Income"] = 0
-            padded_data = pandas.concat([padded_data, df_user])
-        return padded_data
+        self.padded_data = self.data
+        if not working_hours.empty:
+            for index, row in working_hours.iterrows():
+                df_user = pandas.DataFrame()
+                user = row["User"]
+                if row["Start"] == "*":
+                    start = self.data[self.data["User"] == user]["Date"].min()
+                else:
+                    start = row["Start"]
+                if row["Stop"] == "*":
+                    stop = self.data[self.data["User"] == user]["Date"].max()
+                else:
+                    stop = row["Stop"]
+                df_user["Date"] = pandas.date_range(start, stop)
+                df_user["User"] = user
+                df_user["Key"] = "ZP-1"
+                df_user["Time"] = 0.0
+                df_user["Billable"] = 0.0
+                df_user["Group"] = "ZP"
+                df_user["Internal"] = 0.0
+                df_user["Year"] = df_user.loc[:, ("Date")].dt.year
+                df_user["Currency"] = "EUR"
+                df_user["Rate"] = 0
+                df_user["Income"] = 0
+                self.padded_data = pandas.concat([self.padded_data, df_user])
+        else:
+            for user in self.data["User"].unique():
+                df_user = pandas.DataFrame()
+                start = self.data[self.data["User"] == user]["Date"].min()
+                stop = self.data[self.data["User"] == user]["Date"].max()
+                print(user, start, stop)
+                df_user["Date"] = pandas.date_range(start, stop)
+                df_user["User"] = user
+                df_user["Key"] = "ZP-1"
+                df_user["Time"] = 0.0
+                df_user["Billable"] = 0.0
+                df_user["Group"] = "ZP"
+                df_user["Internal"] = 0.0
+                df_user["Year"] = df_user.loc[:, ("Date")].dt.year
+                df_user["Currency"] = "EUR"
+                df_user["Rate"] = 0
+                df_user["Income"] = 0
+                self.padded_data = pandas.concat([self.padded_data, df_user])
 
     def userRolling7(self, to_sum) -> pandas.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        daily_sum = self.paddedData().groupby(["Date", "User"], as_index=False)[to_sum].sum()
+        daily_sum = self.padded_data.groupby(["Date", "User"], as_index=False)[to_sum].sum()
         rolling_sum_7d = (
             daily_sum.set_index("Date").groupby(["User"], as_index=False).rolling("7d", min_periods=7)[to_sum].sum()
         )
@@ -231,13 +286,13 @@ class TempoData:
 
     def teamRolling7(self, to_sum) -> pandas.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        daily_sum = self.paddedData().groupby(["Date"], as_index=False)[to_sum].sum()
+        daily_sum = self.padded_data.groupby(["Date"], as_index=False)[to_sum].sum()
         rolling_sum_7d = daily_sum.set_index("Date").rolling("7d", min_periods=7)[to_sum].sum()
         return rolling_sum_7d.reset_index(inplace=False)
 
     def teamRolling7Relative(self, costs: pandas.Series) -> pandas.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user, relative to the costs"""
-        daily_sum = self.paddedData().groupby(["Date"], as_index=False)["Income"].sum()
+        daily_sum = self.padded_data.groupby(["Date"], as_index=False)["Income"].sum()
         daily_cost = costs
         daily_cost["Date"] = daily_cost["Date"].astype("datetime64[M]")
 
