@@ -162,16 +162,20 @@ class TempoData:
 
     def lastEntry(self, user, stop) -> pandas.Timestamp:
         if stop == "*":
-            last = self.data[self.data["User"] == user]["Date"].max()
+            data = self.data[self.data["Date"] < pandas.to_datetime("today")]
+            last = data[data["User"] == user]["Date"].max()
         else:
             last = stop
 
         return pandas.Timestamp(last)
 
-    def totalHours(self, user, start):
+    def totalHours(self, user, start, stop=None):
         data = self.data[self.data["User"] == user]
         data = data[data["Date"] >= pandas.to_datetime(start)]
-        total = data[data["Date"] < pandas.to_datetime("today")]["Time"].sum()
+        if stop is None:
+            total = data[data["Date"] < pandas.to_datetime("today")]["Time"].sum()
+        else:
+            total = data[data["Date"] <= pandas.to_datetime(stop)]["Time"].sum()
 
         return total
 
@@ -180,6 +184,7 @@ class TempoData:
         user_data = pandas.DataFrame()
         if not working_hours.empty:
             user_data = working_hours[working_hours["Stop"] == "*"]
+            user_data["Trend"] = 0
             user_data["First"] = [self.firstEntry(u, s).date() for u, s in zip(user_data["User"], user_data["Start"])]
             user_data["Last"] = [self.lastEntry(u, s).date() for u, s in zip(user_data["User"], user_data["Stop"])]
             user_data["Days"] = [weekdays(f, t) for f, t in zip(user_data["First"], user_data["Last"])]
@@ -191,7 +196,17 @@ class TempoData:
             user_data["Delta"] = user_data["Delta"] + [
                 tot - exp for tot, exp in zip(user_data["Total"], user_data["Expected"])
             ]
+            user_data["Last 7"] = [
+                self.totalHours(user, start, stop)
+                for user, start, stop in zip(
+                    user_data["User"], user_data["Last"] - pandas.to_timedelta("6day"), user_data["Last"]
+                )
+            ]
+            user_data["Trend"] = [
+                last_week - 5 * daily for daily, last_week in zip(user_data["Daily"], user_data["Last 7"])
+            ]
             user_data = user_data.drop(["Start", "Stop"], axis="columns")
+            print(user_data)
 
         else:
             # Find the first time entry for each user
