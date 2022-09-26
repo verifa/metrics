@@ -97,7 +97,7 @@ lint: black-check pylint mypy isort
 ##
 ##	dependes on install: and black-check:
 ##
-dev: install lint
+dev: install lint tests
 	poetry run python app.py
 
 ## run:
