@@ -18,9 +18,12 @@ description = "Verifa metrics dashboard"
 authors = ["Jacob Larfors <jarfors@verifa.io>"]
 license = "Apache v2.0"
 
+[tool.poetry.extras]
+pandas = ["dash"]
+
 [tool.poetry.dependencies]
 python = "^3.10"
-pandas = "dash"
+pandas = "^1.4.0"
 dash = "^2.3.1"
 gunicorn = "^20.1.0"
 tempo-api-python-client = "^0.5.1"
