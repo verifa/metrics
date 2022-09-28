@@ -89,7 +89,7 @@ data.padTheData(supplementary_data.working_hours)
 
 table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours).round(1))
 last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
-print(f"Last common day: {last_reported}")
+logging.info(f"Last common day: {last_reported}")
 
 
 # =========================================================
