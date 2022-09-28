@@ -1,5 +1,6 @@
 """Tempo related functions and classes"""
 import json
+import logging
 import os
 import sys
 from datetime import date
@@ -32,13 +33,13 @@ class SupplementaryData:
 
     def load(self, users: pandas.Series) -> None:
         if not os.path.exists(self.working_hours_path):
-            print("[WARNING] Working hours file path does not exist: " + self.working_hours_path)
+            logging.warning("Working hours file path does not exist: " + self.working_hours_path)
         else:
             self.working_hours = pandas.read_json(self.working_hours_path)
-            print("Loaded " + self.working_hours_path)
+            logging.info("Loaded " + self.working_hours_path)
 
         if not os.path.exists(self.costs_path):
-            print("[WARNING] Costs file path does not exist: " + self.costs_path)
+            logging.warning("Costs file path does not exist: " + self.costs_path)
         else:
             self.costs = pandas.read_json(self.costs_path)
             self.costs.index.name = "Month"
@@ -57,14 +58,14 @@ class SupplementaryData:
             self.costs["Date"] = self.costs.index
             self.costs = self.costs.drop("days_in_month", axis=1)
             self.costs = self.costs.drop("Month", axis=1)
-            print("Loaded " + self.costs_path)
+            logging.info("Loaded " + self.costs_path)
 
         if not os.path.exists(self.rates_path):
             sys.exit("[WARNING] Rates file path does not exist: " + self.rates_path)
         else:
             rates_data = json.load(open(self.rates_path))
             self.rates = pandas.json_normalize(rates_data, record_path="Default")
-            print("Loaded " + self.rates_path)
+            logging.info("Loaded " + self.rates_path)
 
             self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
             self.rates = self.rates.explode("User")
@@ -206,7 +207,7 @@ class TempoData:
                 last_week - 5 * daily for daily, last_week in zip(user_data["Daily"], user_data["Last 7"])
             ]
             user_data = user_data.drop(["Start", "Stop"], axis="columns")
-            print(user_data)
+            logging.info("\n" + user_data.to_string())
 
         else:
             # Find the first time entry for each user
@@ -277,7 +278,7 @@ class TempoData:
                 df_user = pandas.DataFrame()
                 start = self.data[self.data["User"] == user]["Date"].min()
                 stop = self.data[self.data["User"] == user]["Date"].max()
-                print(user, start, stop)
+                logging.debug(user, start, stop)
                 df_user["Date"] = pandas.date_range(start, stop)
                 df_user["User"] = user
                 df_user["Key"] = "ZP-1"
