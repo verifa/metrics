@@ -1,4 +1,5 @@
 """System module."""
+import logging
 import os
 from datetime import date
 
@@ -20,6 +21,11 @@ TODAY = pd.Timestamp("today")
 ROLLING_DATE = lookBack(180)
 TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
 
+TEMPO_LOG_LEVEL = os.environ.get("TEMPO_LOG_LEVEL") or "WARNING"
+if TEMPO_LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+    logging.basicConfig(level=logging.getLevelName(TEMPO_LOG_LEVEL))
+else:
+    logging.warning(f"{TEMPO_LOG_LEVEL} is not a valid log level, using default: WARNING")
 
 # =========================================================
 # Helpers

@@ -45,6 +45,10 @@ To be able to add secret configurations there is a default config path `/tempo` 
 
 For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides the default value for config files.
 
+### TEMPO_LOG_LEVEL
+
+Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]`
+
 ### Configuration files
 
 #### Working hours JSON file
