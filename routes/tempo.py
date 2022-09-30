@@ -197,17 +197,17 @@ class TempoData:
             user_data["Delta"] = user_data["Delta"] + [
                 tot - exp for tot, exp in zip(user_data["Total"], user_data["Expected"])
             ]
-            user_data["Last 7"] = [
+            user_data["Last 7 days"] = [
                 self.totalHours(user, start, stop)
                 for user, start, stop in zip(
                     user_data["User"], user_data["Last"] - pandas.to_timedelta("6day"), user_data["Last"]
                 )
             ]
             user_data["Trend"] = [
-                last_week - 5 * daily for daily, last_week in zip(user_data["Daily"], user_data["Last 7"])
+                last_week - 5 * daily for daily, last_week in zip(user_data["Daily"], user_data["Last 7 days"])
             ]
-            user_data = user_data.drop(["Start", "Stop"], axis="columns")
             logging.info("\n" + user_data.to_string())
+            user_data = user_data.drop(["Daily", "Start", "Stop", "First", "Days", "Expected", "Total"], axis="columns")
 
         else:
             # Find the first time entry for each user
