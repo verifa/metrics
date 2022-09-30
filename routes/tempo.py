@@ -174,7 +174,7 @@ class TempoData:
         data = self.data[self.data["User"] == user]
         data = data[data["Date"] >= pandas.to_datetime(start)]
         if stop is None:
-            total = data[data["Date"] < pandas.to_datetime("today")]["Time"].sum()
+            total = data["Time"].sum()
         else:
             total = data[data["Date"] <= pandas.to_datetime(stop)]["Time"].sum()
 

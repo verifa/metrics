@@ -18,6 +18,7 @@ from routes.tempo import SupplementaryData, TempoData
 
 START_DATE = pd.Timestamp("2021-01-01")
 TODAY = pd.Timestamp("today")
+YESTERDAY = TODAY - pd.to_timedelta("1day")
 ROLLING_DATE = lookBack(180)
 TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
 
@@ -72,7 +73,7 @@ def normaliseTeamAverage(frame, last):
 
 
 data = TempoData()
-data.load(from_date=START_DATE, to_date=TODAY)
+data.load(from_date=START_DATE, to_date=YESTERDAY)
 
 supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH)
 supplementary_data.load(data.getUsers())
@@ -392,7 +393,7 @@ tabStructure = dcc.Tabs(
 pageheader = html.Div(
     [
         dcc.Markdown("## Verifa Metrics Dashboard"),
-        dcc.Markdown(f"""#### {START_DATE.strftime("%b %d, %Y")} ➜ {TODAY.strftime("%b %d, %Y")}"""),
+        dcc.Markdown(f"""#### {START_DATE.strftime("%b %d, %Y")} ➜ {YESTERDAY.strftime("%b %d, %Y")}"""),
     ]
 )
 
