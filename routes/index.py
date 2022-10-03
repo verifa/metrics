@@ -220,19 +220,25 @@ if not (supplementary_data.costs.empty):
     df_team_earn_rolling_30 = rollingAverage(df_team_earn_rolling, "Diff", 30)
     df_team_earn_rolling_30.columns = ["Date", "Diff30"]
     df_team_earn_rolling_30 = df_team_earn_rolling_30.merge(df_team_earn_rolling, on=["Date"])
-    df_team_earn_rolling_90 = rollingAverage(df_team_earn_rolling, "Diff", 90)
-    df_team_earn_rolling_90.columns = ["Date", "Diff90"]
-    df_team_earn_rolling_90 = df_team_earn_rolling_90.merge(df_team_earn_rolling_30, on=["Date"])
     df_team_earn_rolling_365 = rollingAverage(df_team_earn_rolling, "Diff", 365)
     df_team_earn_rolling_365.columns = ["Date", "Diff365"]
-    df_team_earn_rolling_365 = df_team_earn_rolling_365.merge(df_team_earn_rolling_90, on=["Date"])
+    df_team_earn_rolling_365 = df_team_earn_rolling_365.merge(df_team_earn_rolling_30, on=["Date"])
     df_team_rolling_total = df_team_earn_rolling_365
+
+    df_team_rolling_total.rename(
+        columns={
+            "Diff": "Rolling Weekly Average",
+            "Diff30": "Rolling Monthly Average",
+            "Diff365": "Rolling Yearly Average",
+        },
+        inplace=True,
+    )
 
     figure_rolling_earnings = px.scatter(
         df_team_rolling_total,
         x="Date",
-        y=["Diff", "Diff30", "Diff90", "Diff365"],
-        color_discrete_sequence=["#C8E6C9", "#81C784", "#388E3C", "#1B5E20"],
+        y=["Rolling Weekly Average", "Rolling Monthly Average", "Rolling Yearly Average"],
+        color_discrete_sequence=["#C8E6C9", "#77AEE0", "#1B5E20"],
         height=600,
     )
     figure_rolling_earnings.add_hline(y=1, fillcolor="indigo")
