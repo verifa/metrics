@@ -49,6 +49,18 @@ For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides 
 
 Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]`
 
+### NOTION_KEY
+
+Notion API key.
+
+### NOTION_OKR_DATABASE_ID
+
+The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link.
+
+### NOTION_OKR_LABELS
+
+The labels used in Notion.
+
 ### Configuration files
 
 #### Working hours JSON file

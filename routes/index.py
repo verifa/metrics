@@ -9,6 +9,7 @@ import plotly.figure_factory as ff
 from dash import dcc, html
 
 from routes.date_utils import lookBack
+from routes.notion import OKR
 from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
@@ -20,13 +21,18 @@ START_DATE = pd.Timestamp("2021-01-01")
 TODAY = pd.Timestamp("today")
 YESTERDAY = TODAY - pd.to_timedelta("1day")
 ROLLING_DATE = lookBack(180)
-TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH") or "/tempo"
+TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH", "/tempo")
 
-TEMPO_LOG_LEVEL = os.environ.get("TEMPO_LOG_LEVEL") or "WARNING"
+TEMPO_LOG_LEVEL = os.environ.get("TEMPO_LOG_LEVEL", "WARNING")
 if TEMPO_LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
     logging.basicConfig(level=logging.getLevelName(TEMPO_LOG_LEVEL))
 else:
     logging.warning(f"{TEMPO_LOG_LEVEL} is not a valid log level, using default: WARNING")
+
+NOTION_KEY = os.environ.get("NOTION_KEY", "")
+NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
+NOTION_OKR_LABELS = [["2022", "Q4"], ["2022"]]
+
 
 # =========================================================
 # Helpers
@@ -81,7 +87,6 @@ supplementary_data.load(data.getUsers())
 data.injectRates(supplementary_data.rates)
 
 data.padTheData(supplementary_data.working_hours)
-
 
 # =========================================================
 # Table: User working hours
@@ -377,32 +382,20 @@ figure_eggbaskets.update_layout(
 
 
 # =========================================================
-# Rendering
+# Base rendering
 # =========================================================
 
 
-tabStructure = dcc.Tabs(
-    id="tabs-graph",
-    value="start_page",
-    children=[
-        dcc.Tab(label="Main", value="start_page"),
-        dcc.Tab(label="Rates", value="rates"),
-        dcc.Tab(label="Billable", value="billable"),
-        dcc.Tab(label="Internal", value="internal"),
-        dcc.Tab(label="Popular projects", value="popular_projects"),
-        dcc.Tab(label="Projects", value="projects"),
-        dcc.Tab(label="Normalised Work Time", value="normalised_worktime"),
-        dcc.Tab(label="Rolling income", value="rolling_income"),
-    ],
-)
-
-pageheader = html.Div(
-    [
-        dcc.Markdown("## Verifa Metrics Dashboard"),
-        dcc.Markdown(f"""#### {START_DATE.strftime("%b %d, %Y")} ➜ {YESTERDAY.strftime("%b %d, %Y")}"""),
-    ]
-)
-
+tab_children = [
+    dcc.Tab(label="Main", value="start_page"),
+    dcc.Tab(label="Rates", value="rates"),
+    dcc.Tab(label="Billable", value="billable"),
+    dcc.Tab(label="Internal", value="internal"),
+    dcc.Tab(label="Popular projects", value="popular_projects"),
+    dcc.Tab(label="Projects", value="projects"),
+    dcc.Tab(label="Normalised Work Time", value="normalised_worktime"),
+    dcc.Tab(label="Rolling income", value="rolling_income"),
+]
 
 figure_tabs = {
     "start_page": (
@@ -430,6 +423,38 @@ figure_tabs = {
         [figure_rolling_total, figure_rolling_income_team, figure_rolling_income_individual],
     ),
 }
+
+
+# =========================================================
+# Dynamic addition of tabs
+# =========================================================
+
+if NOTION_KEY and NOTION_OKR_DATABASE_ID:
+    okr = OKR(NOTION_KEY, NOTION_OKR_DATABASE_ID)
+    okr.get_okr()
+
+    okr_figs = [okr.get_figure(label) for label in NOTION_OKR_LABELS]
+
+    figure_tabs["okr_fig"] = (
+        "OKR",
+        okr_figs,
+    )
+
+    tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
+
+
+# =========================================================
+# Rendering
+# =========================================================
+
+tab_structure = dcc.Tabs(id="tabs-graph", value="start_page", children=tab_children)
+
+pageheader = html.Div(
+    [
+        dcc.Markdown("## Verifa Metrics Dashboard"),
+        dcc.Markdown(f"""#### {START_DATE.strftime("%b %d, %Y")} ➜ {YESTERDAY.strftime("%b %d, %Y")}"""),
+    ]
+)
 
 
 def render_content(tab):
