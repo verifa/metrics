@@ -26,7 +26,7 @@ app.scripts.config.serve_locally = True
 server = app.server
 
 app.layout = html.Div(
-    className="px-8", children=[index.pageheader, index.tabStructure, html.Div(id="tabs-content-graph")]
+    className="px-8", children=[index.pageheader, index.tab_structure, html.Div(id="tabs-content-graph")]
 )
 
 
