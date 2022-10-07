@@ -72,11 +72,11 @@ class OKR(Notion):
             x="Progress (%)",
             y="title",
             title=fig_title,
-            height=100 + 50 * keyresults["title"].count(),
+            height=25 + 50 * keyresults["title"].count(),
             orientation="h",
         )
 
-        fig.update_layout(yaxis_title="")
+        fig.update_layout(xaxis=dict(domain=[0.20, 1.0]), yaxis_title="", title_x=0.5)
         fig.update_xaxes(range=[0, 100])
 
         return fig
