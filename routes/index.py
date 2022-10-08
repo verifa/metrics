@@ -349,9 +349,27 @@ figure_internal_last_year.update_layout(yaxis_title="Internal entries [h]")
 # =========================================================
 
 
-figure_popular_projects = px.histogram(data.data, x="Group", y="Time", color="User", height=600)
+figure_popular_projects_this_year = px.histogram(
+    data.thisYear().sort_values("Key"),
+    x="Group",
+    y="Time",
+    color="User",
+    height=600,
+    title=f"Popular projects for {data.this_year}",
+)
+figure_popular_projects_this_year.update_xaxes(categoryorder="total ascending")
+figure_popular_projects_this_year.update_layout(yaxis_title="Popular project entries [h]")
 
-figure_popular_projects.update_xaxes(categoryorder="total ascending")
+figure_popular_projects_last_year = px.histogram(
+    data.lastYear().sort_values("Key"),
+    x="Group",
+    y="Time",
+    color="User",
+    height=600,
+    title=f"Popular projects for {data.last_year}",
+)
+figure_popular_projects_last_year.update_xaxes(categoryorder="total ascending")
+figure_popular_projects_last_year.update_layout(yaxis_title="Popular project entries [h]")
 
 
 # =========================================================
@@ -409,7 +427,7 @@ figure_tabs = {
     "rates": ("Rates", [table_rates]),
     "billable": ("Billable work", [figure_billable_this_year, figure_billable_last_year]),
     "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
-    "popular_projects": ("Popular projects", [figure_popular_projects]),
+    "popular_projects": ("Popular projects", [figure_popular_projects_this_year, figure_popular_projects_last_year]),
     "projects": ("What we work on", [figure_projects_team, figure_projects_individual]),
     "normalised_worktime": (
         "Normalised Work Time",
