@@ -101,7 +101,7 @@ class TempoData:
         self.raw = pandas.json_normalize(logs)
         self.data = self.raw[["issue.key", "timeSpentSeconds", "billableSeconds", "startDate", "author.displayName"]]
         self.data.columns = ["Key", "Time", "Billable", "Date", "User"]
-        df = pandas.DataFrame(self.data.loc[:, ("Key")].str.split("-", 1).tolist(), columns=["Group", "Number"])
+        df = pandas.DataFrame(self.data.loc[:, ("Key")].str.split("-", n=1).tolist(), columns=["Group", "Number"])
         self.data.loc[:, ("Group")] = df["Group"]
         self.data.loc[:, ("Date")] = pandas.to_datetime(self.data.loc[:, ("Date")], format="%Y-%m-%d")
         self.data.loc[:, ("Time")] = self.data.loc[:, ("Time")] / 3600
