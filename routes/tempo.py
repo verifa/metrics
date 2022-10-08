@@ -242,6 +242,11 @@ class TempoData:
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
         return rate_data.sort_values(by=["Key", "Rate", "Hours"], ascending=[True, True, False], na_position="first")
 
+    def missingRatesTable(self) -> pandas.DataFrame:
+        rate_data = self.ratesTable()
+        rate_data = rate_data[rate_data["Rate"] == "<b>nan</b>"]
+        return rate_data
+
     def padTheData(self, working_hours: pandas.DataFrame) -> None:
         """
         creates the self.padded_data padded with zero data
