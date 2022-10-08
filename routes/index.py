@@ -104,6 +104,7 @@ logging.info(f"Last common day: {last_reported}")
 
 
 table_rates = ff.create_table(data.ratesTable().round(1))
+table_missing_rates = ff.create_table(data.missingRatesTable().round(1))
 
 
 # =========================================================
@@ -420,6 +421,7 @@ figure_tabs = {
         "Main",
         [
             table_working_hours,
+            table_missing_rates,
             figure_rolling_earnings if not (supplementary_data.costs.empty) else figure_rolling_total,
             figure_eggbaskets,
         ],
