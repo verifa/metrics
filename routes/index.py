@@ -426,7 +426,7 @@ figure_tabs = {
 
 
 # =========================================================
-# Dynamic addition of tabs
+# Dynamic addition of content
 # =========================================================
 
 if NOTION_KEY and NOTION_OKR_DATABASE_ID:
@@ -435,12 +435,14 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
 
     okr_figs = [okr.get_figure(label) for label in NOTION_OKR_LABELS]
 
-    figure_tabs["okr_fig"] = (
-        "OKR",
-        okr_figs,
-    )
-
+    # Add tab
+    figure_tabs["okr_fig"] = ("OKR", okr_figs)
     tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
+
+    # Update main page with first NOTION_OKR_LABELS
+    (head, plots) = figure_tabs["start_page"]
+    plots.append(okr_figs[0])
+    figure_tabs["start_page"] = (head, plots)
 
 
 # =========================================================
