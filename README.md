@@ -35,29 +35,31 @@ make help
 
 ## Runtime environment
 
-### TEMPO_KEY
+### TEMPO_KEY (required)
 
 To read data from tempo, the API key to use is expected as the TEMPO_KEY environment variable.
 
-### TEMPO_CONFIG_PATH
+### TEMPO_CONFIG_PATH (optional)
 
 To be able to add secret configurations there is a default config path `/tempo` where secrets can be mounted as files.
 
 For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides the default value for config files.
 
-### TEMPO_LOG_LEVEL
+### TEMPO_LOG_LEVEL (optional)
 
 Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]`
 
-### NOTION_KEY
+### NOTION_KEY (optional)
 
 Notion API key.
 
-### NOTION_OKR_DATABASE_ID
+### NOTION_OKR_DATABASE_ID (optional)
+Requires: NOTION_KEY
 
 The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link.
 
-### NOTION_OKR_LABELS
+### NOTION_OKR_LABELS (optional)
+Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID
 
 The labels used in Notion.
 
