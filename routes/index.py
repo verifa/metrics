@@ -84,7 +84,13 @@ data.load(from_date=START_DATE, to_date=YESTERDAY)
 supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH)
 supplementary_data.load(data.getUsers())
 
-data.injectRates(supplementary_data.rates)
+if not supplementary_data.rates.empty:
+    data.injectRates(supplementary_data.rates)
+    table_rates = ff.create_table(data.ratesTable().round(1))
+    table_missing_rates = ff.create_table(data.missingRatesTable().round(1))
+
+if not supplementary_data.working_hours.empty:
+    data.padTheData(supplementary_data.working_hours)
 
 data.zeroOutBillableTime(supplementary_data.internal_keys)
 
@@ -102,31 +108,24 @@ logging.info(f"Last common day: {last_reported}")
 
 
 # =========================================================
-# Table: Project rates
-# =========================================================
-
-
-table_rates = ff.create_table(data.ratesTable().round(1), height_constant=20)
-table_missing_rates = ff.create_table(data.missingRatesTable().round(1))
-
-
-# =========================================================
 # Figure: Normalised time (individual)
 # =========================================================
 
 
-df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
-figure_normalised_individual = px.scatter(
-    df_user_normalised[df_user_normalised["Date"] > ROLLING_DATE],
-    x="Date",
-    y=["%-billable", "%-internal"],
-    facet_col="User",
-    facet_col_wrap=2,
-    color_discrete_sequence=["#8FBC8F", "#FF7F50"],
-    height=1200,
-)
-figure_normalised_individual.update_layout(title="Normalised data, rolling 7 days", yaxis_title="Work time [%]")
+def figureNormalisedIndividual(data, supplementary_data):
+    df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
+    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
+    figure_normalised_individual = px.scatter(
+        df_user_normalised[df_user_normalised["Date"] > ROLLING_DATE],
+        x="Date",
+        y=["%-billable", "%-internal"],
+        facet_col="User",
+        facet_col_wrap=2,
+        color_discrete_sequence=["#8FBC8F", "#FF7F50"],
+        height=1200,
+    )
+    figure_normalised_individual.update_layout(title="Normalised data, rolling 7 days", yaxis_title="Work time [%]")
+    return figure_normalised_individual
 
 
 # =========================================================
@@ -134,19 +133,23 @@ figure_normalised_individual.update_layout(title="Normalised data, rolling 7 day
 # =========================================================
 
 
-df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
-figure_normalised_team = px.scatter(
-    df_team_normalised,
-    x="Date",
-    y=["%-billable", "%-internal", "%-billable30", "%-internal30"],
-    color_discrete_sequence=["#8FBC8F", "#FF7F50", "#006400", "#A52A2A"],
-    height=800,
-)
-figure_normalised_team.update_layout(title="Normalised team data", yaxis_title="Work time [%]")
-figure_normalised_team.update_layout(
-    xaxis_rangeslider_visible=True,
-    xaxis_range=[ROLLING_DATE, str(date.today())],
-)
+def figureNormalisedTeam(data, supplementary_data):
+    df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
+    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
+    df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
+    figure_normalised_team = px.scatter(
+        df_team_normalised,
+        x="Date",
+        y=["%-billable", "%-internal", "%-billable30", "%-internal30"],
+        color_discrete_sequence=["#8FBC8F", "#FF7F50", "#006400", "#A52A2A"],
+        height=800,
+    )
+    figure_normalised_team.update_layout(title="Normalised team data", yaxis_title="Work time [%]")
+    figure_normalised_team.update_layout(
+        xaxis_rangeslider_visible=True,
+        xaxis_range=[ROLLING_DATE, str(date.today())],
+    )
+    return figure_normalised_team
 
 
 # =========================================================
@@ -154,16 +157,18 @@ figure_normalised_team.update_layout(
 # =========================================================
 
 
-df_user_time_rolling = data.userRolling7("Income")
-figure_rolling_income_individual = px.scatter(
-    df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
-    x="Date",
-    y="Income",
-    facet_col="User",
-    facet_col_wrap=3,
-    height=800,
-)
-figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
+def figureRollingIncomeIndividual(data):
+    df_user_time_rolling = data.userRolling7("Income")
+    figure_rolling_income_individual = px.scatter(
+        df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
+        x="Date",
+        y="Income",
+        facet_col="User",
+        facet_col_wrap=3,
+        height=800,
+    )
+    figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
+    return figure_rolling_income_individual
 
 
 # =========================================================
@@ -171,23 +176,26 @@ figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
 # =========================================================
 
 
-df_team_time_rolling_7 = teamRollingAverage7(
-    df_user_time_rolling[df_user_time_rolling["Date"] <= last_reported], "Income"
-)
-df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, "Income", 30)
-df_team_time_rolling_30.columns = ["Date", "Income30"]
-df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
-figure_rolling_income_team = px.scatter(
-    df_team_time_rolling_30,
-    x="Date",
-    y=["Income", "Income30"],
-    color_discrete_sequence=["#8FBC8F", "#006400"],
-    height=600,
-)
-figure_rolling_income_team.update_layout(
-    title="Rolling income (average/person)",
-    yaxis_title="Income (euro)",
-)
+def figureRollingIncomeTeam(data):
+    df_user_time_rolling = data.userRolling7("Income")
+    df_team_time_rolling_7 = teamRollingAverage7(
+        df_user_time_rolling[df_user_time_rolling["Date"] <= last_reported], "Income"
+    )
+    df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, "Income", 30)
+    df_team_time_rolling_30.columns = ["Date", "Income30"]
+    df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
+    figure_rolling_income_team = px.scatter(
+        df_team_time_rolling_30,
+        x="Date",
+        y=["Income", "Income30"],
+        color_discrete_sequence=["#8FBC8F", "#006400"],
+        height=600,
+    )
+    figure_rolling_income_team.update_layout(
+        title="Rolling income (average/person)",
+        yaxis_title="Income (euro)",
+    )
+    return figure_rolling_income_team
 
 
 # =========================================================
@@ -195,36 +203,39 @@ figure_rolling_income_team.update_layout(
 # =========================================================
 
 
-df_user_time_rolling = data.teamRolling7("Income")
-df_team_time_rolling_30 = rollingAverage(df_user_time_rolling, "Income", 30)
-df_team_time_rolling_30.columns = ["Date", "Income30"]
-df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_user_time_rolling, on=["Date"])
-df_team_rolling_total_90 = rollingAverage(df_user_time_rolling, "Income", 90)
-df_team_rolling_total_90.columns = ["Date", "Income90"]
-df_team_rolling_total_90 = df_team_rolling_total_90.merge(df_team_time_rolling_30, on=["Date"])
-df_team_rolling_total_365 = rollingAverage(df_user_time_rolling, "Income", 365)
-df_team_rolling_total_365.columns = ["Date", "Income365"]
-df_team_rolling_total_365 = df_team_rolling_total_365.merge(df_team_rolling_total_90, on=["Date"])
-df_team_rolling_total = df_team_rolling_total_365
+def figureRollingTotal(data):
+    df_user_time_rolling = data.teamRolling7("Income")
+    df_team_time_rolling_30 = rollingAverage(df_user_time_rolling, "Income", 30)
+    df_team_time_rolling_30.columns = ["Date", "Income30"]
+    df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_user_time_rolling, on=["Date"])
+    df_team_rolling_total_90 = rollingAverage(df_user_time_rolling, "Income", 90)
+    df_team_rolling_total_90.columns = ["Date", "Income90"]
+    df_team_rolling_total_90 = df_team_rolling_total_90.merge(df_team_time_rolling_30, on=["Date"])
+    df_team_rolling_total_365 = rollingAverage(df_user_time_rolling, "Income", 365)
+    df_team_rolling_total_365.columns = ["Date", "Income365"]
+    df_team_rolling_total_365 = df_team_rolling_total_365.merge(df_team_rolling_total_90, on=["Date"])
+    df_team_rolling_total = df_team_rolling_total_365
 
-figure_rolling_total = px.scatter(
-    df_team_rolling_total,
-    x="Date",
-    y=["Income", "Income30", "Income90", "Income365"],
-    color_discrete_sequence=["#C8E6C9", "#81C784", "#388E3C", "#1B5E20"],
-    height=600,
-)
-figure_rolling_total.update_layout(
-    title="Rolling income (total)",
-    yaxis_title="Income (euro)",
-)
+    figure_rolling_total = px.scatter(
+        df_team_rolling_total,
+        x="Date",
+        y=["Income", "Income30", "Income90", "Income365"],
+        color_discrete_sequence=["#C8E6C9", "#81C784", "#388E3C", "#1B5E20"],
+        height=600,
+    )
+    figure_rolling_total.update_layout(
+        title="Rolling income (total)",
+        yaxis_title="Income (euro)",
+    )
+    return figure_rolling_total
 
 
 # =========================================================
 # Figure: Rolling Income vs. Cost
 # =========================================================
 
-if not (supplementary_data.costs.empty):
+
+def figureRollingEarnings(data):
     df_team_earn_rolling = data.teamRolling7Relative(supplementary_data.costs)
     df_team_earn_rolling_30 = rollingAverage(df_team_earn_rolling, "Diff", 30)
     df_team_earn_rolling_30.columns = ["Date", "Diff30"]
@@ -255,6 +266,7 @@ if not (supplementary_data.costs.empty):
         title="Income normalized with cost",
         yaxis_title="Income / Cost",
     )
+    return figure_rolling_earnings
 
 
 # =========================================================
@@ -290,6 +302,7 @@ figure_projects_team.update_layout(bargap=0.1)
 # =========================================================
 # Figure: Billable time
 # =========================================================
+
 
 # a figure for this year
 figure_billable_this_year = px.histogram(
@@ -378,6 +391,10 @@ figure_popular_projects_last_year.update_layout(yaxis_title="Popular project ent
 
 # =========================================================
 # Figure: Egg baskets
+# -------------------
+# Two variants
+# - Sum of Income (Euro) if rates data exists
+# - Sum of billable time otherwise
 # =========================================================
 
 
@@ -386,6 +403,9 @@ if supplementary_data.rates.empty:
     yAxisTitle = "Sum of billable time"
     figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="Group", y="Billable", color="User")
     figure_eggbaskets.update_xaxes(categoryorder="total ascending")
+    figure_eggbaskets.update_layout(
+        title="Sum of billable time (" + str(eggs_days_ago) + " days back)",
+    )
 else:
     yAxisTitle = "Sum of Income (Euro)"
     figure_eggbaskets = px.histogram(
@@ -397,26 +417,27 @@ else:
         facet_col_wrap=3,
         category_orders={"TimeBasket": ["60-90 days ago", "30-60 days ago", "0-30 days ago"]},
     )
-
+    figure_eggbaskets.update_layout(
+        title="Baskets for our eggs (" + str(eggs_days_ago) + " days back)",
+    )
 figure_eggbaskets.update_layout(
-    height=600, yaxis_title=yAxisTitle, bargap=0.1, title="Baskets for our eggs (" + str(eggs_days_ago) + " days back)"
+    height=600,
+    yaxis_title=yAxisTitle,
+    bargap=0.1,
 )
 
 
 # =========================================================
-# Base rendering
+# Base rendering (only requires TEMPO_KEY)
 # =========================================================
 
 
 tab_children = [
     dcc.Tab(label="Main", value="start_page"),
-    dcc.Tab(label="Rates", value="rates"),
     dcc.Tab(label="Billable", value="billable"),
     dcc.Tab(label="Internal", value="internal"),
     dcc.Tab(label="Popular projects", value="popular_projects"),
     dcc.Tab(label="Projects", value="projects"),
-    dcc.Tab(label="Normalised Work Time", value="normalised_worktime"),
-    dcc.Tab(label="Rolling income", value="rolling_income"),
 ]
 
 figure_tabs = {
@@ -425,26 +446,13 @@ figure_tabs = {
         [
             table_working_hours,
             table_missing_rates,
-            figure_rolling_earnings if not (supplementary_data.costs.empty) else figure_rolling_total,
             figure_eggbaskets,
         ],
     ),
-    "rates": ("Rates", [table_rates]),
     "billable": ("Billable work", [figure_billable_this_year, figure_billable_last_year]),
     "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
     "popular_projects": ("Popular projects", [figure_popular_projects_this_year, figure_popular_projects_last_year]),
     "projects": ("What we work on", [figure_projects_team, figure_projects_individual]),
-    "normalised_worktime": (
-        "Normalised Work Time",
-        [
-            figure_normalised_team,
-            figure_normalised_individual,
-        ],
-    ),
-    "rolling_income": (
-        "Rolling income",
-        [figure_rolling_total, figure_rolling_income_team, figure_rolling_income_individual],
-    ),
 }
 
 
@@ -452,6 +460,49 @@ figure_tabs = {
 # Dynamic addition of content
 # =========================================================
 
+
+# ---------------------------------------------------------
+# Project rates
+# Requires config files: rates, workinghours and costs
+if not supplementary_data.rates.empty:
+    figure_rolling_total = figureRollingTotal(data)
+    figure_rolling_income_team = figureRollingIncomeTeam(data)
+    figure_rolling_income_individual = figureRollingIncomeIndividual(data)
+
+    # Add tabs
+    figure_tabs["rates"] = ("Rates", [table_rates])
+    tab_children.append(dcc.Tab(label="Rates", value="rates"))
+    figure_tabs["rolling_income"] = (
+        "Rolling income",
+        [figure_rolling_total, figure_rolling_income_team, figure_rolling_income_individual],
+    )
+    tab_children.append(dcc.Tab(label="Rolling income", value="rolling_income"))
+
+    if not supplementary_data.costs.empty:
+        figure_rolling_earnings = figureRollingEarnings(data)
+        # Update main page
+        (head, plots) = figure_tabs["start_page"]
+        plots.append(figure_rolling_earnings)
+        figure_tabs["start_page"] = (head, plots)
+
+
+# ---------------------------------------------------------
+# Normalised working time
+# Requires config files: workinghours
+if not supplementary_data.working_hours.empty:
+    figure_normalised_team = figureNormalisedTeam(data, supplementary_data)
+    figure_normalised_individual = figureNormalisedIndividual(data, supplementary_data)
+
+    # Add tab
+    figure_tabs["normalised_worktime"] = (
+        "Normalised Work Time",
+        [figure_normalised_team, figure_normalised_individual],
+    )
+    tab_children.append(dcc.Tab(label="Normalised Work Time", value="normalised_worktime"))
+
+
+# ---------------------------------------------------------
+# OKR data from NOTION
 if NOTION_KEY and NOTION_OKR_DATABASE_ID:
     okr = OKR(NOTION_KEY, NOTION_OKR_DATABASE_ID)
     okr.get_okr()
@@ -473,6 +524,7 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
 # =========================================================
 # Rendering
 # =========================================================
+
 
 tab_structure = dcc.Tabs(id="tabs-graph", value="start_page", children=tab_children)
 

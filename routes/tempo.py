@@ -62,7 +62,7 @@ class SupplementaryData:
             logging.info("Loaded " + self.costs_path)
 
         if not os.path.exists(self.rates_path):
-            sys.exit("[WARNING] Rates file path does not exist: " + self.rates_path)
+            logging.warning("Rates file path does not exist: " + self.rates_path)
         else:
             rates_data = json.load(open(self.rates_path))
             self.rates = pandas.json_normalize(rates_data, record_path="Default")
@@ -286,7 +286,6 @@ class TempoData:
                 df_user = pandas.DataFrame()
                 start = self.data[self.data["User"] == user]["Date"].min()
                 stop = self.data[self.data["User"] == user]["Date"].max()
-                logging.debug(user, start, stop)
                 df_user["Date"] = pandas.date_range(start, stop)
                 df_user["User"] = user
                 df_user["Key"] = "ZP-1"
