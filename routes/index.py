@@ -86,7 +86,10 @@ supplementary_data.load(data.getUsers())
 
 data.injectRates(supplementary_data.rates)
 
+data.zeroOutBillableTime(supplementary_data.internal_keys)
+
 data.padTheData(supplementary_data.working_hours)
+
 
 # =========================================================
 # Table: User working hours
