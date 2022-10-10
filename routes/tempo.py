@@ -21,6 +21,7 @@ class SupplementaryData:
     working_hours: pandas.DataFrame
     costs_path: str
     costs: pandas.DataFrame
+    internal_keys: pandas.DataFrame
 
     def __init__(self, config_path: str) -> None:
         self.working_hours_path = config_path + "/workinghours/data.json"
@@ -75,6 +76,8 @@ class SupplementaryData:
             self.rates["Rate"] = rcol
             self.rates = self.rates.drop(columns=["Rate_x", "Rate_y"])
             self.rates = self.rates.astype({"Rate": "int"})
+            # adds the internal keys
+            self.internal_keys = pandas.json_normalize(rates_data, record_path="Internal")
 
 
 class TempoData:
@@ -334,3 +337,12 @@ class TempoData:
     def lastYear(self) -> pandas.DataFrame:
         """returns a dataFrame with entries for the previous year"""
         return self.data[self.data["Year"] == float(self.last_year)]
+
+    def zeroOutBillableTime(self, keys: pandas.DataFrame) -> None:
+        """
+        Sets billable time to zero (0) for internal project keys
+        """
+        for key in keys["Key"]:
+            logging.debug("Internal Key: " + key)
+            self.data.loc[self.data["Group"] == key, ("Billable")] = 0
+            self.data.loc[self.data["Group"] == key, ("Internal")] = self.data[self.data["Group"] == key]["Time"]
