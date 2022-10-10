@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-import pandas
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import requests
@@ -27,7 +27,7 @@ class Notion:
 
 class OKR(Notion):
     database_id: str
-    data: pandas.DataFrame
+    data: pd.DataFrame
 
     def __init__(self, token: str = "", database_id: str = "") -> None:
         super().__init__(token)
@@ -36,7 +36,7 @@ class OKR(Notion):
     def get_okr(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
 
-        data = pandas.DataFrame(
+        data = pd.DataFrame(
             columns=["title", "current_value", "target_value", "objective", "assignee", "period", "scope"]
         )
 

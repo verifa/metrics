@@ -1,6 +1,6 @@
 """Various date utility functions"""
 import numpy
-import pandas
+import pandas as pd
 
 
 def weekdays(from_date: str, to_date: str):
@@ -8,9 +8,9 @@ def weekdays(from_date: str, to_date: str):
     return numpy.busday_count(from_date, str(lookAhead(1, to_date).date()), weekmask="1111100")
 
 
-def lookAhead(offset: int, from_date: str = pandas.Timestamp("today")):
-    return pandas.Timestamp(from_date).floor("D") + pandas.offsets.Day(offset)
+def lookAhead(offset: int, from_date: str = pd.Timestamp("today")):
+    return pd.Timestamp(from_date).floor("D") + pd.offsets.Day(offset)
 
 
-def lookBack(offset: int, from_date: str = pandas.Timestamp("today")):
-    return pandas.Timestamp(from_date).floor("D") - pandas.offsets.Day(offset)
+def lookBack(offset: int, from_date: str = pd.Timestamp("today")):
+    return pd.Timestamp(from_date).floor("D") - pd.offsets.Day(offset)
