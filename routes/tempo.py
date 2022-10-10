@@ -237,13 +237,13 @@ class TempoData:
 
         return user_data
 
-    def tableByUser(self, working_hours, fnTableHeight=None) -> go:
+    def tableByUser(self, working_hours, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
         table_working_hours = self.byUser(working_hours).round(2)
         print(table_working_hours)
         fig = go.Figure(
             data=[
                 go.Table(
-                    header=dict(values=list(table_working_hours.columns), fill_color="paleturquoise", align="left"),
+                    header=dict(values=list(table_working_hours.columns), fill_color=color_head, align="left"),
                     cells=dict(
                         values=[
                             table_working_hours["User"],
@@ -252,7 +252,7 @@ class TempoData:
                             table_working_hours["Last"],
                             table_working_hours["Last 7 days"],
                         ],
-                        fill_color="lavender",
+                        fill_color=color_cells,
                         align="left",
                     ),
                 )
@@ -271,16 +271,16 @@ class TempoData:
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
         return rate_data
 
-    def ratesTable(self, fnTableHeight=None) -> go:
+    def ratesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
         rate_data = self.rawRatesTable()
         fig = go.Figure(
             data=[
                 go.Table(
                     columnwidth=[50, 50, 50, 400],
-                    header=dict(values=list(rate_data.columns), fill_color="paleturquoise", align="left"),
+                    header=dict(values=list(rate_data.columns), fill_color=color_head, align="left"),
                     cells=dict(
                         values=[rate_data["Key"], rate_data["Rate"], rate_data["Hours"], rate_data["Users"]],
-                        fill_color="lavender",
+                        fill_color=color_cells,
                         align="left",
                     ),
                 )
@@ -291,17 +291,17 @@ class TempoData:
             fig.update_layout(height=fnTableHeight(rate_data))
         return fig
 
-    def missingRatesTable(self, fnTableHeight=None) -> pd.DataFrame:
+    def missingRatesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
         rate_data = self.rawRatesTable()
         rate_data = rate_data[rate_data["Rate"] == "???"]
         fig = go.Figure(
             data=[
                 go.Table(
                     columnwidth=[50, 50, 50, 400],
-                    header=dict(values=list(rate_data.columns), fill_color="paleturquoise", align="left"),
+                    header=dict(values=list(rate_data.columns), fill_color=color_head, align="left"),
                     cells=dict(
                         values=[rate_data["Key"], rate_data["Rate"], rate_data["Hours"], rate_data["Users"]],
-                        fill_color="lavender",
+                        fill_color=color_cells,
                         align="left",
                     ),
                 )

@@ -85,7 +85,9 @@ class OKR(Notion):
 
         return fig
 
-    def get_figure_initiatives(self, search_period=None, fnTableHeight=None) -> go:
+    def get_figure_initiatives(
+        self, search_period=None, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender"
+    ) -> go:
         initiatives = self.data[self.data["scope"] == "Initiatives"]
         fig_title = "Initiatives"
 
@@ -103,10 +105,10 @@ class OKR(Notion):
             data=[
                 go.Table(
                     columnwidth=[400, 400],
-                    header=dict(values=list(initiatives.columns), fill_color="paleturquoise", align="left"),
+                    header=dict(values=list(initiatives.columns), fill_color=color_head, align="left"),
                     cells=dict(
                         values=[initiatives.title, initiatives.assignee, initiatives.notes],
-                        fill_color="lavender",
+                        fill_color=color_cells,
                         align="left",
                     ),
                 )
