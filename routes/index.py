@@ -84,6 +84,8 @@ data.load(from_date=START_DATE, to_date=YESTERDAY)
 supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH)
 supplementary_data.load(data.getUsers())
 
+data.zeroOutBillableTime(supplementary_data.internal_keys)
+
 if not supplementary_data.rates.empty:
     data.injectRates(supplementary_data.rates)
     table_rates = ff.create_table(data.ratesTable().round(1))
@@ -92,7 +94,6 @@ if not supplementary_data.rates.empty:
 if not supplementary_data.working_hours.empty:
     data.padTheData(supplementary_data.working_hours)
 
-data.zeroOutBillableTime(supplementary_data.internal_keys)
 
 data.padTheData(supplementary_data.working_hours)
 
