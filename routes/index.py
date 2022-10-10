@@ -93,7 +93,7 @@ data.padTheData(supplementary_data.working_hours)
 # =========================================================
 
 
-table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours).round(1))
+table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours).round(1), height_constant=20)
 last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
 logging.info(f"Last common day: {last_reported}")
 
@@ -103,7 +103,7 @@ logging.info(f"Last common day: {last_reported}")
 # =========================================================
 
 
-table_rates = ff.create_table(data.ratesTable().round(1))
+table_rates = ff.create_table(data.ratesTable().round(1), height_constant=20)
 table_missing_rates = ff.create_table(data.missingRatesTable().round(1))
 
 
@@ -453,15 +453,17 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
     okr = OKR(NOTION_KEY, NOTION_OKR_DATABASE_ID)
     okr.get_okr()
 
-    okr_figs = [okr.get_figure(label) for label in NOTION_OKR_LABELS]
+    okr_figs_kr = [okr.get_figure_key_result(label) for label in NOTION_OKR_LABELS]
+    okr_figs_ini = [okr.get_figure_initiatives(label) for label in NOTION_OKR_LABELS]
 
     # Add tab
-    figure_tabs["okr_fig"] = ("OKR", okr_figs)
+    figure_tabs["okr_fig"] = ("OKR", okr_figs_kr + okr_figs_ini)
     tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
 
     # Update main page with first NOTION_OKR_LABELS
     (head, plots) = figure_tabs["start_page"]
-    plots.append(okr_figs[0])
+    plots.append(okr_figs_kr[0])
+    plots.append(okr_figs_ini[0])
     figure_tabs["start_page"] = (head, plots)
 
 

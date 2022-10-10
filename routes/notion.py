@@ -6,6 +6,7 @@ import sys
 
 import pandas
 import plotly.express as px
+import plotly.graph_objects as go
 import requests
 
 
@@ -55,7 +56,7 @@ class OKR(Notion):
         self.data = data.sort_index()
         logging.debug(f"OKR data\n{self.data}")
 
-    def get_figure(self, search_period=None) -> px.bar:
+    def get_figure_key_result(self, search_period=None) -> px.bar:
         keyresults = self.data[self.data["scope"] == "Company"]
         fig_title = "Key Results"
 
@@ -78,5 +79,43 @@ class OKR(Notion):
 
         fig.update_layout(yaxis_title="")
         fig.update_xaxes(range=[0, 100])
+
+        return fig
+
+    def get_figure_initiatives(self, search_period=None) -> go:
+        initiatives = self.data[self.data["scope"] == "Initiatives"]
+        fig_title = "Initiatives"
+
+        if search_period:
+            fig_title = f"{fig_title} {search_period}"
+            initiatives = initiatives[initiatives["period"].isin([search_period])]
+
+        logging.debug(f"Initiatives\n{initiatives}")
+
+        initiatives = initiatives.drop(
+            ["current_value", "target_value", "objective", "scope", "period"], axis="columns"
+        )
+
+        total_height = 208
+        for x in range(initiatives.shape[0]):
+            total_height += 22
+        for y in range(initiatives.shape[1]):
+            if len(str(initiatives.iloc[x][y])) > 30:
+                total_height += 17
+
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    columnwidth=[400, 400],
+                    header=dict(values=list(initiatives.columns), fill_color="paleturquoise", align="left"),
+                    cells=dict(
+                        values=[initiatives.title, initiatives.assignee],
+                        fill_color="lavender",
+                        align="left",
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(title=fig_title, height=total_height)
 
         return fig
