@@ -82,7 +82,7 @@ class OKR(Notion):
 
         return fig
 
-    def get_figure_initiatives(self, search_period=None) -> go:
+    def get_figure_initiatives(self, search_period=None, fnTableHeight=None) -> go:
         initiatives = self.data[self.data["scope"] == "Initiatives"]
         fig_title = "Initiatives"
 
@@ -95,13 +95,6 @@ class OKR(Notion):
         initiatives = initiatives.drop(
             ["current_value", "target_value", "objective", "scope", "period"], axis="columns"
         )
-
-        total_height = 208
-        for x in range(initiatives.shape[0]):
-            total_height += 22
-        for y in range(initiatives.shape[1]):
-            if len(str(initiatives.iloc[x][y])) > 30:
-                total_height += 17
 
         fig = go.Figure(
             data=[
@@ -116,6 +109,8 @@ class OKR(Notion):
                 )
             ]
         )
-        fig.update_layout(title=fig_title, height=total_height)
+        fig.update_layout(title=fig_title)
+        if fnTableHeight:
+            fig.update_layout(height=fnTableHeight(initiatives))
 
         return fig

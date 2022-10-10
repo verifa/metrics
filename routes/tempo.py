@@ -7,6 +7,7 @@ from datetime import date
 
 import numpy
 import pandas
+import plotly.graph_objects as go
 from tempoapiclient import client as Client
 
 from routes.date_utils import lookBack, weekdays
@@ -236,19 +237,80 @@ class TempoData:
 
         return user_data
 
-    def ratesTable(self) -> pandas.DataFrame:
+    def tableByUser(self, working_hours, fnTableHeight=None) -> go:
+        table_working_hours = self.byUser(working_hours).round(2)
+        print(table_working_hours)
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    header=dict(values=list(table_working_hours.columns), fill_color="paleturquoise", align="left"),
+                    cells=dict(
+                        values=[
+                            table_working_hours["User"],
+                            table_working_hours["Delta"],
+                            table_working_hours["Trend"],
+                            table_working_hours["Last"],
+                            table_working_hours["Last 7 days"],
+                        ],
+                        fill_color="lavender",
+                        align="left",
+                    ),
+                )
+            ]
+        )
+        if fnTableHeight:
+            fig.update_layout(height=fnTableHeight(table_working_hours))
+        return fig
+
+    def rawRatesTable(self) -> go:
         rate_data = self.data[self.data["Billable"] > 0]
         rate_data = rate_data.groupby(["Key", "Rate"], dropna=False, as_index=False).agg(
             Hours=("Billable", numpy.sum), Users=("User", ", ".join)
         )
-        rate_data["Rate"].replace(numpy.nan, "<b>nan</b>", inplace=True)
+        rate_data["Rate"].replace(numpy.nan, "???", inplace=True)
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
-        return rate_data.sort_values(by=["Key", "Rate", "Hours"], ascending=[True, True, False], na_position="first")
-
-    def missingRatesTable(self) -> pandas.DataFrame:
-        rate_data = self.ratesTable()
-        rate_data = rate_data[rate_data["Rate"] == "<b>nan</b>"]
         return rate_data
+
+    def ratesTable(self, fnTableHeight=None) -> go:
+        rate_data = self.rawRatesTable()
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    columnwidth=[50, 50, 50, 400],
+                    header=dict(values=list(rate_data.columns), fill_color="paleturquoise", align="left"),
+                    cells=dict(
+                        values=[rate_data["Key"], rate_data["Rate"], rate_data["Hours"], rate_data["Users"]],
+                        fill_color="lavender",
+                        align="left",
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(title="Rates")
+        if fnTableHeight:
+            fig.update_layout(height=fnTableHeight(rate_data))
+        return fig
+
+    def missingRatesTable(self, fnTableHeight=None) -> pandas.DataFrame:
+        rate_data = self.rawRatesTable()
+        rate_data = rate_data[rate_data["Rate"] == "???"]
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    columnwidth=[50, 50, 50, 400],
+                    header=dict(values=list(rate_data.columns), fill_color="paleturquoise", align="left"),
+                    cells=dict(
+                        values=[rate_data["Key"], rate_data["Rate"], rate_data["Hours"], rate_data["Users"]],
+                        fill_color="lavender",
+                        align="left",
+                    ),
+                )
+            ]
+        )
+        fig.update_layout(title="Missing Rates")
+        if fnTableHeight:
+            fig.update_layout(height=fnTableHeight(rate_data))
+        return fig
 
     def padTheData(self, working_hours: pandas.DataFrame) -> None:
         """

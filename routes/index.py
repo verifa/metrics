@@ -73,6 +73,16 @@ def normaliseTeamAverage(frame, last):
     return df_norm
 
 
+def tableHeight(table):
+    total_height = 228
+    for x in range(table.shape[0]):
+        total_height += 20
+    for y in range(table.shape[1]):
+        if len(str(table.iloc[x][y])) > 30:
+            total_height += 17
+    return total_height
+
+
 # =========================================================
 # Fetch data
 # =========================================================
@@ -88,8 +98,8 @@ data.zeroOutBillableTime(supplementary_data.internal_keys)
 
 if not supplementary_data.rates.empty:
     data.injectRates(supplementary_data.rates)
-    table_rates = ff.create_table(data.ratesTable().round(1))
-    table_missing_rates = ff.create_table(data.missingRatesTable().round(1))
+    table_rates = data.ratesTable(tableHeight)
+    table_missing_rates = data.missingRatesTable(tableHeight)
 
 if not supplementary_data.working_hours.empty:
     data.padTheData(supplementary_data.working_hours)
@@ -103,7 +113,7 @@ data.padTheData(supplementary_data.working_hours)
 # =========================================================
 
 
-table_working_hours = ff.create_table(data.byUser(supplementary_data.working_hours).round(1), height_constant=20)
+table_working_hours = data.tableByUser(supplementary_data.working_hours, tableHeight)
 last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
 logging.info(f"Last common day: {last_reported}")
 
@@ -509,7 +519,7 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
     okr.get_okr()
 
     okr_figs_kr = [okr.get_figure_key_result(label) for label in NOTION_OKR_LABELS]
-    okr_figs_ini = [okr.get_figure_initiatives(label) for label in NOTION_OKR_LABELS]
+    okr_figs_ini = [okr.get_figure_initiatives(label, tableHeight) for label in NOTION_OKR_LABELS]
 
     # Add tab
     figure_tabs["okr_fig"] = ("OKR", okr_figs_kr + okr_figs_ini)
