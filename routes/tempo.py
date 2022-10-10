@@ -5,7 +5,7 @@ import os
 import sys
 from datetime import date
 
-import numpy
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from tempoapiclient import client as Client
@@ -134,7 +134,7 @@ class TempoData:
         """returns aggregated billable time grouped by issue key group and user"""
         timed_data = self.data[self.data["Date"] > lookBack(days_back)]
         df = timed_data.groupby(["Group", "User"], as_index=False)[["Billable"]].sum()
-        df["Billable"].replace(0, numpy.nan, inplace=True)
+        df["Billable"].replace(0, np.nan, inplace=True)
         df.dropna(subset=["Billable"], inplace=True)
         return df
 
@@ -146,10 +146,10 @@ class TempoData:
         baskets.loc[baskets["Date"] > lookBack(90), "TimeBasket"] = "60-90 days ago"
         baskets.loc[baskets["Date"] > lookBack(60), "TimeBasket"] = "30-60 days ago"
         baskets.loc[baskets["Date"] > lookBack(30), "TimeBasket"] = "0-30 days ago"
-        baskets["TimeBasket"].replace("0", numpy.nan, inplace=True)
+        baskets["TimeBasket"].replace("0", np.nan, inplace=True)
         baskets.dropna(subset=["TimeBasket"], inplace=True)
         df = baskets.groupby(["Group", "User", "TimeBasket"], as_index=False)[["Income"]].sum()
-        df["Income"].replace(0, numpy.nan, inplace=True)
+        df["Income"].replace(0, np.nan, inplace=True)
         df.dropna(subset=["Income"], inplace=True)
         return df
 
@@ -265,9 +265,9 @@ class TempoData:
     def rawRatesTable(self) -> go:
         rate_data = self.data[self.data["Billable"] > 0]
         rate_data = rate_data.groupby(["Key", "Rate"], dropna=False, as_index=False).agg(
-            Hours=("Billable", numpy.sum), Users=("User", ", ".join)
+            Hours=("Billable", np.sum), Users=("User", ", ".join)
         )
-        rate_data["Rate"].replace(numpy.nan, "???", inplace=True)
+        rate_data["Rate"].replace(np.nan, "???", inplace=True)
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
         return rate_data
 
