@@ -37,7 +37,7 @@ class OKR(Notion):
         result_dict = self.fetch_data(self.database_id).json()
 
         data = pd.DataFrame(
-            columns=["title", "current_value", "target_value", "objective", "assignee", "period", "scope"]
+            columns=["title", "current_value", "target_value", "objective", "assignee", "period", "scope", "notes"]
         )
 
         for item in result_dict["results"]:
@@ -47,11 +47,14 @@ class OKR(Notion):
                     current_value = item["properties"]["Current Value"]["number"]
                     target_value = item["properties"]["Target Value"]["number"]
                     objective = item["properties"]["Objective"]["select"]["name"]
-                    assignee = sorted([person["name"] for person in item["properties"]["Assignee"]["people"]])
+                    noteslist = [i["plain_text"] for i in item["properties"]["Notes"]["rich_text"]]
+                    notes = " ".join(noteslist)
+                    assigneelist = sorted([person["name"] for person in item["properties"]["Assignee"]["people"]])
+                    assignee = ", ".join(assigneelist)
                     period = sorted([p["name"] for p in item["properties"]["Period"]["multi_select"]])
                     scope = item["properties"]["Scope"]["select"]["name"]
 
-                    data.loc[-1] = [title, current_value, target_value, objective, assignee, period, scope]
+                    data.loc[-1] = [title, current_value, target_value, objective, assignee, period, scope, notes]
                     data.index = data.index + 1
         self.data = data.sort_index()
         logging.debug(f"OKR data\n{self.data}")
@@ -102,7 +105,7 @@ class OKR(Notion):
                     columnwidth=[400, 400],
                     header=dict(values=list(initiatives.columns), fill_color="paleturquoise", align="left"),
                     cells=dict(
-                        values=[initiatives.title, initiatives.assignee],
+                        values=[initiatives.title, initiatives.assignee, initiatives.notes],
                         fill_color="lavender",
                         align="left",
                     ),
@@ -111,6 +114,6 @@ class OKR(Notion):
         )
         fig.update_layout(title=fig_title)
         if fnTableHeight:
-            fig.update_layout(height=fnTableHeight(initiatives))
+            fig.update_layout(height=fnTableHeight(initiatives, base_height=400))
 
         return fig
