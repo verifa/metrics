@@ -76,13 +76,13 @@ def normaliseTeamAverage(frame, last):
     return df_norm
 
 
-def tableHeight(table, base_height=228):
+def tableHeight(table, base_height=208):
     total_height = base_height
     for x in range(table.shape[0]):
         total_height += 20
-    for y in range(table.shape[1]):
-        if len(str(table.iloc[x][y])) > 30:
-            total_height += 17
+        for y in range(table.shape[1]):
+            if len(str(table.iloc[x][y])) > 30:
+                total_height += 12
     return total_height
 
 
