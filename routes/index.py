@@ -10,6 +10,7 @@ from dash import dcc, html
 
 from routes.date_utils import lookBack
 from routes.notion import OKR
+from routes.office_vibe import OfficeVibe
 from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
@@ -536,6 +537,20 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
     plots.append(okr_figs_ini[0])
     figure_tabs["start_page"] = (head, plots)
 
+# ----------------------
+# office vibe
+
+vibe = OfficeVibe("~/Downloads/OfficevibeQuestionReports_Verifa__EN_2022-10-28_11-57.csv")
+vibe.read_report()
+vibe.flip_data()
+
+figures = vibe.generate_figs()
+# Add tab
+figure_tabs["vibe_reports"] = (
+    "Office Vibe reports",
+    figures,
+)
+tab_children.append(dcc.Tab(label="Office Vibe", value="vibe_reports"))
 
 # =========================================================
 # Rendering
