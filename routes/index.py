@@ -276,6 +276,24 @@ def figureRollingEarnings(data):
         height=600,
     )
     figure_rolling_earnings.add_hline(y=1, fillcolor="indigo")
+    figure_rolling_earnings.add_vrect(
+        x0=max(df_team_rolling_total["Date"]) - pd.Timedelta(365, "D"),
+        x1=max(df_team_rolling_total["Date"]),
+        annotation_text="One Year",
+        annotation_position="top left",
+        fillcolor="green",
+        opacity=0.05,
+        line_width=0,
+    )
+    figure_rolling_earnings.add_vrect(
+        x0=max(df_team_rolling_total["Date"]) - pd.Timedelta(30, "D"),
+        x1=max(df_team_rolling_total["Date"]),
+        annotation_text="30 days",
+        annotation_position="top right",
+        fillcolor="darkgreen",
+        opacity=0.05,
+        line_width=0,
+    )
     figure_rolling_earnings.update_layout(
         title="Income normalized with cost",
         yaxis_title="Income / Cost",
