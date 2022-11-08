@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import sys
+from typing import Optional
 
 import pandas as pd
 import plotly.express as px
@@ -13,7 +14,7 @@ import requests
 class Notion:
     token: str
 
-    def __init__(self, token: str = None) -> None:
+    def __init__(self, token: Optional[str] = None) -> None:
         token = token or os.environ.get("NOTION_KEY")
         if token is None:
             sys.exit("Notion token not provided or NOTION_KEY not set")
