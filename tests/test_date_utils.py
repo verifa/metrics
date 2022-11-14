@@ -59,5 +59,46 @@ class TestLookAhead(unittest.TestCase):
         self.assertEqual(str(lookAhead(1, "2022-01-01").date()), "2022-01-02", "Should be 2022-01-02")
 
 
+class TestLeapYear(unittest.TestCase):
+    "tests for the leapYear() function"
+
+    def test_2010(self):
+        self.assertFalse(leapYear(2010))
+
+    def test_2015(self):
+        self.assertFalse(leapYear(2015))
+
+    def test_2020(self):
+        self.assertTrue(leapYear(2020))
+
+    def test_2021(self):
+        self.assertFalse(leapYear(2021))
+
+    def test_2022(self):
+        self.assertFalse(leapYear(2022))
+
+    def test_2023(self):
+        self.assertFalse(leapYear(2023))
+
+    def test_2024(self):
+        self.assertTrue(leapYear(2024))
+
+
+class TestLastMonthDay(unittest.TestCase):
+    "tests for lastMonthDay()"
+
+    def test_2022_01(self):
+        self.assertEqual(lastMonthDay("2022-01"), "2022-01-31", "Should be 2022-01-31")
+
+    def test_2022_02(self):
+        self.assertEqual(lastMonthDay("2022-02"), "2022-02-28", "Should be 2022-02-28")
+
+    def test_2024_02(self):
+        self.assertEqual(lastMonthDay("2024-02"), "2024-02-29", "Should be 2024-02-29")
+
+    def test_2022_04(self):
+        self.assertEqual(lastMonthDay("2022-04"), "2022-04-30", "Should be 2022-04-30")
+
+
 if __name__ == "__main__":
     unittest.main()

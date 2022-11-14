@@ -11,7 +11,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from tempoapiclient import client as Client
 
-from routes.date_utils import lookBack, weekdays
+from routes.date_utils import lookBack, splitMonthTable, weekdays
 
 
 class SupplementaryData:
@@ -32,6 +32,7 @@ class SupplementaryData:
         self.rates = pd.DataFrame()
         self.working_hours = pd.DataFrame()
         self.costs = pd.DataFrame()
+        self.raw_costs = pd.DataFrame()
         self.padding = pd.DataFrame()
 
     def load(self, users: pd.Series) -> None:
@@ -45,6 +46,8 @@ class SupplementaryData:
             logging.warning("Costs file path does not exist: " + self.costs_path)
         else:
             self.costs = pd.read_json(self.costs_path)
+            self.raw_costs = splitMonthTable(self.costs)
+            logging.debug(f"Raw costs\n{self.raw_costs}")
             self.costs.index.name = "Month"
             self.costs.index = self.costs["Month"]
             self.costs.index = self.costs.index.map(str)

@@ -6,6 +6,7 @@ from datetime import date
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
+import plotly.graph_objects as go
 from dash import dcc, html
 
 from routes.date_utils import lookBack
@@ -230,13 +231,27 @@ def figureRollingTotal(data):
     df_team_rolling_total_365 = df_team_rolling_total_365.merge(df_team_rolling_total_90, on=["Date"])
     df_team_rolling_total = df_team_rolling_total_365
 
+    df_raw_costs = supplementary_data.raw_costs
+
     figure_rolling_total = px.scatter(
         df_team_rolling_total,
         x="Date",
         y=["Income", "Income30", "Income90", "Income365"],
-        color_discrete_sequence=["#C8E6C9", "#81C784", "#388E3C", "#1B5E20"],
+        color_discrete_sequence=["#B6B6B6", "#81C784", "#388E3C", "#1B5E20"],
         height=600,
     )
+    if not df_raw_costs.empty:
+        figure_rolling_total.add_trace(
+            go.Scatter(
+                x=df_raw_costs["Month"],
+                y=df_raw_costs["Weekly"],
+                mode="lines",
+                line=go.scatter.Line(color="salmon"),
+                fill="tozeroy",
+                fillcolor="rgba(250,128,114,0.1)",
+                name="Costs",
+            )
+        )
     figure_rolling_total.update_layout(
         title="Rolling income (total)",
         yaxis_title="Income (euro)",
