@@ -223,21 +223,15 @@ def figureRollingTotal(data):
     df_team_time_rolling_30 = rollingAverage(df_user_time_rolling, "Income", 30)
     df_team_time_rolling_30.columns = ["Date", "Income30"]
     df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_user_time_rolling, on=["Date"])
-    df_team_rolling_total_90 = rollingAverage(df_user_time_rolling, "Income", 90)
-    df_team_rolling_total_90.columns = ["Date", "Income90"]
-    df_team_rolling_total_90 = df_team_rolling_total_90.merge(df_team_time_rolling_30, on=["Date"])
-    df_team_rolling_total_365 = rollingAverage(df_user_time_rolling, "Income", 365)
-    df_team_rolling_total_365.columns = ["Date", "Income365"]
-    df_team_rolling_total_365 = df_team_rolling_total_365.merge(df_team_rolling_total_90, on=["Date"])
-    df_team_rolling_total = df_team_rolling_total_365
+    df_team_rolling_total = df_team_time_rolling_30
 
     df_raw_costs = supplementary_data.raw_costs
 
     figure_rolling_total = px.scatter(
         df_team_rolling_total,
         x="Date",
-        y=["Income", "Income30", "Income90", "Income365"],
-        color_discrete_sequence=["#B6B6B6", "#81C784", "#388E3C", "#1B5E20"],
+        y=["Income", "Income30"],
+        color_discrete_sequence=["#B6B6B6", "#81C784"],
         height=600,
     )
     if not df_raw_costs.empty:
