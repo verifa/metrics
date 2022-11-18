@@ -34,6 +34,7 @@ class SupplementaryData:
         self.costs = pd.DataFrame()
         self.raw_costs = pd.DataFrame()
         self.padding = pd.DataFrame()
+        self.internal_keys = pd.DataFrame()
 
     def load(self, users: pd.Series) -> None:
         if not os.path.exists(self.working_hours_path):
@@ -244,18 +245,30 @@ class TempoData:
     def tableByUser(self, working_hours, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
         table_working_hours = self.byUser(working_hours).round(2)
         print(table_working_hours)
+        if not working_hours.empty:
+            cell_values = [
+                table_working_hours["User"],
+                table_working_hours["Delta"],
+                table_working_hours["Trend"],
+                table_working_hours["Last"],
+                table_working_hours["Last 7 days"],
+            ]
+        else:
+            cell_values = [
+                table_working_hours["User"],
+                table_working_hours["Time"],
+                table_working_hours["Billable"],
+                table_working_hours["First"],
+                table_working_hours["Last"],
+                table_working_hours["Days"],
+            ]
+
         fig = go.Figure(
             data=[
                 go.Table(
                     header=dict(values=list(table_working_hours.columns), fill_color=color_head, align="left"),
                     cells=dict(
-                        values=[
-                            table_working_hours["User"],
-                            table_working_hours["Delta"],
-                            table_working_hours["Trend"],
-                            table_working_hours["Last"],
-                            table_working_hours["Last 7 days"],
-                        ],
+                        values=cell_values,
                         fill_color=color_cells,
                         align="left",
                     ),
@@ -407,7 +420,8 @@ class TempoData:
         """
         Sets billable time to zero (0) for internal project keys
         """
-        for key in keys["Key"]:
-            logging.debug("Internal Key: " + key)
-            self.data.loc[self.data["Group"] == key, ("Billable")] = 0
-            self.data.loc[self.data["Group"] == key, ("Internal")] = self.data[self.data["Group"] == key]["Time"]
+        if not keys.empty:
+            for key in keys["Key"]:
+                logging.debug("Internal Key: " + key)
+                self.data.loc[self.data["Group"] == key, ("Billable")] = 0
+                self.data.loc[self.data["Group"] == key, ("Internal")] = self.data[self.data["Group"] == key]["Time"]

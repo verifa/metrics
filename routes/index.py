@@ -109,9 +109,6 @@ if not supplementary_data.working_hours.empty:
     data.padTheData(supplementary_data.working_hours)
 
 
-data.padTheData(supplementary_data.working_hours)
-
-
 # =========================================================
 # Table: User working hours
 # =========================================================
@@ -481,15 +478,13 @@ tab_children = [
     dcc.Tab(label="Projects", value="projects"),
 ]
 
+main_list = [table_working_hours]
+if not supplementary_data.rates.empty:
+    main_list.append(table_missing_rates)
+main_list.append(figure_eggbaskets)
+
 figure_tabs = {
-    "start_page": (
-        "Main",
-        [
-            table_working_hours,
-            table_missing_rates,
-            figure_eggbaskets,
-        ],
-    ),
+    "start_page": ("Main", main_list),
     "billable": ("Billable work", [figure_billable_this_year, figure_billable_last_year]),
     "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
     "popular_projects": ("Popular projects", [figure_popular_projects_this_year, figure_popular_projects_last_year]),
