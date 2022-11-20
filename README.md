@@ -80,14 +80,100 @@ Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID
 
 The labels used in Notion.
 
-### Configuration files
+## Configuration files
 
-#### Working hours JSON file
+Metrics is expecting a simple layout for the optional configuration files. A folder structure found in `/tempo`or, if set, in ${TEMPO_CONFIG_PATH}.
 
-a simple json file with username and expected daily hours of work.
+```bash
+.
+├── costs
+│   └── data.json
+├── rates
+│   └── data.json
+└── workinghours
+    ├── data.json
+```
+### Working hours
+
+a data.json file with with at least one entry for each user in the workinghours folder.
+- username, needs to match name in tempo
+- expected daily hours of work.
+- delta, used as an offset when calculating the delta between expected working hours and actual working hours
+- start date, "*" assumes the first entry in tempo is the start date, or a date in YYYY-MM-DD format
+- stop date, the last date for a user or "*" for users still reporting time in tempo
+
 ```json
 [
-    {"User" : "Bob Builder", "Daily" : 8 },
+    {
+        "User":  "Bob Builder",
+        "Daily": 8,
+        "Delta": 0,
+        "Start": "*",
+        "Stop":  "*"
+    },
     ...
 ]
 ```
+
+### rates
+
+The rates file contains 4 lists
+- *Default* is a list with project issue keys, rate and currency
+- *Exceptions* is a list of with exceptions if different users have a different rate for the same issue key
+- *Internal* is a list of tempo project is considered internal, even if they are set to billable in tempo
+- *Currency* is a list of exchange rates, € is the currency used in the metrics, so for other currencies a simple conversion is used
+
+```json
+{
+  "Default": [
+    {
+      "Key": "CUS-1",
+      "Rate": "100",
+      "Currency": "EUR"
+    },
+    .....
+    {
+      "Key": "AB-1",
+      "Rate": "1000",
+      "Currency": "SEK"
+    },
+  ],
+  "Exceptions": [
+    {
+      "Key": "CUS-1",
+      "Rate": "125",
+      "User": "Alice Architect"
+    },
+    ...
+  ],
+  "Internal": [
+    {
+      "Key": "US"
+    },
+    ...
+  ],
+  "Currency": [
+    {
+      "SEK2EUR": "0.1"
+    }
+  ]
+}
+
+### costs
+
+For costs a flat list with the costs, in €, for the month is added once the books are closed for the month
+
+```json
+[
+  {
+    "Month": "2021-01",
+    "Cost": "12345"
+  },
+  {
+    "Month": "2021-02",
+    "Cost": "12346"
+  },
+  ....
+]
+
+Naturally estimates can be added for current and future months
