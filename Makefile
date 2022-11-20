@@ -103,6 +103,8 @@ dev: install lint tests
 ## run:
 ##	uses $(DOCKER) to run the metrics-dashboard image in a local container
 ##
+##  if $(TEMPO_CONFIG_PATH) is set, this is mounted as /tempo in the container
+##
 ##	depends on build:
 ##	uses $(DOCKER), $(TEMPO_KEY), $(IMAGE) and $(TAG)
 ##
@@ -116,6 +118,16 @@ endif
 run: build
 	$(info Additional docker mounts: $(vmounts))
 	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} $(vmounts) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+
+## bare:
+##	uses $(DOCKER) to run the metrics-dashboard image in a local container
+##  without any optional config files
+##
+##	depends on build:
+##	uses $(DOCKER), $(TEMPO_KEY), $(IMAGE) and $(TAG)
+##
+bare: build
+	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
 
 ## build:
 ##	builds the metrics-dashboard image

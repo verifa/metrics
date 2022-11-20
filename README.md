@@ -25,6 +25,23 @@ make run
 # Browse http://localhost:8000
 ```
 
+the run target uses the environment variable TEMPO_CONFIG_PATH, described below, as a mount point if set
+
+```Makefile
+ifneq ($(TEMPO_CONFIG_PATH),)
+  vmounts=-v $(TEMPO_CONFIG_PATH):/tempo
+else
+  vmounts=
+endif
+```
+
+To run a container that ignores the optional environment variable
+
+```bash
+make bare
+# Browse http://localhost:8000
+```
+
 *Note:* To use `podman`, you can set the `DOCKER` variable to `podman`, e.g. `make DOCKER=podman dev`
 
 For more details about the different make target
