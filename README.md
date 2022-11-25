@@ -1,7 +1,5 @@
 # Verifa Metrics Dashboard
 
-TODO: basically everything...
-
 ## Development
 
 This project uses [python-poetry](https://python-poetry.org/) to manage dependencies.
@@ -93,7 +91,7 @@ Metrics is expecting a simple layout for the optional configuration files. A fol
 └── workinghours
     ├── data.json
 ```
-### Working hours
+### working hours
 
 a data.json file with with at least one entry for each user in the workinghours folder.
 - username, needs to match name in tempo
@@ -158,6 +156,7 @@ The rates file contains 4 lists
     }
   ]
 }
+```
 
 ### costs
 
@@ -175,5 +174,7 @@ For costs a flat list with the costs, in €, for the month is added once the bo
   },
   ....
 ]
+
+```
 
 Naturally estimates can be added for current and future months
