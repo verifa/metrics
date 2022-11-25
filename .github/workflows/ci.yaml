@@ -9,8 +9,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.10.2
       - name: Install lint dependencies
@@ -21,8 +21,8 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.10.2
       - name: Run image
@@ -58,3 +58,20 @@ jobs:
       - name: deploy
         if: github.ref == 'refs/heads/main'
         run: make deploy
+
+  mkdocs:
+    needs: [ci]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build
+        run: mkdocs build
+      - name: Publish
+        if: github.ref == 'refs/heads/main'
+        run: mkdocs gh-deploy --force

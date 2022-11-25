@@ -1,0 +1,52 @@
+site_name: Metrics for time logging
+site_url: https://metrics.verifa.io
+site_description: >-
+  A way to display metrics from your time logging system
+
+# Repository
+repo_name: verifa/metrics
+repo_url: https://github.com/verifa/metrics
+
+# Copyright
+copyright: Copyright &copy; 2022 Verifa
+
+# Theme
+theme:
+  name: material
+
+  font:
+    text: Outfit
+  features:
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - content.code.annotate
+    - toc.follow
+
+# Plugins
+plugins:
+  - awesome-pages
+  - search
+  - tags
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/verifa
+
+extra_css:
+  - stylesheets/theme.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences
+  - meta
+  - toc:
+      permalink: true
