@@ -251,6 +251,72 @@ def figureRollingTotal(data):
 
 
 # =========================================================
+# Figure: Financial plots
+# =========================================================
+
+
+def figureFinancialTotal(data):
+    figure_rolling_total = px.scatter(height=600)
+    monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["In"] != 0]
+
+    figure_rolling_total.add_trace(
+        go.Scatter(
+            x=monthly_result["Month"],
+            y=monthly_result["In"],
+            mode="lines",
+            line=go.scatter.Line(color="#0F5567"),
+            fill="tozeroy",
+            fillcolor="rgba(15,85,103,0.1)",
+            name="Income",
+        )
+    )
+    figure_rolling_total.add_trace(
+        go.Scatter(
+            x=monthly_result["Month"],
+            y=-monthly_result["Cost"],
+            mode="lines",
+            line=go.scatter.Line(color="#F0AA98"),
+            fill="tozeroy",
+            fillcolor="rgba(240,170,152,0.1)",
+            name="Costs",
+        )
+    )
+    figure_rolling_total.add_trace(
+        go.Scatter(
+            x=monthly_result["Month"],
+            y=monthly_result["In"] - monthly_result["Cost"],
+            mode="lines",
+            line=go.scatter.Line(color="#C4C4C4"),
+            fill="tozeroy",
+            fillcolor="rgba(196,196,196,0.5)",
+            name="Result",
+        )
+    )
+
+    monthly_result = monthly_result[monthly_result["Month"].dt.day == 1]
+    monthly_result["Month"] = monthly_result["Month"] + pd.Timedelta("14 days")
+    monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["Cost"].sum()
+    monthly_sum_in = monthly_result.rolling(12, min_periods=1)["In"].sum()
+    monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
+    logging.info(monthly_result)
+
+    figure_rolling_total.add_trace(
+        go.Scatter(
+            x=monthly_result["Month"],
+            y=monthly_result["Result"],
+            mode="lines",
+            line=go.scatter.Line(color="black"),
+            name="Cumulative sum 1 year",
+        )
+    )
+    figure_rolling_total.update_layout(
+        title="Financials (real data)",
+        yaxis_title="€ (euro)",
+    )
+    return figure_rolling_total
+
+
+# =========================================================
 # Figure: Rolling Income vs. Cost
 # =========================================================
 
@@ -496,6 +562,16 @@ figure_tabs = {
 # Dynamic addition of content
 # =========================================================
 
+
+# ---------------------------------------------------------
+# Financial data
+# Requires income and costs in config files
+if "In" in supplementary_data.costs:
+    figure = figureFinancialTotal(data)
+
+    # Add tabs
+    figure_tabs["finance"] = ("Finance", [figure])
+    tab_children.append(dcc.Tab(label="Finance", value="finance"))
 
 # ---------------------------------------------------------
 # Project rates
