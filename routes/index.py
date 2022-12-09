@@ -304,7 +304,7 @@ def figureFinancialTotal(data):
         go.Scatter(
             x=monthly_result["Month"],
             y=monthly_result["Result"],
-            mode="lines",
+            mode="lines+markers",
             line=go.scatter.Line(color="black"),
             name="Cumulative sum 1 year",
         )
