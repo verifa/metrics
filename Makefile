@@ -9,6 +9,7 @@ PIP := pip3
 
 # Static
 CLOUDRUN_SERVICE=metrics-dashboard
+MAKEFLAGS += -j2
 
 ##
 ## 		Makefile targets
