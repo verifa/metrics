@@ -1,6 +1,7 @@
 """Google sheets related functions and classes"""
 
 import logging
+import os
 
 import pandas as pd
 from google.oauth2 import service_account
@@ -62,3 +63,22 @@ class GoogleSheets:
             logging.error(err)
             return []
         return pd.DataFrame(values)
+
+
+def main():
+    sheet = GoogleSheets(
+        credentials_path=os.environ.get("METRICS_GSHEET_CREDS"),
+        spreadsheet_id=os.environ.get("METRICS_GSHEET_SHEET_ID"),
+    )
+
+    range = sheet.get_range("Costs!A1:B5")
+    print(range)
+
+    all_dataframes = sheet.get_all()
+    for dataframe in all_dataframes:
+        print("----")
+        print(dataframe)
+
+
+if __name__ == "__main__":
+    main()
