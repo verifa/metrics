@@ -62,6 +62,8 @@ class SupplementaryData:
             daily = daily.resample("D").ffill().rename("days_in_month")
             self.costs = self.costs.join(daily)
             self.costs["Cost"] = self.costs["Cost"] / self.costs["days_in_month"]
+            if "In" in self.costs:
+                self.costs["In"] = self.costs["In"] / self.costs["days_in_month"]
             self.costs["Date"] = self.costs.index
             self.costs = self.costs.drop("days_in_month", axis=1)
             self.costs = self.costs.drop("Month", axis=1)
