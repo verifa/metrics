@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from dash import dcc, html
 
 from routes.date_utils import lookBack
-from routes.notion import OKR
+from routes.notion import OKR, Financials
 from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
@@ -32,6 +32,7 @@ else:
 
 NOTION_KEY = os.environ.get("NOTION_KEY", "")
 NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
+NOTION_FINANCIAL_DATABASE_ID = os.environ.get("NOTION_FINANCIAL_DATABASE_ID", "")
 NOTION_OKR_LABELS = [["2022", "Q4"], ["2022"]]
 
 COLOR_HEAD = "#ad9ce3"
@@ -91,11 +92,19 @@ def tableHeight(table, base_height=208):
 # Fetch data
 # =========================================================
 
+# ---------------------------------------------------------
+# OKR data from NOTION
+if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
+    financials = Financials(NOTION_KEY, NOTION_FINANCIAL_DATABASE_ID)
+    financials.get_financials()
+    financials_df = financials.data
+else:
+    financials_df = pd.DataFrame()
 
 data = TempoData()
 data.load(from_date=START_DATE, to_date=YESTERDAY)
 
-supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH)
+supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH, financials_df)
 supplementary_data.load(data.getUsers())
 
 data.zeroOutBillableTime(supplementary_data.internal_keys)
@@ -257,12 +266,12 @@ def figureRollingTotal(data):
 
 def figureFinancialTotal(data):
     figure_rolling_total = px.scatter(height=600)
-    monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["In"] != 0]
+    monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]
 
     figure_rolling_total.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
-            y=monthly_result["In"],
+            y=monthly_result["Real_income"],
             mode="lines",
             line=go.scatter.Line(color="#0F5567"),
             fill="tozeroy",
@@ -284,7 +293,7 @@ def figureFinancialTotal(data):
     figure_rolling_total.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
-            y=monthly_result["In"] - monthly_result["Cost"],
+            y=monthly_result["Real_income"] - monthly_result["Cost"],
             mode="lines",
             line=go.scatter.Line(color="#C4C4C4"),
             fill="tozeroy",
@@ -296,7 +305,7 @@ def figureFinancialTotal(data):
     monthly_result = monthly_result[monthly_result["Month"].dt.day == 1]
     monthly_result["Month"] = monthly_result["Month"] + pd.Timedelta("14 days")
     monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["Cost"].sum()
-    monthly_sum_in = monthly_result.rolling(12, min_periods=1)["In"].sum()
+    monthly_sum_in = monthly_result.rolling(12, min_periods=1)["Real_income"].sum()
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
     logging.info(monthly_result)
 
@@ -566,7 +575,7 @@ figure_tabs = {
 # ---------------------------------------------------------
 # Financial data
 # Requires income and costs in config files
-if "In" in supplementary_data.costs:
+if "Real_income" in supplementary_data.costs:
     figure = figureFinancialTotal(data)
 
     # Add tabs
