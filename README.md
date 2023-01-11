@@ -78,14 +78,25 @@ Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID
 
 The labels used in Notion.
 
+### NOTION_FINANCIAL_DATABASE_ID (optional)
+Requires: NOTION_KEY
+
+Like the example of NOTION_OKR_DATABASE, a database ID from notion is needed.
+
+The database should include the column names `Month`, `cost`, and `income`, example:
+
+|  Month  | cost | income |
+|---------|------|--------|
+| 2022-10 | 9001 | 1337   |
+| 2022-11 | 8080 | 13337  |
+| 2022-12 | 7001 | 13338  |
+
 ## Configuration files
 
-Metrics is expecting a simple layout for the optional configuration files. A folder structure found in `/tempo`or, if set, in ${TEMPO_CONFIG_PATH}.
+Metrics is expecting a simple layout for the optional configuration files. A folder structure found in `/tempo` or, if set, in ${TEMPO_CONFIG_PATH}.
 
 ```bash
 .
-├── costs
-│   └── data.json
 ├── rates
 │   └── data.json
 └── workinghours
@@ -158,23 +169,3 @@ The rates file contains 4 lists
 }
 ```
 
-### costs
-
-For costs a flat list with the costs, in €, for the month is added once the books are closed for the month
-
-```json
-[
-  {
-    "Month": "2021-01",
-    "Cost": "12345"
-  },
-  {
-    "Month": "2021-02",
-    "Cost": "12346"
-  },
-  ....
-]
-
-```
-
-Naturally estimates can be added for current and future months

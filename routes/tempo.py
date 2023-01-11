@@ -24,17 +24,18 @@ class SupplementaryData:
     costs_path: str
     costs: pd.DataFrame
     internal_keys: pd.DataFrame
+    financials: pd.DataFrame
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config_path: str, financials: pd.DataFrame) -> None:
         self.working_hours_path = config_path + "/workinghours/data.json"
         self.rates_path = config_path + "/rates/data.json"
-        self.costs_path = config_path + "/costs/data.json"
         self.rates = pd.DataFrame()
         self.working_hours = pd.DataFrame()
         self.costs = pd.DataFrame()
         self.raw_costs = pd.DataFrame()
         self.padding = pd.DataFrame()
         self.internal_keys = pd.DataFrame()
+        self.financials = financials
 
     def load(self, users: pd.Series) -> None:
         if not os.path.exists(self.working_hours_path):
@@ -43,10 +44,10 @@ class SupplementaryData:
             self.working_hours = pd.read_json(self.working_hours_path)
             logging.info("Loaded " + self.working_hours_path)
 
-        if not os.path.exists(self.costs_path):
+        if self.financials.empty:
             logging.warning("Costs file path does not exist: " + self.costs_path)
         else:
-            self.costs = pd.read_json(self.costs_path)
+            self.costs = self.financials
             self.raw_costs = splitMonthTable(self.costs)
             logging.debug(f"Raw costs\n{self.raw_costs}")
             self.costs.index.name = "Month"
@@ -62,12 +63,12 @@ class SupplementaryData:
             daily = daily.resample("D").ffill().rename("days_in_month")
             self.costs = self.costs.join(daily)
             self.costs["Cost"] = self.costs["Cost"] / self.costs["days_in_month"]
-            if "In" in self.costs:
-                self.costs["In"] = self.costs["In"] / self.costs["days_in_month"]
+            if "Real_income" in self.costs:
+                self.costs["Real_income"] = self.costs["Real_income"] / self.costs["days_in_month"]
             self.costs["Date"] = self.costs.index
             self.costs = self.costs.drop("days_in_month", axis=1)
             self.costs = self.costs.drop("Month", axis=1)
-            logging.info("Loaded " + self.costs_path)
+            logging.info("Loaded financials")
 
         if not os.path.exists(self.rates_path):
             logging.warning("Rates file path does not exist: " + self.rates_path)
@@ -246,7 +247,6 @@ class TempoData:
 
     def tableByUser(self, working_hours, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
         table_working_hours = self.byUser(working_hours).round(2)
-        print(table_working_hours)
         if not working_hours.empty:
             cell_values = [
                 table_working_hours["User"],
