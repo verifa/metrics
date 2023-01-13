@@ -21,7 +21,6 @@ class SupplementaryData:
     rates: pd.DataFrame
     working_hours_path: str
     working_hours: pd.DataFrame
-    costs_path: str
     costs: pd.DataFrame
     internal_keys: pd.DataFrame
     financials: pd.DataFrame
@@ -45,7 +44,7 @@ class SupplementaryData:
             logging.info("Loaded " + self.working_hours_path)
 
         if self.financials.empty:
-            logging.warning("Costs file path does not exist: " + self.costs_path)
+            logging.warning("Notion financial table does not exist")
         else:
             self.costs = self.financials
             self.raw_costs = splitMonthTable(self.costs)
