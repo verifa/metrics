@@ -50,46 +50,15 @@ make help
 
 ## Runtime environment
 
-### TEMPO_KEY (required)
-
-To read data from tempo, the API key to use is expected as the TEMPO_KEY environment variable.
-
-### TEMPO_CONFIG_PATH (optional)
-
-To be able to add secret configurations there is a default config path `/tempo` where secrets can be mounted as files.
-
-For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides the default value for config files.
-
-### TEMPO_LOG_LEVEL (optional)
-
-Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]`
-
-### NOTION_KEY (optional)
-
-Notion API key.
-
-### NOTION_OKR_DATABASE_ID (optional)
-Requires: NOTION_KEY
-
-The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link.
-
-### NOTION_OKR_LABELS (optional)
-Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID
-
-The labels used in Notion.
-
-### NOTION_FINANCIAL_DATABASE_ID (optional)
-Requires: NOTION_KEY
-
-Like the example of NOTION_OKR_DATABASE, a database ID from notion is needed.
-
-The database should include the column names `Month`, `cost`, and `income`, example:
-
-|  Month  | cost | income |
-|---------|------|--------|
-| 2022-10 | 9001 | 1337   |
-| 2022-11 | 8080 | 13337  |
-| 2022-12 | 7001 | 13338  |
+| Key | Notes |
+|-----|-------|
+| **TEMPO_KEY**<br/>(required) | To read data from tempo, the API key to use is expected as the *TEMPO_KEY* environment variable. |
+| **TEMPO_CONFIG_PATH**<br/>(optional) | To be able to add secret configurations there is a default config path `/tempo` where secrets can be mounted as files. For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides the default value for config files. |
+| **TEMPO_LOG_LEVEL**<br/>(optional) | Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]` |
+| **NOTION_KEY**<br/>(optional) | Notion API key. |
+| **NOTION_OKR_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link. |
+| **NOTION_OKR_LABELS**<br/>(optional) | *Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID*<br/>The labels used in Notion. |
+| **NOTION_FINANCIAL_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Month`, `cost`, and `income`. |
 
 ## Configuration files
 
