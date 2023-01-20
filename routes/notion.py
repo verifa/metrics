@@ -13,12 +13,14 @@ import requests
 
 class Notion:
     token: str
+    database_id: str
 
-    def __init__(self, token: Optional[str] = None) -> None:
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
         token = token or os.environ.get("NOTION_KEY")
         if token is None:
             sys.exit("Notion token not provided or NOTION_KEY not set")
         self.token = token
+        self.database_id = database_id
 
     def fetch_data(self, database_id) -> requests.Response:
         url = f"https://api.notion.com/v1/databases/{database_id}/query"
@@ -26,13 +28,34 @@ class Notion:
         return response
 
 
-class Financials(Notion):
-    database_id: str
+class WorkingHours(Notion):
     data: pd.DataFrame
 
-    def __init__(self, token: str = "", database_id: str = "") -> None:
-        super().__init__(token)
-        self.database_id = database_id
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
+        super().__init__(token, database_id)
+
+    def get_workinghours(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        data = pd.DataFrame(columns=["User", "Daily", "Delta", "Start", "Stop"])
+
+        for item in result_dict["results"]:
+            user = item["properties"]["User"]["title"][0]["plain_text"]
+            daily = item["properties"]["Daily"]["number"]
+            delta = item["properties"]["Delta"]["number"]
+            start = item["properties"]["Start"]["rich_text"][0]["plain_text"]
+            stop = item["properties"]["Stop"]["rich_text"][0]["plain_text"]
+
+            data.loc[-1] = [user, daily, delta, start, stop]
+            data.index = data.index + 1
+
+        self.data = data.sort_values(by=["User"])
+
+
+class Financials(Notion):
+    data: pd.DataFrame
+
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
+        super().__init__(token, database_id)
 
     def get_financials(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
@@ -68,12 +91,10 @@ class Financials(Notion):
 
 
 class OKR(Notion):
-    database_id: str
     data: pd.DataFrame
 
-    def __init__(self, token: str = "", database_id: str = "") -> None:
-        super().__init__(token)
-        self.database_id = database_id
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
+        super().__init__(token, database_id)
 
     def get_okr(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()

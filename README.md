@@ -59,6 +59,7 @@ make help
 | **NOTION_OKR_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link. |
 | **NOTION_OKR_LABELS**<br/>(optional) | *Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID*<br/>The labels used in Notion. |
 | **NOTION_FINANCIAL_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Month`, `cost`, and `income`. |
+| **NOTION_WORKINGHOURS_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `User`, `Daily`, `Delta`, `Start`, and `Stop`. |
 
 ## Configuration files
 
@@ -66,31 +67,8 @@ Metrics is expecting a simple layout for the optional configuration files. A fol
 
 ```bash
 .
-├── rates
-│   └── data.json
-└── workinghours
-    ├── data.json
-```
-### working hours
-
-a data.json file with with at least one entry for each user in the workinghours folder.
-- username, needs to match name in tempo
-- expected daily hours of work.
-- delta, used as an offset when calculating the delta between expected working hours and actual working hours
-- start date, "*" assumes the first entry in tempo is the start date, or a date in YYYY-MM-DD format
-- stop date, the last date for a user or "*" for users still reporting time in tempo
-
-```json
-[
-    {
-        "User":  "Bob Builder",
-        "Daily": 8,
-        "Delta": 0,
-        "Start": "*",
-        "Stop":  "*"
-    },
-    ...
-]
+└── rates
+    └── data.json
 ```
 
 ### rates
