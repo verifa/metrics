@@ -19,17 +19,15 @@ class SupplementaryData:
 
     rates_path: str
     rates: pd.DataFrame
-    working_hours_path: str
     working_hours: pd.DataFrame
     costs: pd.DataFrame
     internal_keys: pd.DataFrame
     financials: pd.DataFrame
 
-    def __init__(self, config_path: str, financials: pd.DataFrame) -> None:
-        self.working_hours_path = config_path + "/workinghours/data.json"
+    def __init__(self, config_path: str, financials: pd.DataFrame, working_hours: pd.DataFrame) -> None:
         self.rates_path = config_path + "/rates/data.json"
         self.rates = pd.DataFrame()
-        self.working_hours = pd.DataFrame()
+        self.working_hours = working_hours
         self.costs = pd.DataFrame()
         self.raw_costs = pd.DataFrame()
         self.padding = pd.DataFrame()
@@ -37,11 +35,8 @@ class SupplementaryData:
         self.financials = financials
 
     def load(self, users: pd.Series) -> None:
-        if not os.path.exists(self.working_hours_path):
-            logging.warning("Working hours file path does not exist: " + self.working_hours_path)
-        else:
-            self.working_hours = pd.read_json(self.working_hours_path)
-            logging.info("Loaded " + self.working_hours_path)
+        if self.working_hours.empty:
+            logging.info("Notion working hours table does not exist")
 
         if self.financials.empty:
             logging.warning("Notion financial table does not exist")

@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from dash import dcc, html
 
 from routes.date_utils import lookBack
-from routes.notion import OKR, Financials
+from routes.notion import OKR, Financials, WorkingHours
 from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
@@ -33,6 +33,7 @@ else:
 NOTION_KEY = os.environ.get("NOTION_KEY", "")
 NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
 NOTION_FINANCIAL_DATABASE_ID = os.environ.get("NOTION_FINANCIAL_DATABASE_ID", "")
+NOTION_WORKINGHOURS_DATABASE_ID = os.environ.get("NOTION_WORKINGHOURS_DATABASE_ID", "")
 NOTION_OKR_LABELS = [["2022", "Q4"], ["2022"]]
 
 COLOR_HEAD = "#ad9ce3"
@@ -93,7 +94,7 @@ def tableHeight(table, base_height=208):
 # =========================================================
 
 # ---------------------------------------------------------
-# OKR data from NOTION
+# Data from NOTION
 if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
     financials = Financials(NOTION_KEY, NOTION_FINANCIAL_DATABASE_ID)
     financials.get_financials()
@@ -101,10 +102,17 @@ if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
 else:
     financials_df = pd.DataFrame()
 
+if NOTION_KEY and NOTION_WORKINGHOURS_DATABASE_ID:
+    working_hours = WorkingHours(NOTION_KEY, NOTION_WORKINGHOURS_DATABASE_ID)
+    working_hours.get_workinghours()
+    working_hours_df = working_hours.data
+else:
+    working_hours_df = pd.DataFrame()
+
 data = TempoData()
 data.load(from_date=START_DATE, to_date=YESTERDAY)
 
-supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH, financials_df)
+supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df)
 supplementary_data.load(data.getUsers())
 
 data.zeroOutBillableTime(supplementary_data.internal_keys)
