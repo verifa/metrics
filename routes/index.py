@@ -272,9 +272,10 @@ def figureRollingTotal(data):
 # =========================================================
 
 
-def figureFinancialTotal(data):
+def figureFinancialTotal(year=None):
     figure_rolling_total = px.scatter(height=600)
     monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]
+    monthly_result = monthly_result[monthly_result["Year"] == str(year)]
 
     figure_rolling_total.add_trace(
         go.Scatter(
@@ -327,7 +328,7 @@ def figureFinancialTotal(data):
         )
     )
     figure_rolling_total.update_layout(
-        title="Financials (real data)",
+        title=f"Financials ({year})",
         yaxis_title="€ (euro)",
     )
     return figure_rolling_total
@@ -584,10 +585,13 @@ figure_tabs = {
 # Financial data
 # Requires income and costs in config files
 if "Real_income" in supplementary_data.costs:
-    figure = figureFinancialTotal(data)
+
+    max_year = int(supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]["Year"].max())
+
+    figures = [figureFinancialTotal(year) for year in range(START_DATE.year, max_year + 1)]
 
     # Add tabs
-    figure_tabs["finance"] = ("Finance", [figure])
+    figure_tabs["finance"] = ("Finance", figures[::-1])
     tab_children.append(dcc.Tab(label="Finance", value="finance"))
 
 # ---------------------------------------------------------
