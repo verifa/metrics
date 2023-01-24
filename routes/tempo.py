@@ -132,6 +132,10 @@ class TempoData:
         """returns aggregated time and billable time grouped by date, user and group"""
         return self.data.groupby(["Date", "User", "Group"], as_index=False)[["Time", "Billable"]].sum()
 
+    def byTimeType(self) -> pd.DataFrame:
+        """returns aggregated time and time type grouped by date, user and group"""
+        return self.data.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
+
     def byTotalGroup(self, days_back) -> pd.DataFrame:
         """returns aggregated billable time grouped by issue key group and user"""
         timed_data = self.data[self.data["Date"] > lookBack(days_back)]

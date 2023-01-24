@@ -346,6 +346,31 @@ def figureFinancialTotal(year=None):
 
 
 # =========================================================
+# Figure: Spent time on; billable/verifriday/other
+# =========================================================
+
+
+def figureSpentTimePercentage(data):
+    data.data["Timetype"] = pd.isna(data.data["Rate"])
+    data.data["Timetype"] = ["Billable" if not (x) else "Non-billable" for x in data.data["Timetype"]]
+    data.data["Timetype"] = [
+        "VeriFriday" if x == "VF" else data.data["Timetype"][idx + 1] for idx, x in enumerate(data.data["Group"])
+    ]
+
+    df_by_group = data.byTimeType().sort_values("Group")
+    figure_projects_team = px.histogram(
+        df_by_group[df_by_group["Date"] > ROLLING_DATE],
+        x="Date",
+        y="Time",
+        color="Timetype",
+        height=400,
+        barnorm="percent",
+    )
+    figure_projects_team.update_layout(bargap=0.1)
+    return figure_projects_team
+
+
+# =========================================================
 # Figure: Rolling Income vs. Cost
 # =========================================================
 
@@ -595,7 +620,10 @@ figure_tabs = {"start_page": ("Main", main_list)}
 
 if SHOWTAB_PROJECTS:
     tab_children.append(dcc.Tab(label="Time spent on...", value="projects"))
-    figure_tabs["projects"] = ("What we work on", figureProjects(data))
+    figures_project = figureProjects(data)
+    figure_time_spent = figureSpentTimePercentage(data)
+    figures_project.insert(0, figure_time_spent)
+    figure_tabs["projects"] = ("What we work on", figures_project)
 if SHOWTAB_BILLABLE:
     tab_children.append(dcc.Tab(label="Billable", value="billable"))
     figure_tabs["billable"] = ("Billable work", figureBillable(data))
