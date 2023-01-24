@@ -46,4 +46,5 @@ def splitMonthTable(df: pd.DataFrame) -> pd.DataFrame:
     result["Weekly"] = result["Cost"] * 12 / 52
     if "Real_income" in result:
         result["WeeklyIn"] = result["Real_income"] * 12 / 52
+    result["Year"] = result["Month"].dt.strftime("%Y")
     return result.sort_values(by=["Month"])
