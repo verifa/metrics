@@ -40,6 +40,17 @@ COLOR_HEAD = "#ad9ce3"
 COLOR_ONE = "#ccecef"
 COLOR_TWO = "#fc9cac"
 
+# Configure tabs to show in the UI
+SHOWTAB_BILLABLE = False
+SHOWTAB_INTERNAL = False
+SHOWTAB_POPULAR_PROJECTS = False
+SHOWTAB_PROJECTS = True
+SHOWTAB_FINANCE = True
+SHOWTAB_RATES = False
+SHOWTAB_ROLLING_INCOME = True
+SHOWTAB_NORMALISED_WORKTIME = True
+SHOWTAB_OKR_FIG = False
+
 # =========================================================
 # Helpers
 # =========================================================
@@ -312,7 +323,7 @@ def figureFinancialTotal(year=None):
     )
 
     monthly_result = monthly_result[monthly_result["Month"].dt.day == 1]
-    monthly_result["Month"] = monthly_result["Month"] + pd.Timedelta("14 days")
+    monthly_result["Month"] = monthly_result["Month"] + pd.DateOffset(months=1) - pd.Timedelta("1 day")
     monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["Cost"].sum()
     monthly_sum_in = monthly_result.rolling(12, min_periods=1)["Real_income"].sum()
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
@@ -328,8 +339,8 @@ def figureFinancialTotal(year=None):
         )
     )
     figure_rolling_total.update_layout(
-        title=f"Financials ({year})",
-        yaxis_title="€ (euro)",
+        title=f"Financial numbers for {year}",
+        yaxis_title="Income/Cost/Result (euro)",
     )
     return figure_rolling_total
 
@@ -402,33 +413,30 @@ def figureRollingEarnings(data):
 
 
 # =========================================================
-# Figure: Projects (individual)
+# Figure: Projects
 # =========================================================
 
 
-df_by_group = data.byGroup().sort_values("Group")
-figure_projects_individual = px.histogram(
-    df_by_group[df_by_group["Date"] > ROLLING_DATE],
-    x="Date",
-    y="Time",
-    color="Group",
-    facet_col="User",
-    facet_col_wrap=3,
-    height=800,
-)
-figure_projects_individual.update_layout(bargap=0.1)
+def figureProjects(data):
+    df_by_group = data.byGroup().sort_values("Group")
+    figure_projects_individual = px.histogram(
+        df_by_group[df_by_group["Date"] > ROLLING_DATE],
+        x="Date",
+        y="Time",
+        color="Group",
+        facet_col="User",
+        facet_col_wrap=3,
+        height=800,
+    )
+    figure_projects_individual.update_layout(bargap=0.1)
 
+    df_by_group = data.byGroup().sort_values("Group")
+    figure_projects_team = px.histogram(
+        df_by_group[df_by_group["Date"] > ROLLING_DATE], x="Date", y="Time", color="Group", height=600
+    )
+    figure_projects_team.update_layout(bargap=0.1)
 
-# =========================================================
-# Figure: Projects (team)
-# =========================================================
-
-
-df_by_group = data.byGroup().sort_values("Group")
-figure_projects_team = px.histogram(
-    df_by_group[df_by_group["Date"] > ROLLING_DATE], x="Date", y="Time", color="Group", height=600
-)
-figure_projects_team.update_layout(bargap=0.1)
+    return [figure_projects_team, figure_projects_individual]
 
 
 # =========================================================
@@ -436,31 +444,34 @@ figure_projects_team.update_layout(bargap=0.1)
 # =========================================================
 
 
-# a figure for this year
-figure_billable_this_year = px.histogram(
-    data.thisYear().sort_values("Key"),
-    x="User",
-    y="Billable",
-    color="Key",
-    height=600,
-    title=f"Billable entries for {data.this_year}",
-)
+def figureBillable(data):
+    # a figure for this year
+    figure_billable_this_year = px.histogram(
+        data.thisYear().sort_values("Key"),
+        x="User",
+        y="Billable",
+        color="Key",
+        height=600,
+        title=f"Billable entries for {data.this_year}",
+    )
 
-figure_billable_this_year.update_xaxes(categoryorder="total ascending")
-figure_billable_this_year.update_layout(yaxis_title="Billable entries [h]")
+    figure_billable_this_year.update_xaxes(categoryorder="total ascending")
+    figure_billable_this_year.update_layout(yaxis_title="Billable entries [h]")
 
-# a figure for last year
-figure_billable_last_year = px.histogram(
-    data.lastYear().sort_values("Key"),
-    x="User",
-    y="Billable",
-    color="Key",
-    height=600,
-    title=f"Billable entries for {data.last_year}",
-)
+    # a figure for last year
+    figure_billable_last_year = px.histogram(
+        data.lastYear().sort_values("Key"),
+        x="User",
+        y="Billable",
+        color="Key",
+        height=600,
+        title=f"Billable entries for {data.last_year}",
+    )
 
-figure_billable_last_year.update_xaxes(categoryorder="total ascending")
-figure_billable_last_year.update_layout(yaxis_title="Billable entries [h]")
+    figure_billable_last_year.update_xaxes(categoryorder="total ascending")
+    figure_billable_last_year.update_layout(yaxis_title="Billable entries [h]")
+
+    return [figure_billable_this_year, figure_billable_last_year]
 
 
 # =========================================================
@@ -468,29 +479,32 @@ figure_billable_last_year.update_layout(yaxis_title="Billable entries [h]")
 # =========================================================
 
 
-figure_internal_this_year = px.histogram(
-    data.thisYear().sort_values("Key"),
-    x="User",
-    y="Internal",
-    color="Key",
-    height=600,
-    title=f"Internal entries for {data.this_year}",
-)
+def figureInternal(data):
+    figure_internal_this_year = px.histogram(
+        data.thisYear().sort_values("Key"),
+        x="User",
+        y="Internal",
+        color="Key",
+        height=600,
+        title=f"Internal entries for {data.this_year}",
+    )
 
-figure_internal_this_year.update_xaxes(categoryorder="total descending")
-figure_internal_this_year.update_layout(yaxis_title="Internal entries [h]")
+    figure_internal_this_year.update_xaxes(categoryorder="total descending")
+    figure_internal_this_year.update_layout(yaxis_title="Internal entries [h]")
 
-figure_internal_last_year = px.histogram(
-    data.lastYear().sort_values("Key"),
-    x="User",
-    y="Internal",
-    color="Key",
-    height=600,
-    title=f"Internal entries for {data.last_year}",
-)
+    figure_internal_last_year = px.histogram(
+        data.lastYear().sort_values("Key"),
+        x="User",
+        y="Internal",
+        color="Key",
+        height=600,
+        title=f"Internal entries for {data.last_year}",
+    )
 
-figure_internal_last_year.update_xaxes(categoryorder="total descending")
-figure_internal_last_year.update_layout(yaxis_title="Internal entries [h]")
+    figure_internal_last_year.update_xaxes(categoryorder="total descending")
+    figure_internal_last_year.update_layout(yaxis_title="Internal entries [h]")
+
+    return [figure_internal_this_year, figure_internal_last_year]
 
 
 # =========================================================
@@ -498,27 +512,30 @@ figure_internal_last_year.update_layout(yaxis_title="Internal entries [h]")
 # =========================================================
 
 
-figure_popular_projects_this_year = px.histogram(
-    data.thisYear().sort_values("Key"),
-    x="Group",
-    y="Time",
-    color="User",
-    height=600,
-    title=f"Popular projects for {data.this_year}",
-)
-figure_popular_projects_this_year.update_xaxes(categoryorder="total ascending")
-figure_popular_projects_this_year.update_layout(yaxis_title="Popular project entries [h]")
+def figurePopularProjects(data):
+    figure_popular_projects_this_year = px.histogram(
+        data.thisYear().sort_values("Key"),
+        x="Group",
+        y="Time",
+        color="User",
+        height=600,
+        title=f"Popular projects for {data.this_year}",
+    )
+    figure_popular_projects_this_year.update_xaxes(categoryorder="total ascending")
+    figure_popular_projects_this_year.update_layout(yaxis_title="Popular project entries [h]")
 
-figure_popular_projects_last_year = px.histogram(
-    data.lastYear().sort_values("Key"),
-    x="Group",
-    y="Time",
-    color="User",
-    height=600,
-    title=f"Popular projects for {data.last_year}",
-)
-figure_popular_projects_last_year.update_xaxes(categoryorder="total ascending")
-figure_popular_projects_last_year.update_layout(yaxis_title="Popular project entries [h]")
+    figure_popular_projects_last_year = px.histogram(
+        data.lastYear().sort_values("Key"),
+        x="Group",
+        y="Time",
+        color="User",
+        height=600,
+        title=f"Popular projects for {data.last_year}",
+    )
+    figure_popular_projects_last_year.update_xaxes(categoryorder="total ascending")
+    figure_popular_projects_last_year.update_layout(yaxis_title="Popular project entries [h]")
+
+    return [figure_popular_projects_this_year, figure_popular_projects_last_year]
 
 
 # =========================================================
@@ -530,33 +547,37 @@ figure_popular_projects_last_year.update_layout(yaxis_title="Popular project ent
 # =========================================================
 
 
-eggs_days_ago = 90
-if supplementary_data.rates.empty:
-    yAxisTitle = "Sum of billable time"
-    figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="Group", y="Billable", color="User")
-    figure_eggbaskets.update_xaxes(categoryorder="total ascending")
+def figureEggBaskets(data, supplementary_data):
+
+    eggs_days_ago = 90
+    if supplementary_data.rates.empty:
+        yAxisTitle = "Sum of billable time"
+        figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="Group", y="Billable", color="User")
+        figure_eggbaskets.update_xaxes(categoryorder="total ascending")
+        figure_eggbaskets.update_layout(
+            title="Sum of billable time (" + str(eggs_days_ago) + " days back)",
+        )
+    else:
+        yAxisTitle = "Sum of Income (Euro)"
+        figure_eggbaskets = px.histogram(
+            data.byEggBaskets(),
+            x="Group",
+            y="Income",
+            color="User",
+            facet_col="TimeBasket",
+            facet_col_wrap=3,
+            category_orders={"TimeBasket": ["60-90 days ago", "30-60 days ago", "0-30 days ago"]},
+        )
+        figure_eggbaskets.update_layout(
+            title="Baskets for our eggs (" + str(eggs_days_ago) + " days back)",
+        )
     figure_eggbaskets.update_layout(
-        title="Sum of billable time (" + str(eggs_days_ago) + " days back)",
+        height=600,
+        yaxis_title=yAxisTitle,
+        bargap=0.1,
     )
-else:
-    yAxisTitle = "Sum of Income (Euro)"
-    figure_eggbaskets = px.histogram(
-        data.byEggBaskets(),
-        x="Group",
-        y="Income",
-        color="User",
-        facet_col="TimeBasket",
-        facet_col_wrap=3,
-        category_orders={"TimeBasket": ["60-90 days ago", "30-60 days ago", "0-30 days ago"]},
-    )
-    figure_eggbaskets.update_layout(
-        title="Baskets for our eggs (" + str(eggs_days_ago) + " days back)",
-    )
-figure_eggbaskets.update_layout(
-    height=600,
-    yaxis_title=yAxisTitle,
-    bargap=0.1,
-)
+
+    return figure_eggbaskets
 
 
 # =========================================================
@@ -564,26 +585,26 @@ figure_eggbaskets.update_layout(
 # =========================================================
 
 
-tab_children = [
-    dcc.Tab(label="Main", value="start_page"),
-    dcc.Tab(label="Billable", value="billable"),
-    dcc.Tab(label="Internal", value="internal"),
-    dcc.Tab(label="Popular projects", value="popular_projects"),
-    dcc.Tab(label="Projects", value="projects"),
-]
-
 main_list = [table_working_hours]
 if not supplementary_data.rates.empty:
     main_list.append(table_missing_rates)
-main_list.append(figure_eggbaskets)
+main_list.append(figureEggBaskets(data, supplementary_data))
 
-figure_tabs = {
-    "start_page": ("Main", main_list),
-    "billable": ("Billable work", [figure_billable_this_year, figure_billable_last_year]),
-    "internal": ("Internal work", [figure_internal_this_year, figure_internal_last_year]),
-    "popular_projects": ("Popular projects", [figure_popular_projects_this_year, figure_popular_projects_last_year]),
-    "projects": ("What we work on", [figure_projects_team, figure_projects_individual]),
-}
+tab_children = [dcc.Tab(label="Main", value="start_page")]
+figure_tabs = {"start_page": ("Main", main_list)}
+
+if SHOWTAB_PROJECTS:
+    tab_children.append(dcc.Tab(label="Time spent on...", value="projects"))
+    figure_tabs["projects"] = ("What we work on", figureProjects(data))
+if SHOWTAB_BILLABLE:
+    tab_children.append(dcc.Tab(label="Billable", value="billable"))
+    figure_tabs["billable"] = ("Billable work", figureBillable(data))
+if SHOWTAB_INTERNAL:
+    tab_children.append(dcc.Tab(label="Internal", value="internal"))
+    figure_tabs["internal"] = ("Internal work", figureInternal(data))
+if SHOWTAB_POPULAR_PROJECTS:
+    tab_children.append(dcc.Tab(label="Popular projects", value="popular_projects"))
+    figure_tabs["popular_projects"] = ("Popular projects", figurePopularProjects(data))
 
 
 # =========================================================
@@ -601,26 +622,24 @@ if "Real_income" in supplementary_data.costs:
     figures = [figureFinancialTotal(year) for year in range(START_DATE.year, max_year + 1)]
 
     # Add tabs
-    figure_tabs["finance"] = ("Finance", figures[::-1])
-    tab_children.append(dcc.Tab(label="Finance", value="finance"))
+    if SHOWTAB_FINANCE:
+        figure_tabs["finance"] = ("Finances (real numbers)", figures[::-1])
+        tab_children.append(dcc.Tab(label="Finances", value="finance"))
 
 # ---------------------------------------------------------
 # Project rates
 # Requires config: rates, workinghours and costs
 if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty):
-    figure_rolling_total = figureRollingTotal(data)
-    figure_rolling_income_team = figureRollingIncomeTeam(data)
-    figure_rolling_income_individual = figureRollingIncomeIndividual(data)
-
     # Add tabs
-    figure_tabs["rates"] = ("Rates", [table_rates])
-    tab_children.append(dcc.Tab(label="Rates", value="rates"))
-    figure_tabs["rolling_income"] = (
-        "Rolling income",
-        [figure_rolling_total, figure_rolling_income_team, figure_rolling_income_individual],
-    )
-    tab_children.append(dcc.Tab(label="Rolling income", value="rolling_income"))
-
+    if SHOWTAB_RATES:
+        figure_tabs["rates"] = ("Rates", [table_rates])
+        tab_children.append(dcc.Tab(label="Rates", value="rates"))
+    if SHOWTAB_ROLLING_INCOME:
+        figure_tabs["rolling_income"] = (
+            "Rolling income",
+            [figureRollingTotal(data), figureRollingIncomeTeam(data), figureRollingIncomeIndividual(data)],
+        )
+        tab_children.append(dcc.Tab(label="Income analysis", value="rolling_income"))
     if not supplementary_data.costs.empty:
         figure_rolling_earnings = figureRollingEarnings(data)
         # Update main page
@@ -633,15 +652,13 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
 # Normalised working time
 # Requires config files: workinghours
 if not supplementary_data.working_hours.empty:
-    figure_normalised_team = figureNormalisedTeam(data, supplementary_data)
-    figure_normalised_individual = figureNormalisedIndividual(data, supplementary_data)
-
     # Add tab
-    figure_tabs["normalised_worktime"] = (
-        "Normalised Work Time",
-        [figure_normalised_team, figure_normalised_individual],
-    )
-    tab_children.append(dcc.Tab(label="Normalised Work Time", value="normalised_worktime"))
+    if SHOWTAB_NORMALISED_WORKTIME:
+        figure_tabs["normalised_worktime"] = (
+            "Normalised Work Time",
+            [figureNormalisedTeam(data, supplementary_data), figureNormalisedIndividual(data, supplementary_data)],
+        )
+        tab_children.append(dcc.Tab(label="Normalised Work Time", value="normalised_worktime"))
 
 
 # ---------------------------------------------------------
@@ -656,8 +673,9 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
     ]
 
     # Add tab
-    figure_tabs["okr_fig"] = ("OKR", okr_figs_kr + okr_figs_ini)
-    tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
+    if SHOWTAB_OKR_FIG:
+        figure_tabs["okr_fig"] = ("OKR", okr_figs_kr + okr_figs_ini)
+        tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
 
     # Update main page with first NOTION_OKR_LABELS
     (head, plots) = figure_tabs["start_page"]

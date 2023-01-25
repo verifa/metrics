@@ -142,8 +142,7 @@ class TempoData:
 
     def byEggBaskets(self) -> pd.DataFrame:
         """returns aggregated billable income grouped by issue key group, user and time box (30, 60, 90)"""
-
-        baskets = self.data
+        baskets = self.data.copy()
         baskets["TimeBasket"] = "0"
         baskets.loc[baskets["Date"] > lookBack(90), "TimeBasket"] = "60-90 days ago"
         baskets.loc[baskets["Date"] > lookBack(60), "TimeBasket"] = "30-60 days ago"
