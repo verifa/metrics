@@ -596,8 +596,8 @@ if "Real_income" in supplementary_data.costs:
 
 # ---------------------------------------------------------
 # Project rates
-# Requires config files: rates, workinghours and costs
-if not supplementary_data.rates.empty:
+# Requires config: rates, workinghours and costs
+if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty):
     figure_rolling_total = figureRollingTotal(data)
     figure_rolling_income_team = figureRollingIncomeTeam(data)
     figure_rolling_income_individual = figureRollingIncomeIndividual(data)
