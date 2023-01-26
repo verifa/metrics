@@ -384,6 +384,16 @@ def figureRollingEarnings(data):
         opacity=0.05,
         line_width=0,
     )
+    uncertain_area = supplementary_data.costs[supplementary_data.costs["Real_income"] == 0]
+    figure_rolling_earnings.add_vrect(
+        x0=min(uncertain_area["Date"]),
+        x1=min(uncertain_area["Date"]) + pd.Timedelta(1, "D"),
+        annotation_text="Uncertain ᐅ",
+        annotation_position="bottom left",
+        fillcolor="red",
+        opacity=0.55,
+        line_width=0,
+    )
     figure_rolling_earnings.update_layout(
         title="Income normalized with cost",
         yaxis_title="Income / Cost",
