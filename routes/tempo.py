@@ -134,7 +134,14 @@ class TempoData:
 
     def byTimeType(self) -> pd.DataFrame:
         """returns aggregated time and time type grouped by date, user and group"""
-        return self.data.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
+        newdata = self.data.copy()
+        newdata["Timetype"] = pd.isna(newdata["Rate"])
+        newdata["Timetype"] = ["Billable" if not (x) else "Non-billable" for x in newdata["Timetype"]]
+        newdata["Timetype"] = [
+            "VeriFriday" if x == "VF" else newdata["Timetype"][idx + 1] for idx, x in enumerate(newdata["Group"])
+        ]
+
+        return newdata.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
 
     def byTotalGroup(self, days_back) -> pd.DataFrame:
         """returns aggregated billable time grouped by issue key group and user"""

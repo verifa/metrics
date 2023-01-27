@@ -351,12 +351,6 @@ def figureFinancialTotal(year=None):
 
 
 def figureSpentTimePercentage(data):
-    data.data["Timetype"] = pd.isna(data.data["Rate"])
-    data.data["Timetype"] = ["Billable" if not (x) else "Non-billable" for x in data.data["Timetype"]]
-    data.data["Timetype"] = [
-        "VeriFriday" if x == "VF" else data.data["Timetype"][idx + 1] for idx, x in enumerate(data.data["Group"])
-    ]
-
     df_by_group = data.byTimeType().sort_values("Group")
     figure_projects_team = px.histogram(
         df_by_group[df_by_group["Date"] > ROLLING_DATE],
