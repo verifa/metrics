@@ -138,9 +138,8 @@ class TempoData:
         newdata["Timetype"] = pd.isna(newdata["Rate"])
         newdata["Timetype"] = ["Billable" if not (x) else "Non-billable" for x in newdata["Timetype"]]
         newdata["Timetype"] = [
-            "VeriFriday" if x == "VF" else newdata["Timetype"][idx + 1] for idx, x in enumerate(newdata["Group"])
+            "VeriFriday" if x == "VF" else newdata["Timetype"][idx] for idx, x in enumerate(newdata["Group"])
         ]
-
         return newdata.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
 
     def byTotalGroup(self, days_back) -> pd.DataFrame:
