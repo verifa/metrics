@@ -37,6 +37,12 @@ class SupplementaryData:
     def load(self, users: pd.Series) -> None:
         if self.working_hours.empty:
             logging.info("Notion working hours table does not exist")
+        else:
+            print(users)
+            for index, row in self.working_hours.iterrows():
+                not_matches = (users == row["User"]).value_counts().loc[False]
+                if not_matches == users.count():
+                    self.working_hours.drop(index=index, inplace=True)
 
         if self.financials.empty:
             logging.warning("Notion financial table does not exist")
