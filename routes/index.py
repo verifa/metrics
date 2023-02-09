@@ -105,8 +105,18 @@ def tableHeight(table, base_height=208):
 # Fetch data
 # =========================================================
 
+
 # ---------------------------------------------------------
 # Data from NOTION
+
+if NOTION_KEY and NOTION_TASKS_DATABASE_ID:
+    tasks = Tasks(NOTION_KEY, NOTION_TASKS_DATABASE_ID)
+    tasks.get_tasks()
+    tasks_df = tasks.data
+    task_list = list(tasks_df["TaskID"])
+else:
+    task_list = []
+
 if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
     financials = Financials(NOTION_KEY, NOTION_FINANCIAL_DATABASE_ID)
     financials.get_financials()
@@ -121,10 +131,6 @@ if NOTION_KEY and NOTION_WORKINGHOURS_DATABASE_ID:
 else:
     working_hours_df = pd.DataFrame()
 
-if NOTION_KEY and NOTION_TASKS_DATABASE_ID:
-    tasks = Tasks(NOTION_KEY, NOTION_TASKS_DATABASE_ID)
-    tasks.get_tasks()
-    tasks_df = tasks.data
 
 data = TempoData()
 data.load(from_date=START_DATE, to_date=YESTERDAY)
@@ -141,6 +147,7 @@ if not supplementary_data.rates.empty:
 
 if not supplementary_data.working_hours.empty:
     data.padTheData(supplementary_data.working_hours)
+    data.filter_data(task_list)
 
 
 # =========================================================

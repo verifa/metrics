@@ -96,6 +96,7 @@ class TempoData:
     raw: pd.DataFrame
     data: pd.DataFrame
     padded_data: pd.DataFrame
+    filtered_data: pd.DataFrame
     this_year: int
     last_year: int
 
@@ -140,12 +141,15 @@ class TempoData:
 
     def byTimeType(self) -> pd.DataFrame:
         """returns aggregated time and time type grouped by date, user and group"""
-        newdata = self.data.copy()
+        newdata = self.filtered_data.copy()
+        newdata["Timetype"] = pd.isna(newdata["Rate"])
         newdata["Timetype"] = pd.isna(newdata["Rate"])
         newdata["Timetype"] = ["Billable" if not (x) else "Non-billable" for x in newdata["Timetype"]]
+
         newdata["Timetype"] = [
-            "VeriFriday" if x == "VF" else newdata["Timetype"][idx] for idx, x in enumerate(newdata["Group"])
+            "VeriFriday" if x == "VF" else newdata.iloc[idx]["Timetype"] for idx, x in enumerate(newdata["Group"])
         ]
+
         return newdata.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
 
     def byTotalGroup(self, days_back) -> pd.DataFrame:
@@ -339,6 +343,11 @@ class TempoData:
         if fnTableHeight:
             fig.update_layout(height=fnTableHeight(rate_data))
         return fig
+
+    def filter_data(self, task_list: list) -> None:
+        data = self.padded_data.copy()
+        data = data[~data["Key"].isin(task_list)]
+        self.filtered_data = data
 
     def padTheData(self, working_hours: pd.DataFrame) -> None:
         """
