@@ -146,7 +146,7 @@ if not supplementary_data.rates.empty:
     table_missing_rates = data.missingRatesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
 
 if not supplementary_data.working_hours.empty:
-    data.padTheData(supplementary_data.working_hours)
+    data.padTheData(supplementary_data.working_hours, task_list)
     data.filter_data(task_list)
 
 
