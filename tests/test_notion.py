@@ -6,7 +6,6 @@ import routes.notion as notion
 
 class TestNotion(unittest.TestCase):
     def test_fetch_data(self):
-
         os.environ.pop("NOTION_KEY", None)
 
         with self.assertRaises(SystemExit) as cm:
