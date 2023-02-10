@@ -567,7 +567,6 @@ def figurePopularProjects(data):
 
 
 def figureEggBaskets(data, supplementary_data):
-
     eggs_days_ago = 90
     if supplementary_data.rates.empty:
         yAxisTitle = "Sum of billable time"
@@ -638,7 +637,6 @@ if SHOWTAB_POPULAR_PROJECTS:
 # Financial data
 # Requires income and costs in config files
 if "Real_income" in supplementary_data.costs:
-
     max_year = int(supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]["Year"].max())
 
     figures = [figureFinancialTotal(year) for year in range(START_DATE.year, max_year + 1)]
