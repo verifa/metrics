@@ -55,7 +55,7 @@ tests: install
 .PHONY: black-check
 black-check:
 	$(PIP) install black > black-install.log
-	black --check .
+	black --check --diff .
 
 ## black:
 ##	uses black to reformat the python files, if needed
