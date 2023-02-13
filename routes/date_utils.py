@@ -44,6 +44,7 @@ def splitMonthTable(df: pd.DataFrame) -> pd.DataFrame:
     last["Month"] = [pd.Timestamp(lastMonthDay(x)) for x in last["Month"]]
     result = pd.concat([first, last], ignore_index=True, sort=True)
     result["Weekly"] = result["Cost"] * 12 / 52
+    result["WeeklyExt"] = result["External_cost"] * 12 / 52
     if "Real_income" in result:
         result["WeeklyIn"] = result["Real_income"] * 12 / 52
     result["Year"] = result["Month"].dt.strftime("%Y")
