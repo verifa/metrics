@@ -263,7 +263,7 @@ def figureRollingTotal(data):
         figure_rolling_total.add_trace(
             go.Scatter(
                 x=df_raw_costs["Month"],
-                y=df_raw_costs["Weekly"],
+                y=df_raw_costs["WeeklyExt"],
                 mode="lines",
                 line=go.scatter.Line(color="salmon"),
                 fill="tozeroy",

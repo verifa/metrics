@@ -58,7 +58,7 @@ make help
 | **NOTION_KEY**<br/>(optional) | Notion API key. |
 | **NOTION_OKR_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link. |
 | **NOTION_OKR_LABELS**<br/>(optional) | *Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID*<br/>The labels used in Notion. |
-| **NOTION_FINANCIAL_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Month`, `cost`, and `income`. |
+| **NOTION_FINANCIAL_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Month`, `cost`, `total-cost-b2b`, and `total-income`. |
 | **NOTION_WORKINGHOURS_DATABASE_ID**<br/>(optional) | *Requires: NOTION_KEY*<br/>Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `User`, `Daily`, `Delta`, `Start`, and `Stop`. |
 
 ## Configuration files
