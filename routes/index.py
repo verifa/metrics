@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 from dash import dcc, html
 
 from routes.date_utils import lookBack
-from routes.notion import OKR, Financials, WorkingHours
+from routes.notion import OKR, Financials, Tasks, WorkingHours
 from routes.tempo import SupplementaryData, TempoData
 
 # =========================================================
@@ -35,6 +35,7 @@ NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
 NOTION_FINANCIAL_DATABASE_ID = os.environ.get("NOTION_FINANCIAL_DATABASE_ID", "")
 NOTION_WORKINGHOURS_DATABASE_ID = os.environ.get("NOTION_WORKINGHOURS_DATABASE_ID", "")
 NOTION_OKR_LABELS = [["2022", "Q4"], ["2022"]]
+NOTION_TASKS_DATABASE_ID = os.environ.get("NOTION_TASKS_DATABASE_ID", "")
 
 COLOR_HEAD = "#ad9ce3"
 COLOR_ONE = "#ccecef"
@@ -104,8 +105,18 @@ def tableHeight(table, base_height=208):
 # Fetch data
 # =========================================================
 
+
 # ---------------------------------------------------------
 # Data from NOTION
+
+if NOTION_KEY and NOTION_TASKS_DATABASE_ID:
+    tasks = Tasks(NOTION_KEY, NOTION_TASKS_DATABASE_ID)
+    tasks.get_tasks()
+    tasks_df = tasks.data
+    task_list = list(tasks_df["TaskID"])
+else:
+    task_list = []
+
 if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
     financials = Financials(NOTION_KEY, NOTION_FINANCIAL_DATABASE_ID)
     financials.get_financials()
@@ -119,6 +130,7 @@ if NOTION_KEY and NOTION_WORKINGHOURS_DATABASE_ID:
     working_hours_df = working_hours.data
 else:
     working_hours_df = pd.DataFrame()
+
 
 data = TempoData()
 data.load(from_date=START_DATE, to_date=YESTERDAY)
@@ -134,7 +146,8 @@ if not supplementary_data.rates.empty:
     table_missing_rates = data.missingRatesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
 
 if not supplementary_data.working_hours.empty:
-    data.padTheData(supplementary_data.working_hours)
+    data.padTheData(supplementary_data.working_hours, task_list)
+    data.filter_data(task_list)
 
 
 # =========================================================

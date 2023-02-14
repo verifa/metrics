@@ -97,6 +97,7 @@ class TempoData:
     raw: pd.DataFrame
     data: pd.DataFrame
     padded_data: pd.DataFrame
+    filtered_data: pd.DataFrame
     this_year: int
     last_year: int
 
@@ -137,16 +138,18 @@ class TempoData:
 
     def byGroup(self) -> pd.DataFrame:
         """returns aggregated time and billable time grouped by date, user and group"""
-        return self.data.groupby(["Date", "User", "Group"], as_index=False)[["Time", "Billable"]].sum()
+        return self.padded_data.groupby(["Date", "User", "Group"], as_index=False)[["Time", "Billable"]].sum()
 
     def byTimeType(self) -> pd.DataFrame:
         """returns aggregated time and time type grouped by date, user and group"""
-        newdata = self.data.copy()
+        newdata = self.filtered_data.copy()
         newdata["Timetype"] = pd.isna(newdata["Rate"])
         newdata["Timetype"] = ["Billable" if not (x) else "Non-billable" for x in newdata["Timetype"]]
+
         newdata["Timetype"] = [
-            "VeriFriday" if x == "VF" else newdata["Timetype"][idx] for idx, x in enumerate(newdata["Group"])
+            "VeriFriday" if x == "VF" else newdata.iloc[idx]["Timetype"] for idx, x in enumerate(newdata["Group"])
         ]
+
         return newdata.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
 
     def byTotalGroup(self, days_back) -> pd.DataFrame:
@@ -341,15 +344,21 @@ class TempoData:
             fig.update_layout(height=fnTableHeight(rate_data))
         return fig
 
-    def padTheData(self, working_hours: pd.DataFrame) -> None:
+    def filter_data(self, task_list: list) -> None:
+        data = self.padded_data.copy()
+        data = data[~data["Key"].isin(task_list)]
+        self.filtered_data = data
+
+    def padTheData(self, working_hours: pd.DataFrame, task_list: list) -> None:
         """
         creates the self.padded_data padded with zero data
         for each User, an entry for the ZP group will be added for each date >= min(Date) && <= max(Date)
         Key: ZP-1, Time: 0, Billable: 0, Group: ZP, Internal: 0, Currency: EUR, Rate: 0, Income: 0
         """
-        self.padded_data = self.data
+        self.padded_data = self.data.copy()
+
         if not working_hours.empty:
-            for index, row in working_hours.iterrows():
+            for _, row in working_hours.iterrows():
                 df_user = pd.DataFrame()
                 user = row["User"]
                 if row["Start"] == "*":
@@ -372,6 +381,9 @@ class TempoData:
                 df_user["Rate"] = 0
                 df_user["Income"] = 0
                 self.padded_data = pd.concat([self.padded_data, df_user])
+            for idx, _ in self.padded_data.iterrows():
+                if self.padded_data.iloc[idx]["Key"] in task_list:
+                    self.padded_data.iloc[idx, self.padded_data.columns.get_loc("Group")] = "NW"
         else:
             for user in self.data["User"].unique():
                 df_user = pd.DataFrame()
@@ -389,10 +401,13 @@ class TempoData:
                 df_user["Rate"] = 0
                 df_user["Income"] = 0
                 self.padded_data = pd.concat([self.padded_data, df_user])
+            for idx, _ in self.padded_data.iterrows():
+                if self.padded_data.iloc[idx]["Key"] in task_list:
+                    self.padded_data.iloc[idx, self.padded_data.columns.get_loc("Group")] = "NW"
 
     def userRolling7(self, to_sum) -> pd.DataFrame:
         """returns rolling 7 day sums for Billable and non Billable time grouped by user"""
-        daily_sum = self.padded_data.groupby(["Date", "User"], as_index=False)[to_sum].sum()
+        daily_sum = self.filtered_data.groupby(["Date", "User"], as_index=False)[to_sum].sum()
         rolling_sum_7d = (
             daily_sum.set_index("Date").groupby(["User"], as_index=False).rolling("7d", min_periods=7)[to_sum].sum()
         )

@@ -28,6 +28,27 @@ class Notion:
         return response
 
 
+class Tasks(Notion):
+    data: pd.DataFrame
+
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
+        super().__init__(token, database_id)
+
+    def get_tasks(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        data = pd.DataFrame(columns=["TaskID", "Tags", "Desc"])
+
+        for item in result_dict["results"]:
+            task_id = item["properties"]["TaskID"]["title"][0]["plain_text"]
+            tags = item["properties"]["Tags"]["multi_select"][0]["name"]
+            desc = item["properties"]["Desc"]["rich_text"][0]["plain_text"]
+
+            data.loc[-1] = [task_id, tags, desc]
+            data.index = data.index + 1
+
+        self.data = data.sort_values(by=["TaskID"])
+
+
 class WorkingHours(Notion):
     data: pd.DataFrame
 
