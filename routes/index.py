@@ -34,7 +34,7 @@ NOTION_KEY = os.environ.get("NOTION_KEY", "")
 NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
 NOTION_FINANCIAL_DATABASE_ID = os.environ.get("NOTION_FINANCIAL_DATABASE_ID", "")
 NOTION_WORKINGHOURS_DATABASE_ID = os.environ.get("NOTION_WORKINGHOURS_DATABASE_ID", "")
-NOTION_OKR_LABELS = [["2022", "Q4"], ["2022"]]
+NOTION_OKR_LABELS = [["2023VH"], ["2023VC"], ["2023EY"]]
 
 COLOR_HEAD = "#ad9ce3"
 COLOR_ONE = "#ccecef"
@@ -697,9 +697,9 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
         figure_tabs["okr_fig"] = ("OKR", okr_figs_kr + okr_figs_ini)
         tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
 
-    # Update main page with first NOTION_OKR_LABELS
+    # Update main page with NOTION_OKR_LABELS
     (head, plots) = figure_tabs["start_page"]
-    plots.append(okr_figs_kr[0])
+    plots += okr_figs_kr
     plots.append(okr_figs_ini[0])
     figure_tabs["start_page"] = (head, plots)
 
