@@ -68,8 +68,12 @@ class Financials(Notion):
             extcost = item["properties"]["total-cost-b2b"]["formula"]["number"]
             income = item["properties"]["total-income"]["formula"]["number"]
 
-            data.loc[-1] = [month, cost, extcost, income]
-            data.index = data.index + 1
+            abcost = item["properties"]["AB-Cost"]["number"]
+            oycost = item["properties"]["OY-Cost"]["number"]
+
+            if oycost != None and abcost != None:
+                data.loc[-1] = [month, cost, extcost, income]
+                data.index = data.index + 1
 
         self.data = data.sort_values(by=["Month"])
 
