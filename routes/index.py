@@ -146,17 +146,19 @@ table_working_hours = data.tableByUser(supplementary_data.working_hours, tableHe
 last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
 logging.info(f"Last common day: {last_reported}")
 
+if not supplementary_data.working_hours.empty:
+    df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
+    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
+    df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
 
 # =========================================================
 # Figure: Normalised time (individual)
 # =========================================================
 
 
-def figureNormalisedIndividual(data, supplementary_data):
-    df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
+def figureNormalisedIndividual(user_data):
     figure_normalised_individual = px.scatter(
-        df_user_normalised[df_user_normalised["Date"] > ROLLING_DATE],
+        user_data[user_data["Date"] > ROLLING_DATE],
         x="Date",
         y=["%-billable", "%-internal"],
         facet_col="User",
@@ -173,12 +175,9 @@ def figureNormalisedIndividual(data, supplementary_data):
 # =========================================================
 
 
-def figureNormalisedTeam(data, supplementary_data):
-    df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
-    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
-    df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
+def figureNormalisedTeam(team_data):
     figure_normalised_team = px.scatter(
-        df_team_normalised,
+        team_data,
         x="Date",
         y=["%-billable", "%-internal", "%-billable30", "%-internal30"],
         color_discrete_sequence=["#8FBC8F", "#FF7F50", "#006400", "#A52A2A"],
@@ -676,7 +675,7 @@ if not supplementary_data.working_hours.empty:
     if SHOWTAB_NORMALISED_WORKTIME:
         figure_tabs["normalised_worktime"] = (
             "Normalised Work Time",
-            [figureNormalisedTeam(data, supplementary_data), figureNormalisedIndividual(data, supplementary_data)],
+            [figureNormalisedTeam(df_team_normalised), figureNormalisedIndividual(df_user_normalised)],
         )
         tab_children.append(dcc.Tab(label="Normalised Work Time", value="normalised_worktime"))
 
