@@ -249,9 +249,7 @@ def figureRollingIncomeTeam(df_average_income_rolling_30):
 # =========================================================
 
 
-def figureRollingTotal(df_team_rolling_total):
-    df_raw_costs = supplementary_data.raw_costs
-
+def figureRollingTotal(df_team_rolling_total, df_raw_costs):
     figure_rolling_total = px.scatter(
         df_team_rolling_total,
         x="Date",
@@ -658,7 +656,7 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
         figure_tabs["rolling_income"] = (
             "Rolling income",
             [
-                figureRollingTotal(df_team_rolling_total),
+                figureRollingTotal(df_team_rolling_total, supplementary_data.raw_costs),
                 figureRollingIncomeTeam(df_average_income_rolling_30),
                 figureRollingIncomeIndividual(df_user_income_rolling),
             ],
