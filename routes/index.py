@@ -150,6 +150,21 @@ if not supplementary_data.working_hours.empty:
     df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
     df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
     df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
+    if not supplementary_data.rates.empty:
+        df_user_income_rolling = data.userRolling7("Income")
+        # Average user data
+        df_average_income_rolling_7 = teamRollingAverage7(
+            df_user_income_rolling[df_user_income_rolling["Date"] <= last_reported], "Income"
+        )
+        df_average_income_rolling_30 = rollingAverage(df_average_income_rolling_7, "Income", 30)
+        df_average_income_rolling_30.columns = ["Date", "Income30"]
+        df_average_income_rolling_30 = df_average_income_rolling_30.merge(df_average_income_rolling_7, on=["Date"])
+        # Team total data
+        df_team_income_rolling = data.teamRolling7("Income")
+        df_team_income_rolling_30 = rollingAverage(df_team_income_rolling, "Income", 30)
+        df_team_income_rolling_30.columns = ["Date", "Income30"]
+        df_team_income_rolling_30 = df_team_income_rolling_30.merge(df_team_income_rolling, on=["Date"])
+        df_team_rolling_total = df_team_income_rolling_30
 
 # =========================================================
 # Figure: Normalised time (individual)
@@ -196,10 +211,9 @@ def figureNormalisedTeam(team_data):
 # =========================================================
 
 
-def figureRollingIncomeIndividual(data):
-    df_user_time_rolling = data.userRolling7("Income")
+def figureRollingIncomeIndividual(df_user_income_rolling):
     figure_rolling_income_individual = px.scatter(
-        df_user_time_rolling[df_user_time_rolling["Date"] > ROLLING_DATE],
+        df_user_income_rolling[df_user_income_rolling["Date"] > ROLLING_DATE],
         x="Date",
         y="Income",
         facet_col="User",
@@ -215,16 +229,9 @@ def figureRollingIncomeIndividual(data):
 # =========================================================
 
 
-def figureRollingIncomeTeam(data):
-    df_user_time_rolling = data.userRolling7("Income")
-    df_team_time_rolling_7 = teamRollingAverage7(
-        df_user_time_rolling[df_user_time_rolling["Date"] <= last_reported], "Income"
-    )
-    df_team_time_rolling_30 = rollingAverage(df_team_time_rolling_7, "Income", 30)
-    df_team_time_rolling_30.columns = ["Date", "Income30"]
-    df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_team_time_rolling_7, on=["Date"])
+def figureRollingIncomeTeam(df_average_income_rolling_30):
     figure_rolling_income_team = px.scatter(
-        df_team_time_rolling_30,
+        df_average_income_rolling_30,
         x="Date",
         y=["Income", "Income30"],
         color_discrete_sequence=["#8FBC8F", "#006400"],
@@ -242,13 +249,7 @@ def figureRollingIncomeTeam(data):
 # =========================================================
 
 
-def figureRollingTotal(data):
-    df_user_time_rolling = data.teamRolling7("Income")
-    df_team_time_rolling_30 = rollingAverage(df_user_time_rolling, "Income", 30)
-    df_team_time_rolling_30.columns = ["Date", "Income30"]
-    df_team_time_rolling_30 = df_team_time_rolling_30.merge(df_user_time_rolling, on=["Date"])
-    df_team_rolling_total = df_team_time_rolling_30
-
+def figureRollingTotal(df_team_rolling_total):
     df_raw_costs = supplementary_data.raw_costs
 
     figure_rolling_total = px.scatter(
@@ -656,7 +657,11 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
     if SHOWTAB_ROLLING_INCOME:
         figure_tabs["rolling_income"] = (
             "Rolling income",
-            [figureRollingTotal(data), figureRollingIncomeTeam(data), figureRollingIncomeIndividual(data)],
+            [
+                figureRollingTotal(df_team_rolling_total),
+                figureRollingIncomeTeam(df_average_income_rolling_30),
+                figureRollingIncomeIndividual(df_user_income_rolling),
+            ],
         )
         tab_children.append(dcc.Tab(label="Income analysis", value="rolling_income"))
     if not supplementary_data.costs.empty:
