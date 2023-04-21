@@ -5,14 +5,13 @@ from datetime import date
 
 import pandas as pd
 import plotly.express as px
-import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from dash import dcc, html
 
 from routes.date_utils import lookBack
 from routes.notion import OKR, Financials, WorkingHours
 from routes.supplementary_data import SupplementaryData
-from routes.tempo import TempoData
+from routes.tempo_data import TempoData
 
 # =========================================================
 # Constants
