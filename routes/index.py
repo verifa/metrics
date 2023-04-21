@@ -165,6 +165,24 @@ if not supplementary_data.working_hours.empty:
         df_team_income_rolling_30.columns = ["Date", "Income30"]
         df_team_income_rolling_30 = df_team_income_rolling_30.merge(df_team_income_rolling, on=["Date"])
         df_team_rolling_total = df_team_income_rolling_30
+        # data for rolling earnings
+        if not supplementary_data.costs.empty:
+            df_team_earn_rolling = data.teamRolling7Relative(supplementary_data.costs)
+            df_team_earn_rolling_30 = rollingAverage(df_team_earn_rolling, "Diff", 30)
+            df_team_earn_rolling_30.columns = ["Date", "Diff30"]
+            df_team_earn_rolling_30 = df_team_earn_rolling_30.merge(df_team_earn_rolling, on=["Date"])
+            df_team_earn_rolling_365 = rollingAverage(df_team_earn_rolling, "Diff", 365)
+            df_team_earn_rolling_365.columns = ["Date", "Diff365"]
+            df_team_earn_rolling_365 = df_team_earn_rolling_365.merge(df_team_earn_rolling_30, on=["Date"])
+            df_team_earn_rolling_total = df_team_earn_rolling_365
+            df_team_earn_rolling_total.rename(
+                columns={
+                    "Diff": "Rolling Weekly Average",
+                    "Diff30": "Rolling Monthly Average",
+                    "Diff365": "Rolling Yearly Average",
+                },
+                inplace=True,
+            )
 
 # =========================================================
 # Figure: Normalised time (individual)
@@ -367,27 +385,9 @@ def figureSpentTimePercentage(data):
 # =========================================================
 
 
-def figureRollingEarnings(data):
-    df_team_earn_rolling = data.teamRolling7Relative(supplementary_data.costs)
-    df_team_earn_rolling_30 = rollingAverage(df_team_earn_rolling, "Diff", 30)
-    df_team_earn_rolling_30.columns = ["Date", "Diff30"]
-    df_team_earn_rolling_30 = df_team_earn_rolling_30.merge(df_team_earn_rolling, on=["Date"])
-    df_team_earn_rolling_365 = rollingAverage(df_team_earn_rolling, "Diff", 365)
-    df_team_earn_rolling_365.columns = ["Date", "Diff365"]
-    df_team_earn_rolling_365 = df_team_earn_rolling_365.merge(df_team_earn_rolling_30, on=["Date"])
-    df_team_rolling_total = df_team_earn_rolling_365
-
-    df_team_rolling_total.rename(
-        columns={
-            "Diff": "Rolling Weekly Average",
-            "Diff30": "Rolling Monthly Average",
-            "Diff365": "Rolling Yearly Average",
-        },
-        inplace=True,
-    )
-
+def figureRollingEarnings(df_team_earn_rolling_total):
     figure_rolling_earnings = px.scatter(
-        df_team_rolling_total,
+        df_team_earn_rolling_total,
         x="Date",
         y=["Rolling Weekly Average", "Rolling Monthly Average", "Rolling Yearly Average"],
         color_discrete_sequence=["#C8E6C9", "#77AEE0", "#1B5E20"],
@@ -395,8 +395,8 @@ def figureRollingEarnings(data):
     )
     figure_rolling_earnings.add_hline(y=1, fillcolor="indigo")
     figure_rolling_earnings.add_vrect(
-        x0=max(df_team_rolling_total["Date"]) - pd.Timedelta(365, "D"),
-        x1=max(df_team_rolling_total["Date"]),
+        x0=max(df_team_earn_rolling_total["Date"]) - pd.Timedelta(365, "D"),
+        x1=max(df_team_earn_rolling_total["Date"]),
         annotation_text="One Year",
         annotation_position="top left",
         fillcolor="green",
@@ -404,8 +404,8 @@ def figureRollingEarnings(data):
         line_width=0,
     )
     figure_rolling_earnings.add_vrect(
-        x0=max(df_team_rolling_total["Date"]) - pd.Timedelta(30, "D"),
-        x1=max(df_team_rolling_total["Date"]),
+        x0=max(df_team_earn_rolling_total["Date"]) - pd.Timedelta(30, "D"),
+        x1=max(df_team_earn_rolling_total["Date"]),
         annotation_text="30 days",
         annotation_position="top right",
         fillcolor="darkgreen",
@@ -663,7 +663,7 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
         )
         tab_children.append(dcc.Tab(label="Income analysis", value="rolling_income"))
     if not supplementary_data.costs.empty:
-        figure_rolling_earnings = figureRollingEarnings(data)
+        figure_rolling_earnings = figureRollingEarnings(df_team_earn_rolling_total)
         # Update main page
         (head, plots) = figure_tabs["start_page"]
         plots.append(figure_rolling_earnings)
