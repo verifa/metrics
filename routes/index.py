@@ -11,7 +11,8 @@ from dash import dcc, html
 
 from routes.date_utils import lookBack
 from routes.notion import OKR, Financials, WorkingHours
-from routes.tempo import SupplementaryData, TempoData
+from routes.supplementary_data import SupplementaryData
+from routes.tempo import TempoData
 
 # =========================================================
 # Constants
