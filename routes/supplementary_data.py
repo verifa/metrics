@@ -32,7 +32,7 @@ class SupplementaryData:
         if self.working_hours.empty:
             logging.info("Notion working hours table does not exist")
         else:
-            print(users)
+            logging.info(f"Users\n{users}")
             for index, row in self.working_hours.iterrows():
                 not_matches = (users == row["User"]).value_counts().loc[False]
                 if not_matches == users.count():
