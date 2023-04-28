@@ -42,6 +42,7 @@ COLOR_TWO = "#fc9cac"
 
 # Configure tabs to show in the UI
 SHOWTAB_BILLABLE = False
+SHOWTAB_COMPARISON = True
 SHOWTAB_INTERNAL = False
 SHOWTAB_POPULAR_PROJECTS = False
 SHOWTAB_PROJECTS = True
@@ -183,6 +184,39 @@ if not supplementary_data.working_hours.empty:
                 },
                 inplace=True,
             )
+            # Comparing normalized worktime with normalized income
+            df_comparison = df_team_earn_rolling_total.merge(df_team_normalised, how="inner", on="Date")
+
+
+# =========================================================
+# Figure: Comparing normalized worktime with normalized income
+# =========================================================
+
+
+def figureEarningsVersusWorkload(user_data):
+    figure_earnings_versus_workload = px.scatter(height=600)
+
+    figure_earnings_versus_workload.add_trace(
+        go.Scatter(
+            x=user_data["%-billable"],
+            y=user_data["Rolling Weekly Average"],
+            mode="markers",
+            line=go.scatter.Line(color="darkgreen"),
+            name="Weekly",
+        )
+    )
+    figure_earnings_versus_workload.add_trace(
+        go.Scatter(
+            x=user_data["%-billable30"],
+            y=user_data["Rolling Monthly Average"],
+            mode="markers",
+            line=go.scatter.Line(color="salmon"),
+            name="Monthly",
+        )
+    )
+    figure_earnings_versus_workload.update_layout(xaxis_title="Billable fraction [%]", yaxis_title="Income / Cost")
+    return figure_earnings_versus_workload
+
 
 # =========================================================
 # Figure: Normalised time (individual)
@@ -681,6 +715,19 @@ if not supplementary_data.working_hours.empty:
             [figureNormalisedTeam(df_team_normalised), figureNormalisedIndividual(df_user_normalised)],
         )
         tab_children.append(dcc.Tab(label="Normalised Work Time", value="normalised_worktime"))
+
+
+# ---------------------------------------------------------
+# Normalised working time
+# Requires config files: workinghours
+if not df_comparison.empty:
+    # Add tab
+    if SHOWTAB_COMPARISON:
+        figure_tabs["comparison"] = (
+            "Comparing workload with income",
+            [figureEarningsVersusWorkload(df_comparison)],
+        )
+        tab_children.append(dcc.Tab(label="Break even", value="comparison"))
 
 
 # ---------------------------------------------------------
