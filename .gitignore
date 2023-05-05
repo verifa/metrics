@@ -14,3 +14,12 @@ config/
 
 # log files
 *.log
+
+# sphinx
+docs
+!docs/.nojekyll
+!docs/CNAME
+!docs/conf.py
+!docs/index.rst
+!docs/Makefile
+

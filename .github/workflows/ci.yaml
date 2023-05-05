@@ -60,19 +60,28 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: make deploy
 
-  mkdocs:
+  sphinx:
     needs: [ci]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v3
         with:
-          python-version: "3.x"
+          python-version: 3.11.2
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.4.0
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build
-        run: mkdocs build
+        run: make docs
       - name: Publish
         if: github.ref == 'refs/heads/main'
-        run: mkdocs gh-deploy --force
+        run: |
+          git config --global user.email "automation@verifa.io"
+          git config --global user.name "Verifa Automation"
+          rm .gitignore
+          cp -r docs/_build/html/* docs
+          git add . && git commit -m "Generates docs"
+          git push origin HEAD:sphinx-deploy --force
