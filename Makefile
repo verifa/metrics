@@ -85,7 +85,7 @@ mypy:
 .PHONY: pylint
 pylint:
 	$(PIP) install pylint > pylint-install.log
-	pylint .
+	pylint --recursive=y .
 
 ## lint:
 ##	a PHONY rule to run all linters
@@ -154,3 +154,11 @@ push: build
 ##
 deploy:
 	gcloud run deploy $(CLOUDRUN_SERVICE) --image $(IMAGE):$(TAG) --region $(REGION) --labels=version=$(TAG)
+
+
+docs: install
+	poetry run sphinx-apidoc -o docs/ routes/
+	cd docs && poetry run make html
+
+
+

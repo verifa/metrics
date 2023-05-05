@@ -12,6 +12,10 @@ import requests
 
 
 class Notion:
+    """
+    I'M A DOCSTRING SHORT AND STOUT
+    """
+
     token: str
     database_id: str
 
@@ -157,7 +161,7 @@ class OKR(Notion):
 
     def get_figure_initiatives(
         self, search_period=None, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender"
-    ) -> go:
+    ) -> go.Figure:
         initiatives = self.data[self.data["scope"] == "Initiatives"]
         fig_title = "Initiatives"
 

@@ -16,7 +16,7 @@ from routes.date_utils import lookBack, weekdays
 class TempoData:
     """Tempo data class."""
 
-    client: Client
+    client: Client.Tempo
     raw: pd.DataFrame
     data: pd.DataFrame
     padded_data: pd.DataFrame
@@ -178,7 +178,9 @@ class TempoData:
 
         return user_data
 
-    def tableByUser(self, working_hours, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
+    def tableByUser(
+        self, working_hours, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender"
+    ) -> go.Figure:
         table_working_hours = self.byUser(working_hours).round(2)
         if not working_hours.empty:
             cell_values = [
@@ -214,7 +216,7 @@ class TempoData:
             fig.update_layout(height=fnTableHeight(table_working_hours))
         return fig
 
-    def rawRatesTable(self) -> go:
+    def rawRatesTable(self) -> pd.DataFrame:
         rate_data = self.data[self.data["Billable"] > 0]
         rate_data = rate_data.groupby(["Key", "Rate"], dropna=False, as_index=False).agg(
             Hours=("Billable", np.sum), Users=("User", ", ".join)
@@ -223,7 +225,7 @@ class TempoData:
         rate_data["Users"] = rate_data["Users"].str.split(", ").map(set).str.join(", ")
         return rate_data
 
-    def ratesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
+    def ratesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go.Figure:
         rate_data = self.rawRatesTable()
         fig = go.Figure(
             data=[
@@ -243,7 +245,7 @@ class TempoData:
             fig.update_layout(height=fnTableHeight(rate_data))
         return fig
 
-    def missingRatesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go:
+    def missingRatesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go.Figure:
         rate_data = self.rawRatesTable()
         rate_data = rate_data[rate_data["Rate"] == "???"]
         fig = go.Figure(
