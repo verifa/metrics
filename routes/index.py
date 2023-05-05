@@ -154,9 +154,7 @@ if not supplementary_data.working_hours.empty:
     if not supplementary_data.rates.empty:
         df_user_income_rolling = data.userRolling7("Income")
         # Average user data
-        df_average_income_rolling_7 = teamRollingAverage7(
-            df_user_income_rolling[df_user_income_rolling["Date"] <= last_reported], "Income"
-        )
+        df_average_income_rolling_7 = teamRollingAverage7(df_user_income_rolling, "Income")
         df_average_income_rolling_30 = rollingAverage(df_average_income_rolling_7, "Income", 30)
         df_average_income_rolling_30.columns = ["Date", "Income30"]
         df_average_income_rolling_30 = df_average_income_rolling_30.merge(df_average_income_rolling_7, on=["Date"])
@@ -291,7 +289,7 @@ def figureRollingIncomeIndividual(df_user_income_rolling):
 # =========================================================
 
 
-def figureRollingIncomeTeam(df_average_income_rolling_30):
+def figureRollingIncomeTeam(df_average_income_rolling_30, last_date):
     figure_rolling_income_team = px.scatter(
         df_average_income_rolling_30,
         x="Date",
@@ -302,6 +300,19 @@ def figureRollingIncomeTeam(df_average_income_rolling_30):
     figure_rolling_income_team.update_layout(
         title="Rolling income (average/person)",
         yaxis_title="Income (euro)",
+    )
+    figure_rolling_income_team.update_layout(
+        xaxis_rangeslider_visible=True,
+        xaxis_range=[ROLLING_DATE, str(date.today())],
+    )
+    figure_rolling_income_team.add_vrect(
+        x0=last_date,
+        x1=max(df_average_income_rolling_30["Date"]),
+        annotation_text="Incomplete reported data ᐅ",
+        annotation_position="bottom left",
+        fillcolor="darkred",
+        opacity=0.10,
+        line_width=0,
     )
     return figure_rolling_income_team
 
@@ -701,7 +712,7 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
             "Rolling income",
             [
                 figureRollingTotal(df_team_rolling_total, supplementary_data.raw_costs),
-                figureRollingIncomeTeam(df_average_income_rolling_30),
+                figureRollingIncomeTeam(df_average_income_rolling_30, last_reported),
                 figureRollingIncomeIndividual(df_user_income_rolling),
             ],
         )
