@@ -82,8 +82,8 @@ def normaliseUserRolling7(frame, working_hours):
     return result
 
 
-def normaliseTeamAverage(frame, last):
-    df_norm = teamRollingAverage7(frame[frame["Date"] <= last], ["%-billable", "%-internal"])
+def normaliseTeamAverage(frame):
+    df_norm = teamRollingAverage7(frame, ["%-billable", "%-internal"])
     df_norm_30 = rollingAverage(df_norm, ["%-billable", "%-internal"], 30)
     df_norm_30.columns = ["Date", "%-billable30", "%-internal30"]
     df_norm = df_norm.merge(df_norm_30, on=["Date"])
@@ -150,7 +150,7 @@ logging.info(f"Last common day: {last_reported}")
 if not supplementary_data.working_hours.empty:
     df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
     df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
-    df_team_normalised = normaliseTeamAverage(df_user_normalised, last_reported)
+    df_team_normalised = normaliseTeamAverage(df_user_normalised)
     if not supplementary_data.rates.empty:
         df_user_income_rolling = data.userRolling7("Income")
         # Average user data
@@ -242,7 +242,7 @@ def figureNormalisedIndividual(user_data):
 # =========================================================
 
 
-def figureNormalisedTeam(team_data):
+def figureNormalisedTeam(team_data, last_date):
     figure_normalised_team = px.scatter(
         team_data,
         x="Date",
@@ -255,6 +255,16 @@ def figureNormalisedTeam(team_data):
         xaxis_rangeslider_visible=True,
         xaxis_range=[ROLLING_DATE, str(date.today())],
     )
+    figure_normalised_team.add_vrect(
+        x0=last_date,
+        x1=max(team_data["Date"]),
+        annotation_text="Incomplete reported data ᐅ",
+        annotation_position="bottom left",
+        fillcolor="darkred",
+        opacity=0.10,
+        line_width=0,
+    )
+
     return figure_normalised_team
 
 
@@ -712,7 +722,7 @@ if not supplementary_data.working_hours.empty:
     if SHOWTAB_NORMALISED_WORKTIME:
         figure_tabs["normalised_worktime"] = (
             "Normalised Work Time",
-            [figureNormalisedTeam(df_team_normalised), figureNormalisedIndividual(df_user_normalised)],
+            [figureNormalisedTeam(df_team_normalised, last_reported), figureNormalisedIndividual(df_user_normalised)],
         )
         tab_children.append(dcc.Tab(label="Normalised Work Time", value="normalised_worktime"))
 
