@@ -8,9 +8,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, html
 
-from routes.date_utils import lookBack
 from routes.notion import OKR, Financials, WorkingHours
 from routes.supplementary_data import SupplementaryData
+from routes.tempo_config import ROLLING_DATE, START_DATE, YESTERDAY
 from routes.tempo_data import TempoData
 
 # =========================================================
@@ -18,10 +18,6 @@ from routes.tempo_data import TempoData
 # =========================================================
 
 
-START_DATE = pd.Timestamp("2021-01-01")
-TODAY = pd.Timestamp("today")
-YESTERDAY = TODAY - pd.to_timedelta("1day")
-ROLLING_DATE = lookBack(180)
 TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH", "/tempo")
 
 TEMPO_LOG_LEVEL = os.environ.get("TEMPO_LOG_LEVEL", "WARNING")
