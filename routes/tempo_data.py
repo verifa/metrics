@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from tempoapiclient import client as Client
 
 from routes.date_utils import lookBack, weekdays
+from routes.tempo_config import YESTERDAY
 
 
 class TempoData:
@@ -282,7 +283,7 @@ class TempoData:
                 else:
                     start = row["Start"]
                 if row["Stop"] == "*":
-                    stop = self.data[self.data["User"] == user]["Date"].max()
+                    stop = YESTERDAY
                 else:
                     stop = row["Stop"]
                 df_user["Date"] = pd.date_range(start, stop)
