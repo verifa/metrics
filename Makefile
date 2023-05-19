@@ -157,7 +157,7 @@ deploy:
 
 
 docs: install
-	poetry run sphinx-apidoc -o docs/ routes/
+	poetry run sphinx-apidoc -o docs/ metrics/
 	cd docs && poetry run make html
 
 

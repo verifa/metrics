@@ -5,7 +5,7 @@ import os
 
 import pandas as pd
 
-from routes.date_utils import splitMonthTable
+from metrics.date_utils import splitMonthTable
 
 
 class SupplementaryData:

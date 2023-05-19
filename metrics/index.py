@@ -8,10 +8,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, html
 
-from routes.notion import OKR, Financials, WorkingHours
-from routes.supplementary_data import SupplementaryData
-from routes.tempo_config import ROLLING_DATE, START_DATE, YESTERDAY
-from routes.tempo_data import TempoData
+from metrics.notion import OKR, Financials, WorkingHours
+from metrics.supplementary_data import SupplementaryData
+from metrics.tempo_config import ROLLING_DATE, START_DATE, YESTERDAY
+from metrics.tempo_data import TempoData
 
 # =========================================================
 # Constants
