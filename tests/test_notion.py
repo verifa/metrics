@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import routes.notion as notion
+import metrics.notion as notion
 
 
 class TestNotion(unittest.TestCase):

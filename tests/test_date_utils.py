@@ -11,7 +11,7 @@ def load_module(file_name, module_name):
     return module
 
 
-load_module("routes/date_utils.py", "date_utils")
+load_module("metrics/date_utils.py", "date_utils")
 from date_utils import *
 
 

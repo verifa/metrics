@@ -10,8 +10,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from tempoapiclient import client as Client
 
-from routes.date_utils import lookBack, weekdays
-from routes.tempo_config import YESTERDAY
+from metrics.date_utils import lookBack, weekdays
+from metrics.tempo_config import YESTERDAY
 
 
 class TempoData:
