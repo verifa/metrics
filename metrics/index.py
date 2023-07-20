@@ -1,7 +1,7 @@
 """System module."""
 import logging
 import os
-from datetime import date
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 import plotly.express as px
@@ -12,6 +12,9 @@ from metrics.notion import OKR, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
 from metrics.tempo_config import ROLLING_DATE, START_DATE, YESTERDAY
 from metrics.tempo_data import TempoData
+
+# happy hack until we can fix these
+pd.options.mode.chained_assignment = None  # default='warn'
 
 # =========================================================
 # Constants
@@ -101,6 +104,15 @@ def tableHeight(table, base_height=208):
 # Fetch data
 # =========================================================
 
+start = datetime.now()
+print(f"\nStarting {start}")
+
+
+def delta(txt):
+    delta = datetime.now() - start
+    print(f"{txt}: {delta}")
+
+
 # ---------------------------------------------------------
 # Data from NOTION
 if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
@@ -110,6 +122,8 @@ if NOTION_KEY and NOTION_FINANCIAL_DATABASE_ID:
 else:
     financials_df = pd.DataFrame()
 
+delta("Notion Financials")
+
 if NOTION_KEY and NOTION_WORKINGHOURS_DATABASE_ID:
     working_hours = WorkingHours(NOTION_KEY, NOTION_WORKINGHOURS_DATABASE_ID)
     working_hours.get_workinghours()
@@ -117,21 +131,30 @@ if NOTION_KEY and NOTION_WORKINGHOURS_DATABASE_ID:
 else:
     working_hours_df = pd.DataFrame()
 
+delta("Notion working Hours")
+
 data = TempoData()
 data.load(from_date=START_DATE, to_date=YESTERDAY)
+delta("TempoData")
 
 supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df)
 supplementary_data.load(data.getUsers())
+delta("Supplementary Data")
 
 data.zeroOutBillableTime(supplementary_data.internal_keys)
+delta("ZeroOutBillable")
 
 if not supplementary_data.rates.empty:
     data.injectRates(supplementary_data.rates)
+    delta("InjectRates")
     table_rates = data.ratesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
+    delta("Table Rates")
     table_missing_rates = data.missingRatesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
+    delta("Table Missing Rates")
 
 if not supplementary_data.working_hours.empty:
     data.padTheData(supplementary_data.working_hours)
+    delta("Data Padding")
 
 
 # =========================================================
@@ -140,26 +163,33 @@ if not supplementary_data.working_hours.empty:
 
 
 table_working_hours = data.tableByUser(supplementary_data.working_hours, tableHeight, COLOR_HEAD, COLOR_ONE)
+delta("Table Working Hours")
 last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
 logging.info(f"Last common day: {last_reported}")
 
 if not supplementary_data.working_hours.empty:
     df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
+    delta("User Time Rolling")
     df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
+    delta("User Normalised")
     df_team_normalised = normaliseTeamAverage(df_user_normalised)
+    delta("Team Normalised")
     if not supplementary_data.rates.empty:
         df_user_income_rolling = data.userRolling7("Income")
+        delta("User Income Rolling")
         # Average user data
         df_average_income_rolling_7 = teamRollingAverage7(df_user_income_rolling, "Income")
         df_average_income_rolling_30 = rollingAverage(df_average_income_rolling_7, "Income", 30)
         df_average_income_rolling_30.columns = ["Date", "Income30"]
         df_average_income_rolling_30 = df_average_income_rolling_30.merge(df_average_income_rolling_7, on=["Date"])
+        delta("Average Income Rolling")
         # Team total data
         df_team_income_rolling = data.teamRolling7("Income")
         df_team_income_rolling_30 = rollingAverage(df_team_income_rolling, "Income", 30)
         df_team_income_rolling_30.columns = ["Date", "Income30"]
         df_team_income_rolling_30 = df_team_income_rolling_30.merge(df_team_income_rolling, on=["Date"])
         df_team_rolling_total = df_team_income_rolling_30
+        delta("User Income Rolling")
         # data for rolling earnings
         if not supplementary_data.costs.empty:
             df_team_earn_rolling = data.teamRolling7Relative(supplementary_data.costs)
@@ -178,8 +208,10 @@ if not supplementary_data.working_hours.empty:
                 },
                 inplace=True,
             )
+            delta("Team Earning Rolling")
             # Comparing normalized worktime with normalized income
             df_comparison = df_team_earn_rolling_total.merge(df_team_normalised, how="inner", on="Date")
+            delta("Comparison")
 
 
 # =========================================================
@@ -786,6 +818,7 @@ pageheader = html.Div(
 
 
 def render_content(tab):
+    delta(tab)
     (head, plots) = figure_tabs[tab]
     sections = [dcc.Graph(id="plot", figure=figure) for figure in plots]
     sections.insert(0, dcc.Markdown("### " + head))
