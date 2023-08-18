@@ -10,7 +10,7 @@ WORKDIR /app
 # Copy poetry files first - optimization to only do poetry install when config changes
 COPY poetry.lock pyproject.toml ./
 # Install dependencies
-RUN poetry install --no-dev --no-ansi
+RUN poetry install --without dev --no-ansi
 
 # Copy source code
 COPY . .
