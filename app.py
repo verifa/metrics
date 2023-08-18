@@ -1,7 +1,13 @@
+import os
+
 from dash import Dash, html
 from dash.dependencies import Input, Output
 
 from metrics import index
+
+TEMPO_DEVELOPMENT = os.getenv("TEMPO_DEVELOPMENT", "False")
+
+print(f"TEMPO_DEVELOPMENT: {TEMPO_DEVELOPMENT}")
 
 external_scripts = [
     # Import TailwindCSS
@@ -36,4 +42,7 @@ def render_content(tab):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host="127.0.0.1")
+    if TEMPO_DEVELOPMENT == "True":
+        app.run_server(debug=True, host="127.0.0.1")
+    else:
+        app.run_server(debug=False, host="127.0.0.1")

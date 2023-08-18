@@ -99,7 +99,7 @@ lint: black-check pylint mypy isort
 ##	dependes on install: and black-check:
 ##
 dev: install lint tests
-	poetry run python app.py
+	TEMPO_DEVELOPMENT=True poetry run python app.py
 
 ## run:
 ##	uses $(DOCKER) to run the metrics-dashboard image in a local container
@@ -159,6 +159,4 @@ deploy:
 docs: install
 	poetry run sphinx-apidoc -o docs/ metrics/
 	cd docs && poetry run make html
-
-
 
