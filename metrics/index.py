@@ -766,8 +766,8 @@ if not supplementary_data.working_hours.empty:
 
 
 # ---------------------------------------------------------
-# Normalised working time
-# Requires config files: workinghours
+# Break even
+# Requires config files: workinghours, rates, finances
 if not supplementary_data.working_hours.empty and not supplementary_data.rates.empty and not supplementary_data.costs.empty and not df_comparison.empty:
     # Add tab
     if SHOWTAB_COMPARISON:
