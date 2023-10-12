@@ -8,7 +8,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, html
 
-from metrics.notion import OKR, Financials, WorkingHours
+from metrics.date_utils import lookBack
+from metrics.notion import OKR, Allocations, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
 from metrics.tempo_config import ROLLING_DATE, START_DATE, YESTERDAY
 from metrics.tempo_data import TempoData
@@ -33,6 +34,7 @@ NOTION_KEY = os.environ.get("NOTION_KEY", "")
 NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
 NOTION_FINANCIAL_DATABASE_ID = os.environ.get("NOTION_FINANCIAL_DATABASE_ID", "")
 NOTION_WORKINGHOURS_DATABASE_ID = os.environ.get("NOTION_WORKINGHOURS_DATABASE_ID", "")
+NOTION_ALLOCATION_DATABASE_ID = os.environ.get("NOTION_ALLOCATIONS_DATABASE_ID", "")
 NOTION_OKR_LABELS = [["2023VH"], ["2023VC"], ["2023EY"]]
 
 COLOR_HEAD = "#ad9ce3"
@@ -132,6 +134,15 @@ else:
     working_hours_df = pd.DataFrame()
 
 delta("Notion working Hours")
+
+if NOTION_KEY and NOTION_ALLOCATION_DATABASE_ID:
+    allocations = Allocations(NOTION_KEY, NOTION_ALLOCATION_DATABASE_ID)
+    allocations.get_allocations()
+    allocations_df = allocations.data
+else:
+    allocations_df = pd.DataFrame()
+
+delta("Notion Allocations")
 
 data = TempoData()
 data.load(from_date=START_DATE, to_date=YESTERDAY)
@@ -464,6 +475,59 @@ def figureSpentTimePercentage(data):
 
 
 # =========================================================
+# Figure: Allocations over time
+# =========================================================
+
+
+# Requires config: rates
+def figureAllocations(allocations_df):
+    allocations_df["Start"] = pd.to_datetime(allocations_df["Start"])
+    allocations_df["Stop"] = pd.to_datetime(allocations_df["Stop"])
+
+    users = allocations_df["User"].unique()
+    start_date = pd.Timestamp.now().floor("D") - pd.offsets.YearBegin(1)
+
+    flattened_df = pd.DataFrame(columns=["Date", "Delta", "User"])
+
+    dates = []
+    for _, row in allocations_df.iterrows():
+        user = row["User"]
+        allocation = row["Allocation"]
+        start = row["Start"]
+        stop = row["Stop"]
+        if stop != None and stop < start_date:
+            continue
+        if start == None or start < start_date:
+            start = start_date
+
+        flattened_df.loc[-1] = [start, allocation, user]
+        flattened_df.index = flattened_df.index + 1
+        flattened_df.loc[-1] = [stop, -allocation, user]
+        flattened_df.index = flattened_df.index + 1
+        dates.append(start)
+        dates.append(stop)
+        dates.append(lookBack(1, start))
+        dates.append(lookBack(1, stop))
+
+    for day in dates:
+        for user in users:
+            flattened_df.loc[-1] = [day, 0, user]
+            flattened_df.index = flattened_df.index + 1
+
+    flattened_df = flattened_df.groupby(["Date", "User"], as_index=False)["Delta"].sum()
+
+    flattened_df = flattened_df.sort_values(by=["User", "Date"])
+    flattened_df["Total Allocation"] = flattened_df.groupby("User")["Delta"].cumsum().round(4)
+
+    figure = px.area(flattened_df, x="Date", y="Total Allocation", color="User", title="Allocations by User")
+
+    figure.update_xaxes(title_text="Date")
+    figure.update_yaxes(title_text="Total Allocation")
+
+    return figure
+
+
+# =========================================================
 # Figure: Rolling Income vs. Cost
 # =========================================================
 
@@ -712,6 +776,18 @@ delta("Base Rendering")
 # =========================================================
 # Dynamic addition of content
 # =========================================================
+
+# ---------------------------------------------------------
+# Allocations
+# Requires Notion Allocations DB
+if not allocations_df.empty:
+    figure = figureAllocations(allocations_df)
+    # Update projects page
+    (head, plots) = figure_tabs["projects"]
+    plots.append(figure)
+    figure_tabs["projects"] = (head, plots)
+
+delta("Allocations building")
 
 # ---------------------------------------------------------
 # Time spent groupings
