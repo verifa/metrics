@@ -1,28 +1,32 @@
 # Verifa Metrics Dashboard
 
+## Requirements
+
+* Docker daemon or Podman (see below under Replacing Docker)
+* Python 3 <span style="color:red">**NOTE (2023.10.12): the project fails with Python 3.12 due to an issue with numpy**</span>
+* [python-poetry](https://python-poetry.org/) to manage dependencies. (Install: <https://python-poetry.org/docs/#osx--linux--bashonwindows-install-instructions>)
+
+Check the [pyproject.toml](./pyproject.toml) for Python requirements. These are handled by Poetry.
+
 ## Development
 
-This project uses [python-poetry](https://python-poetry.org/) to manage dependencies.
-
-Installing poetry: <https://python-poetry.org/docs/#osx--linux--bashonwindows-install-instructions>
-
-Check the [pyproject.toml](./pyproject.toml) for Python requirements.
-
-Then simply:
+```TEMPO_KEY``` is required. See [Runtime environment](#runtime-environment) below.
 
 ```bash
-# Run the dev server
+# Build the image
 make dev
-# Browse to http://localhost:8050
 ```
-
-or to run a container with the built image
-
 ```bash
+# Run a container with the built image
 make run
 # Browse http://localhost:8000
 ```
+```bash
+# For more details about the different make targets
+make help
+```
 
+### TEMPO_CONFIG_PATH
 the run target uses the environment variable TEMPO_CONFIG_PATH, described below, as a mount point if set
 
 ```Makefile
@@ -40,22 +44,22 @@ make bare
 # Browse http://localhost:8000
 ```
 
-*Note:* To use `podman`, you can set the `DOCKER` variable to `podman`, e.g. `make DOCKER=podman dev`
+### Replacing Docker
+To use `podman`, you can set the `DOCKER` variable to `podman`, e.g. `make DOCKER=podman run`
 
-For more details about the different make target
+### Running on Windows
+To run on GitBash for Windows, you can set the `DOCKER` variable to `winpty docker`, e.g. `make DOCKER='winpty docker' run`.
 
-```bash
-make help
-```
+Docker for Windows satisfies the Docker requirement.
 
 ## Runtime environment
 
 | Key | Notes |
 |-----|-------|
-| **TEMPO_KEY** <br/> (required) | To read data from tempo, the API key to use is expected as the *TEMPO_KEY* environment variable. |
+| **TEMPO_KEY** <br/> (required) | Tempo API key. Can be generated from **Tempo → Settings (left sidebar) → API Integration**. |
 | **TEMPO_CONFIG_PATH** <br/> (optional) | To be able to add secret configurations there is a default config path `/tempo` where secrets can be mounted as files. For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides the default value for config files. |
 | **TEMPO_LOG_LEVEL** <br/> (optional) | Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]` |
-| **NOTION_KEY** <br/> (optional) | Notion API key. |
+| **NOTION_KEY** <br/> (optional) | Notion API key. Obtained from https://www.notion.so/my-integrations. You must be an owner of the workspace containing the databases. |
 | **NOTION_OKR_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/> The ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link. |
 | **NOTION_OKR_LABELS** <br/> (optional) | *Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID* <br/> The labels used in Notion. |
 | **NOTION_FINANCIAL_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/> Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Month`, `cost`, `total-cost-b2b`, and `total-income`. |
@@ -115,8 +119,7 @@ The rates file contains 4 lists
 
 
 ## Locally building the documentation
-
+```bash
     make docs
-
+```
 Then open `docs/_build/html/index.html`
-
