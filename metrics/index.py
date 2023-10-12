@@ -213,7 +213,6 @@ if not supplementary_data.working_hours.empty:
             df_comparison = df_team_earn_rolling_total.merge(df_team_normalised, how="inner", on="Date")
             delta("Comparison")
 
-
 # =========================================================
 # Figure: Comparing normalized worktime with normalized income
 # =========================================================
@@ -449,6 +448,7 @@ def figureFinancialTotal(year=None):
 # =========================================================
 
 
+# Requires config: rates
 def figureSpentTimePercentage(data):
     df_by_group = data.byTimeType().sort_values("Group")
     figure_projects_team = px.histogram(
@@ -683,6 +683,7 @@ def figureEggBaskets(data, supplementary_data):
 # Base rendering (only requires TEMPO_KEY)
 # =========================================================
 
+delta("Starting Rendering")
 
 main_list = [table_working_hours]
 if not supplementary_data.rates.empty:
@@ -695,8 +696,6 @@ figure_tabs = {"start_page": ("Main", main_list)}
 if SHOWTAB_PROJECTS:
     tab_children.append(dcc.Tab(label="Time spent on...", value="projects"))
     figures_project = figureProjects(data)
-    figure_time_spent = figureSpentTimePercentage(data)
-    figures_project.insert(0, figure_time_spent)
     figure_tabs["projects"] = ("What we work on", figures_project)
 if SHOWTAB_BILLABLE:
     tab_children.append(dcc.Tab(label="Billable", value="billable"))
@@ -708,11 +707,21 @@ if SHOWTAB_POPULAR_PROJECTS:
     tab_children.append(dcc.Tab(label="Popular projects", value="popular_projects"))
     figure_tabs["popular_projects"] = ("Popular projects", figurePopularProjects(data))
 
+delta("Base Rendering")
 
 # =========================================================
 # Dynamic addition of content
 # =========================================================
 
+# ---------------------------------------------------------
+# Time spent groupings
+# Requires rates file
+if not supplementary_data.rates.empty:
+    figure_time_spent = figureSpentTimePercentage(data)
+    # Update projects page
+    (head, plots) = figure_tabs["projects"]
+    plots.append(figure_time_spent)
+    figure_tabs["projects"] = (head, plots)
 
 # ---------------------------------------------------------
 # Financial data
@@ -767,9 +776,14 @@ if not supplementary_data.working_hours.empty:
 
 
 # ---------------------------------------------------------
-# Normalised working time
-# Requires config files: workinghours
-if not df_comparison.empty:
+# Break even
+# Requires config files: workinghours, rates, finances
+if (
+    not supplementary_data.working_hours.empty
+    and not supplementary_data.rates.empty
+    and not supplementary_data.costs.empty
+    and not df_comparison.empty
+):
     # Add tab
     if SHOWTAB_COMPARISON:
         figure_tabs["comparison"] = (
