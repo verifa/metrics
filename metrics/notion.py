@@ -55,6 +55,28 @@ class WorkingHours(Notion):
         self.data = data.sort_values(by=["User"])
 
 
+class Allocations(Notion):
+    data: pd.DataFrame
+
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
+        super().__init__(token, database_id)
+
+    def get_allocations(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        data = pd.DataFrame(columns=["User", "Allocation", "Start", "Stop"])
+
+        for item in result_dict["results"]:
+            user = item["properties"]["Assign"]["people"][0]["name"]
+            allocation = item["properties"]["Allocation"]["number"]
+            start = item["properties"]["Date"]["date"]["start"]
+            stop = item["properties"]["Date"]["date"]["end"]
+
+            data.loc[-1] = [user, allocation, start, stop]
+            data.index = data.index + 1
+
+        self.data = data.sort_values(by=["User"])
+
+
 class Financials(Notion):
     data: pd.DataFrame
 
