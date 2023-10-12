@@ -213,7 +213,6 @@ if not supplementary_data.working_hours.empty:
             df_comparison = df_team_earn_rolling_total.merge(df_team_normalised, how="inner", on="Date")
             delta("Comparison")
 
-
 # =========================================================
 # Figure: Comparing normalized worktime with normalized income
 # =========================================================
@@ -769,7 +768,7 @@ if not supplementary_data.working_hours.empty:
 # ---------------------------------------------------------
 # Normalised working time
 # Requires config files: workinghours
-if not df_comparison.empty:
+if not supplementary_data.working_hours.empty and not supplementary_data.rates.empty and not supplementary_data.costs.empty and not df_comparison.empty:
     # Add tab
     if SHOWTAB_COMPARISON:
         figure_tabs["comparison"] = (
