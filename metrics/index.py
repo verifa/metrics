@@ -487,7 +487,7 @@ def figureAllocations(allocations_df):
     users = allocations_df["User"].unique()
     start_date = pd.Timestamp.now().floor("D") - pd.offsets.YearBegin(1)
 
-    flattened_df = pd.DataFrame(columns=["Date", "Delta", "User"])
+    flattened_df = pd.DataFrame(columns=["Date", "Delta", "Inverse", "User"])
 
     dates = []
     for _, row in allocations_df.iterrows():
@@ -500,9 +500,9 @@ def figureAllocations(allocations_df):
         if start == None or start < start_date:
             start = start_date
 
-        flattened_df.loc[-1] = [start, allocation, user]
+        flattened_df.loc[-1] = [start, allocation, -allocation, user]
         flattened_df.index = flattened_df.index + 1
-        flattened_df.loc[-1] = [stop, -allocation, user]
+        flattened_df.loc[-1] = [stop, -allocation, allocation, user]
         flattened_df.index = flattened_df.index + 1
         dates.append(start)
         dates.append(stop)
@@ -511,20 +511,31 @@ def figureAllocations(allocations_df):
 
     for day in dates:
         for user in users:
-            flattened_df.loc[-1] = [day, 0, user]
+            flattened_df.loc[-1] = [day, 0, 0, user]
             flattened_df.index = flattened_df.index + 1
+    for user in users:
+        flattened_df.loc[-1] = [start_date, 0, 0.8, user]
+        flattened_df.index = flattened_df.index + 1
 
-    flattened_df = flattened_df.groupby(["Date", "User"], as_index=False)["Delta"].sum()
+    flattened_df = flattened_df.groupby(["Date", "User"], as_index=False).sum()
 
     flattened_df = flattened_df.sort_values(by=["User", "Date"])
     flattened_df["Total Allocation"] = flattened_df.groupby("User")["Delta"].cumsum().round(4)
+    flattened_df["Free Allocation"] = flattened_df.groupby("User")["Inverse"].cumsum().round(4)
 
-    figure = px.area(flattened_df, x="Date", y="Total Allocation", color="User", title="Allocations by User")
+    figure_allocated = px.area(
+        flattened_df, x="Date", y="Total Allocation", color="User", title="Allocations by User", height=400
+    )
+    figure_allocated.update_xaxes(title_text="Date")
+    figure_allocated.update_yaxes(title_text="Total Allocation")
 
-    figure.update_xaxes(title_text="Date")
-    figure.update_yaxes(title_text="Total Allocation")
+    figure_free = px.area(
+        flattened_df, x="Date", y="Free Allocation", color="User", title="Available Allocation by User", height=400
+    )
+    figure_free.update_xaxes(title_text="Date")
+    figure_free.update_yaxes(title_text="Free Allocation")
 
-    return figure
+    return [figure_allocated, figure_free]
 
 
 # =========================================================
@@ -781,10 +792,11 @@ delta("Base Rendering")
 # Allocations
 # Requires Notion Allocations DB
 if not allocations_df.empty:
-    figure = figureAllocations(allocations_df)
+    [figure_allocations, figure_free] = figureAllocations(allocations_df)
     # Update projects page
     (head, plots) = figure_tabs["projects"]
-    plots.append(figure)
+    plots.append(figure_allocations)
+    plots.append(figure_free)
     figure_tabs["projects"] = (head, plots)
 
 delta("Allocations building")
