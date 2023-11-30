@@ -51,7 +51,7 @@ class TempoData:
     def injectRates(self, rates: pd.DataFrame) -> None:
         """Modify data by merging in the given rates data"""
         uprated = self.data.merge(rates, on=["Key", "User"], how="left")
-        uprated["Rate"] = uprated.apply(lambda x: x["Rate"] / 10 if x["Currency"] == "SEK" else x["Rate"], axis=1)
+        uprated["Rate"] = uprated.apply(lambda x: x["Rate"] / 11.43 if x["Currency"] == "SEK" else x["Rate"], axis=1)
         uprated["Income"] = uprated["Rate"] * uprated["Billable"]
         self.data = uprated
 
