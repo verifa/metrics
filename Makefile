@@ -70,7 +70,7 @@ black:
 .PHONY: isort
 isort:
 	$(PIP) install black > black-install.log
-	isort . -c --diff
+	isort . -c -v --diff
 
 ## mypy
 ##	uses mypy to check the project
@@ -159,4 +159,3 @@ deploy:
 docs: install
 	poetry run sphinx-apidoc -o docs/ metrics/
 	cd docs && poetry run make html
-
