@@ -56,7 +56,6 @@ class SupplementaryData:
             daily = daily.iloc[:, 0]
             daily = daily.resample("D").ffill().rename("days_in_month")
             self.costs = self.costs.join(daily)
-            self.costs["Cost"] = self.costs["Cost"] / self.costs["days_in_month"]
             self.costs["External_cost"] = self.costs["External_cost"] / self.costs["days_in_month"]
             if "Real_income" in self.costs:
                 self.costs["Real_income"] = self.costs["Real_income"] / self.costs["days_in_month"]

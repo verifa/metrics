@@ -341,10 +341,7 @@ class TempoData:
 
         rolling_sum_7d = pd.DataFrame()
         rolling_sum_7d["sumIncome"] = daily_relative.set_index("Date").rolling("7d", min_periods=7)["Income"].sum()
-        rolling_sum_7d["sumCost"] = daily_relative.set_index("Date").rolling("7d", min_periods=7)["Cost"].sum()
-        rolling_sum_7d["sumExtCost"] = (
-            daily_relative.set_index("Date").rolling("7d", min_periods=7)["External_cost"].sum()
-        )
+        rolling_sum_7d["sumExtCost"] = daily_relative.set_index("Date").rolling("7d", min_periods=7)["External_cost"].sum()
 
         rolling_sum_7d["Diff"] = rolling_sum_7d["sumIncome"] / rolling_sum_7d["sumExtCost"]
         return rolling_sum_7d.reset_index(inplace=False)

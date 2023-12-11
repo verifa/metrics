@@ -372,7 +372,7 @@ def figureRollingTotal(df_team_rolling_total, df_raw_costs):
         figure_rolling_total.add_trace(
             go.Scatter(
                 x=df_raw_costs["Month"],
-                y=df_raw_costs["WeeklyExt"],
+                y=df_raw_costs["WeeklyExtCost"],
                 mode="lines",
                 line=go.scatter.Line(color="salmon"),
                 fill="tozeroy",
@@ -411,7 +411,7 @@ def figureFinancialTotal(year=None):
     figure_rolling_total.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
-            y=-monthly_result["Cost"],
+            y=-monthly_result["External_cost"],
             mode="lines",
             line=go.scatter.Line(color="#F0AA98"),
             fill="tozeroy",
@@ -422,7 +422,7 @@ def figureFinancialTotal(year=None):
     figure_rolling_total.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
-            y=monthly_result["Real_income"] - monthly_result["Cost"],
+            y=monthly_result["Real_income"] - monthly_result["External_cost"],
             mode="lines",
             line=go.scatter.Line(color="#C4C4C4"),
             fill="tozeroy",
@@ -433,7 +433,7 @@ def figureFinancialTotal(year=None):
 
     monthly_result = monthly_result[monthly_result["Month"].dt.day == 1]
     monthly_result["Month"] = monthly_result["Month"] + pd.DateOffset(months=1) - pd.Timedelta("1 day")
-    monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["Cost"].sum()
+    monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["External_cost"].sum()
     monthly_sum_in = monthly_result.rolling(12, min_periods=1)["Real_income"].sum()
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
     logging.info(monthly_result)

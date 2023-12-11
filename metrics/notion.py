@@ -86,30 +86,27 @@ class Financials(Notion):
     def get_financials(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
 
-        data = pd.DataFrame(columns=["Month", "Cost", "External_cost", "Real_income"])
+        data = pd.DataFrame(columns=["Month", "External_cost", "Real_income"])
 
         for item in result_dict["results"]:
             month = item["properties"]["Month"]["title"][0]["plain_text"]
-            cost = item["properties"]["cost"]["formula"]["number"]
-            extcost = item["properties"]["total-cost-b2b"]["formula"]["number"]
-            income = item["properties"]["total-income"]["formula"]["number"]
+            extcost = item["properties"]["external-cost"]["formula"]["number"]
+            income = item["properties"]["real-income"]["formula"]["number"]
 
             abcost = item["properties"]["AB-Cost"]["number"]
             oycost = item["properties"]["OY-Cost"]["number"]
 
             if oycost != None and abcost != None:
-                data.loc[-1] = [month, cost, extcost, income]
+                data.loc[-1] = [month, extcost, income]
                 data.index = data.index + 1
 
         self.data = data.sort_values(by=["Month"])
 
         # Add 5 calculated cost trend
-        average = sum(self.data["Cost"][-5:]) / 5
         extaverage = sum(self.data["External_cost"][-5:]) / 5
         y, m = list(map(int, self.data.tail(1)["Month"][self.data.index.max()].split("-")))
         for i in range(5):
             income = 0
-            cost = average
             extcost = extaverage
 
             m = (m % 12) + 1
@@ -117,7 +114,7 @@ class Financials(Notion):
             m_ = f"0{m}" if m < 10 else str(m)
             month = f"{y}-{m_}"
 
-            self.data.loc[-1] = [month, cost, extcost, income]
+            self.data.loc[-1] = [month, extcost, income]
             self.data.index = self.data.index + 1
 
         logging.debug(f"Financial data\n{self.data}")
