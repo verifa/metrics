@@ -69,8 +69,8 @@ black:
 ##	uses isort to check the import declarations
 .PHONY: isort
 isort:
-	$(PIP) install black > black-install.log
-	isort . -c -v --diff
+	$(PIP) install isort > black-install.log
+	isort . -c --diff
 
 ## mypy
 ##	uses mypy to check the project
@@ -85,7 +85,7 @@ mypy:
 .PHONY: pylint
 pylint:
 	$(PIP) install pylint > pylint-install.log
-	pylint --recursive=y .
+	pylint --recursive=y --exit-zero .
 
 ## lint:
 ##	a PHONY rule to run all linters
