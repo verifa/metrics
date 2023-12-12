@@ -46,6 +46,7 @@ SHOWTAB_BILLABLE = False
 SHOWTAB_COMPARISON = True
 SHOWTAB_INTERNAL = False
 SHOWTAB_POPULAR_PROJECTS = False
+SHOWTAB_PAYING_PROJECTS = True
 SHOWTAB_PROJECTS = True
 SHOWTAB_FINANCE = True
 SHOWTAB_RATES = False
@@ -683,6 +684,26 @@ def figureInternal(data):
 
 
 # =========================================================
+# Figure: Paying projects
+# =========================================================
+
+
+def figurePayingProjects(data, year=None):
+    figure_paying_projects_this_year = px.histogram(
+        data.getYear(year).sort_values("Key"),
+        x="Group",
+        y="Income",
+        color="User",
+        height=600,
+        title=f"Paying projects for {year}",
+    )
+    figure_paying_projects_this_year.update_xaxes(categoryorder="total ascending")
+    figure_paying_projects_this_year.update_layout(yaxis_title="Income [€]")
+
+    return figure_paying_projects_this_year
+
+
+# =========================================================
 # Figure: Popular projects
 # =========================================================
 
@@ -781,6 +802,13 @@ if SHOWTAB_INTERNAL:
 if SHOWTAB_POPULAR_PROJECTS:
     tab_children.append(dcc.Tab(label="Popular projects", value="popular_projects"))
     figure_tabs["popular_projects"] = ("Popular projects", figurePopularProjects(data))
+if SHOWTAB_PAYING_PROJECTS:
+    if "Real_income" in supplementary_data.costs:
+        max_year = int(supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]["Year"].max())
+        figures = [figurePayingProjects(data, year) for year in range(START_DATE.year, max_year + 1)]
+        figure_tabs["paying_projects"] = ("Paying projects", figures[::-1])
+        tab_children.append(dcc.Tab(label="Paying projects", value="paying_projects"))
+
 
 delta("Base Rendering")
 

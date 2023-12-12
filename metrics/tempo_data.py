@@ -356,6 +356,10 @@ class TempoData:
         """returns a dataFrame with entries for the previous year"""
         return self.data[self.data["Year"] == float(self.last_year)]
 
+    def getYear(self, year) -> pd.DataFrame:
+        """returns a dataFrame with entries for the given year"""
+        return self.data[self.data["Year"] == float(year)]
+
     def zeroOutBillableTime(self, keys: pd.DataFrame) -> None:
         """
         Sets billable time to zero (0) for internal project keys
