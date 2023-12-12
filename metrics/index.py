@@ -787,6 +787,13 @@ if not supplementary_data.rates.empty:
     main_list.append(table_missing_rates)
 main_list.append(figureEggBaskets(data, supplementary_data))
 
+# Allocations
+# Requires Notion Allocations DB
+if not allocations_df.empty:
+    [figure_allocations, figure_free] = figureAllocations(allocations_df)
+    main_list.append(figure_allocations)
+    main_list.append(figure_free)
+
 tab_children = [dcc.Tab(label="Main", value="start_page")]
 figure_tabs = {"start_page": ("Main", main_list)}
 
@@ -821,7 +828,6 @@ delta("Base Rendering")
 # Allocations
 # Requires Notion Allocations DB
 if not allocations_df.empty:
-    [figure_allocations, figure_free] = figureAllocations(allocations_df)
     # Update projects page
     (head, plots) = figure_tabs["projects"]
     plots.append(figure_allocations)
