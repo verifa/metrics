@@ -112,7 +112,7 @@ print(f"\nStarting {start}")
 
 def delta(txt):
     delta = datetime.now() - start
-    print(f"{txt}: {delta}")
+    print(f"{delta} : {txt}")
 
 
 # ---------------------------------------------------------
