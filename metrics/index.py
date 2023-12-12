@@ -53,6 +53,7 @@ SHOWTAB_RATES = False
 SHOWTAB_ROLLING_INCOME = True
 SHOWTAB_NORMALISED_WORKTIME = True
 SHOWTAB_OKR_FIG = False
+SHOWMAIN_OKR_FIG = False
 
 # =========================================================
 # Helpers
@@ -926,10 +927,11 @@ if NOTION_KEY and NOTION_OKR_DATABASE_ID:
         tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
 
     # Update main page with NOTION_OKR_LABELS
-    (head, plots) = figure_tabs["start_page"]
-    plots += okr_figs_kr
-    plots.append(okr_figs_ini[0])
-    figure_tabs["start_page"] = (head, plots)
+    if SHOWMAIN_OKR_FIG:
+        (head, plots) = figure_tabs["start_page"]
+        plots += okr_figs_kr
+        plots.append(okr_figs_ini[0])
+        figure_tabs["start_page"] = (head, plots)
 
 
 # =========================================================
