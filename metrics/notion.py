@@ -63,15 +63,21 @@ class Allocations(Notion):
 
     def get_allocations(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
-        data = pd.DataFrame(columns=["User", "Allocation", "Start", "Stop"])
+        data = pd.DataFrame(columns=["User", "Allocation", "Start", "Stop", "Unconfirmed", "JiraID"])
 
         for item in result_dict["results"]:
             user = item["properties"]["Assign"]["people"][0]["name"]
             allocation = item["properties"]["Allocation"]["number"]
             start = item["properties"]["Date"]["date"]["start"]
             stop = item["properties"]["Date"]["date"]["end"]
+            unconfirmed = item["properties"]["Unconfirmed"]["checkbox"]
+            jiratext = item["properties"]["Task ID"]["rich_text"]
+            if jiratext == []:
+                jiraid = "?"
+            else:
+                jiraid = jiratext[0]["plain_text"]
 
-            data.loc[-1] = [user, allocation, start, stop]
+            data.loc[-1] = [user, allocation, start, stop, unconfirmed, jiraid]
             data.index = data.index + 1
 
         self.data = data.sort_values(by=["User"])
