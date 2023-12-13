@@ -71,7 +71,9 @@ class TempoData:
         newdata["Timetype"] = [
             "VeriFriday" if x == "VF" else newdata["Timetype"][idx] for idx, x in enumerate(newdata["Group"])
         ]
-        return newdata.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum()
+        return newdata.groupby(["Date", "Timetype", "Group"], as_index=False)[["Time", "Timetype"]].sum(
+            numeric_only=True
+        )
 
     def byTotalGroup(self, days_back) -> pd.DataFrame:
         """returns aggregated billable time grouped by issue key group and user"""
