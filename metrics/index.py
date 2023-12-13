@@ -11,7 +11,7 @@ from dash import dcc, html
 from metrics.date_utils import lookBack
 from metrics.notion import OKR, Allocations, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
-from metrics.tempo_config import ROLLING_DATE, START_DATE, YESTERDAY
+from metrics.tempo_config import ROLLING_DATE, START_DATE, TODAY, YESTERDAY
 from metrics.tempo_data import TempoData
 
 # happy hack until we can fix these
@@ -485,59 +485,119 @@ def figureSpentTimePercentage(data):
 def figureAllocations(allocations_df):
     allocations_df["Start"] = pd.to_datetime(allocations_df["Start"])
     allocations_df["Stop"] = pd.to_datetime(allocations_df["Stop"])
+    allocations_df["Allocation"] = pd.to_numeric(allocations_df["Allocation"], errors="coerce")
+    allocations_df = allocations_df[allocations_df["Stop"] >= ROLLING_DATE]
+    allocations_df.loc[allocations_df["Start"] <= ROLLING_DATE, "Start"] = ROLLING_DATE
 
-    users = allocations_df["User"].unique()
-    start_date = pd.Timestamp.now().floor("D") - pd.offsets.YearBegin(1)
+    # Create a list to store rows for each day
+    rows = []
 
-    flattened_df = pd.DataFrame(columns=["Date", "Delta", "Inverse", "User"])
-
-    dates = []
     for _, row in allocations_df.iterrows():
         user = row["User"]
         allocation = row["Allocation"]
-        start = row["Start"]
-        stop = row["Stop"]
-        if stop != None and stop < start_date:
-            continue
-        if start == None or start < start_date:
-            start = start_date
+        unconfirmed = row["Unconfirmed"]
+        jira_id = row["JiraID"]
 
-        flattened_df.loc[-1] = [start, allocation, -allocation, user]
-        flattened_df.index = flattened_df.index + 1
-        flattened_df.loc[-1] = [stop, -allocation, allocation, user]
-        flattened_df.index = flattened_df.index + 1
-        dates.append(start)
-        dates.append(stop)
-        dates.append(lookBack(1, start))
-        dates.append(lookBack(1, stop))
+        # Generate a date range for each day in the specified range
+        date_range = pd.date_range(start=row["Start"], end=row["Stop"], freq="D")
 
-    for day in dates:
-        for user in users:
-            flattened_df.loc[-1] = [day, 0, 0, user]
-            flattened_df.index = flattened_df.index + 1
-    for user in users:
-        flattened_df.loc[-1] = [start_date, 0, 0.8, user]
-        flattened_df.index = flattened_df.index + 1
+        # Create a row for each day
+        for date in date_range:
+            rows.append(
+                {
+                    "User": user,
+                    "Date": date,
+                    "Allocation": allocation,
+                    "Unconfirmed": unconfirmed,
+                    "JiraID": jira_id,
+                }
+            )
 
-    flattened_df = flattened_df.groupby(["Date", "User"], as_index=False).sum()
+    # Create a new DataFrame to group by user and date to aggregate the data
+    result_df = pd.DataFrame(rows)
 
-    flattened_df = flattened_df.sort_values(by=["User", "Date"])
-    flattened_df["Total Allocation"] = flattened_df.groupby("User")["Delta"].cumsum().round(4)
-    flattened_df["Free Allocation"] = flattened_df.groupby("User")["Inverse"].cumsum().round(4)
-
-    figure_allocated = px.area(
-        flattened_df, x="Date", y="Total Allocation", color="User", title="Allocations by User", height=400
+    result_df = (
+        result_df.groupby(["User", "Date"])
+        .agg(
+            {
+                "Allocation": "sum",
+                "Unconfirmed": "max",  # True if any day is True
+                "JiraID": lambda x: ",".join(x.unique()),  # Concatenate JiraIDs
+            }
+        )
+        .reset_index()
     )
+
+    # Group by relevant columns and aggregate date ranges into timelines
+    allocations_df = (
+        result_df.groupby(["User", "Allocation", "Unconfirmed", "JiraID"])
+        .agg(Start=("Date", "min"), Stop=("Date", "max"))
+        .reset_index()
+    )
+
+    # Define a function to determine color based on conditions
+    def determine_color(row):
+        if row["Unconfirmed"]:
+            return "Unconfirmed"
+        elif "?" in row["JiraID"]:
+            return "Missing Jira"
+        elif row["Allocation"] < 0.4:
+            return "Less than 40%"
+        elif row["Allocation"] > 0.8:
+            return "More than 80%"
+        else:
+            return "OK"
+
+    color_mapping = {
+        "Unconfirmed": "red",
+        "Missing Jira": "blue",
+        "OK": "#2FB115",
+        "Less than 40%": "lightgreen",
+        "More than 80%": "darkgreen",
+    }
+
+    # Apply the function to create a new 'Color' column
+    allocations_df["Color"] = allocations_df.apply(determine_color, axis=1)
+
+    # Create a Gantt chart
+    figure_allocated = px.timeline(
+        allocations_df,
+        x_start="Start",
+        x_end="Stop",
+        y="User",
+        color="Color",
+        hover_data={"JiraID": True, "Allocation": ":.0%"},  # Format Allocation as percentage
+        title="Allocations by user",
+        color_discrete_map=color_mapping,  # Explicitly define color mapping
+    )
+
+    # Add vertical line for current date
+    figure_allocated.add_shape(
+        dict(
+            type="line",
+            x0=TODAY,
+            x1=TODAY,
+            y0=0,
+            y1=1,
+            yref="paper",
+            line=dict(color="red", width=2),
+        )
+    )
+
+    # Add text annotation above the red line
+    figure_allocated.add_annotation(
+        text="Today",
+        x=TODAY,
+        y=1.1,
+        yref="paper",
+        showarrow=False,
+        font=dict(color="red"),
+    )
+
     figure_allocated.update_xaxes(title_text="Date")
-    figure_allocated.update_yaxes(title_text="Total Allocation")
+    figure_allocated.update_yaxes(title_text="User")
 
-    figure_free = px.area(
-        flattened_df, x="Date", y="Free Allocation", color="User", title="Available Allocation by User", height=400
-    )
-    figure_free.update_xaxes(title_text="Date")
-    figure_free.update_yaxes(title_text="Free Allocation")
-
-    return [figure_allocated, figure_free]
+    return [figure_allocated]
 
 
 # =========================================================
@@ -790,9 +850,8 @@ main_list.append(figureEggBaskets(data, supplementary_data))
 # Allocations
 # Requires Notion Allocations DB
 if not allocations_df.empty:
-    [figure_allocations, figure_free] = figureAllocations(allocations_df)
+    [figure_allocations] = figureAllocations(allocations_df)
     main_list.append(figure_allocations)
-    main_list.append(figure_free)
 
 tab_children = [dcc.Tab(label="Main", value="start_page")]
 figure_tabs = {"start_page": ("Main", main_list)}
@@ -831,7 +890,6 @@ if not allocations_df.empty:
     # Update projects page
     (head, plots) = figure_tabs["projects"]
     plots.append(figure_allocations)
-    plots.append(figure_free)
     figure_tabs["projects"] = (head, plots)
 
 delta("Allocations building")
