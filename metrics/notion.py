@@ -83,6 +83,29 @@ class Allocations(Notion):
         self.data = data.sort_values(by=["User"])
 
 
+class Crew(Notion):
+    data: pd.DataFrame
+
+    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
+        super().__init__(token, database_id)
+
+    def get_crew(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        data = pd.DataFrame(columns=["User", "Total cost"])
+
+        for item in result_dict["results"]:
+            user = item["properties"]["Person"]["people"][0]["name"]
+            currency = item["properties"]["Currency"]["select"]["name"]
+            cost = item["properties"]["Total Cost"]["number"] / (
+                11.43 if currency == "SEK" else 1
+            )  # TODO: constant or helper method for SEK to EUR
+
+            data.loc[-1] = [user, cost]
+            data.index = data.index + 1
+
+        self.data = data.sort_values(by=["User"])
+
+
 class Financials(Notion):
     data: pd.DataFrame
 
@@ -92,27 +115,41 @@ class Financials(Notion):
     def get_financials(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
 
-        data = pd.DataFrame(columns=["Month", "External_cost", "Real_income"])
+        data = pd.DataFrame(columns=["Month", "External_cost", "Real_income", "Starting_amount"])
 
         for item in result_dict["results"]:
             month = item["properties"]["Month"]["title"][0]["plain_text"]
             extcost = item["properties"]["external-cost"]["formula"]["number"]
             income = item["properties"]["real-income"]["formula"]["number"]
 
+            sekstart = item["properties"]["SEK Start"]["number"]
+            eurstart = item["properties"]["EUR Start"]["number"]
+            start = 0
+            if sekstart != None:
+                start += sekstart / 11.43  # TODO: constant or helper for SEK
+            if eurstart != None:
+                start += eurstart
+
             abcost = item["properties"]["AB-Cost"]["number"]
             oycost = item["properties"]["OY-Cost"]["number"]
 
             if oycost != None and abcost != None:
-                data.loc[-1] = [month, extcost, income]
+                data.loc[-1] = [month, extcost, income, start]
                 data.index = data.index + 1
 
         self.data = data.sort_values(by=["Month"])
 
-        # Add 5 calculated cost trend
+        current_finances = 0
+        for i in range(len(self.data) - 1, 0, -1):
+            start = self.data["Starting_amount"][i]
+            current_finances += self.data["Real_income"][i] - self.data["External_cost"][i] + start
+            if start != 0:
+                break
+
+        # Add 5 projected cost entries based on recent average
         extaverage = sum(self.data["External_cost"][-5:]) / 5
         y, m = list(map(int, self.data.tail(1)["Month"][self.data.index.max()].split("-")))
         for i in range(5):
-            income = 0
             extcost = extaverage
 
             m = (m % 12) + 1
@@ -120,8 +157,9 @@ class Financials(Notion):
             m_ = f"0{m}" if m < 10 else str(m)
             month = f"{y}-{m_}"
 
-            self.data.loc[-1] = [month, extcost, income]
+            self.data.loc[-1] = [month, extcost, 0, current_finances]
             self.data.index = self.data.index + 1
+            current_finances = 0
 
         logging.debug(f"Financial data\n{self.data}")
 
