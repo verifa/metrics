@@ -64,7 +64,7 @@ Docker for Windows satisfies the Docker requirement.
 | **NOTION_OKR_LABELS** <br/> (optional) | *Requires: NOTION_KEY and NOTION_OKR_DATABASE_ID* <br/> The labels used in Notion. |
 | **NOTION_FINANCIAL_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/> Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Month`, `external-cost`, and `real-income`. |
 | **NOTION_WORKINGHOURS_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/> Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `User`, `Daily`, `Delta`, `Start`, and `Stop`. |
-| **NOTION_ALLOCATIONS_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/> Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Allocation`, `Assign`, and `Date` (as a date range). |
+| **NOTION_ALLOCATIONS_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/> Like the example of *NOTION_OKR_DATABASE*, a database ID from notion is needed. The database should include the column names `Allocation`, `Assign`, `Task ID`, `Unconfirmed`, and `Date` (as a date range). |
 
 ## Configuration files
 
