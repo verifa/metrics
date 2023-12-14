@@ -538,8 +538,16 @@ def figureAllocations(allocations_df):
     # Define a function to determine color based on conditions
     def determine_color(row):
         if row["Unconfirmed"]:
+            if row["Allocation"] < 0.4:
+                return "Unconfirmed (< 40%)"
+            elif row["Allocation"] > 0.8:
+                return "Unconfirmed (> 80%)"
             return "Unconfirmed"
         elif "?" in row["JiraID"]:
+            if row["Allocation"] < 0.4:
+                return "Missing Jira (< 40%)"
+            elif row["Allocation"] > 0.8:
+                return "Missing Jira (> 80%)"
             return "Missing Jira"
         elif row["Allocation"] < 0.4:
             return "Less than 40%"
@@ -550,7 +558,11 @@ def figureAllocations(allocations_df):
 
     color_mapping = {
         "Unconfirmed": "red",
-        "Missing Jira": "blue",
+        "Unconfirmed (< 40%)": "lightred",
+        "Unconfirmed (> 80%)": "darkred",
+        "Missing Jira": "gray",
+        "Missing Jira (< 40%)": "lightgray",
+        "Missing Jira (> 80%)": "darkslategray",
         "OK": "#2FB115",
         "Less than 40%": "lightgreen",
         "More than 80%": "darkgreen",
