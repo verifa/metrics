@@ -1127,7 +1127,7 @@ if (
     # Add tab
     if SHOWTAB_COMPARISON:
         figures = []
-        if figure_runway_unclamped:
+        if "Real_income" in supplementary_data.costs and not crew_df.empty and not allocations_df.empty:
             figures.append(figure_runway_unclamped)
         figures.append(figureEarningsVersusWorkload(df_comparison))
 
