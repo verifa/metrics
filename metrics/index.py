@@ -42,6 +42,8 @@ COLOR_HEAD = "#ad9ce3"
 COLOR_ONE = "#ccecef"
 COLOR_TWO = "#fc9cac"
 
+EURinSEK = 11.43
+
 # Configure tabs to show in the UI
 SHOWTAB_BILLABLE = False
 SHOWTAB_COMPARISON = True
@@ -620,6 +622,149 @@ def figureAllocations(allocations_df):
     return [figure_allocated]
 
 
+def figureAverageRate(crew_df: pd.DataFrame, allocations_df: pd.DataFrame, supplementary_data: SupplementaryData):
+    staff = crew_df[lambda df: (df["Consulting Hours"] == 0)]
+    consultants = crew_df[lambda df: (df["Consulting Hours"] > 0)]
+
+    consultant_count = consultants.index.size
+    sharedCosts = staff["Total cost"].sum() / consultant_count
+
+    # Here we have some constants in place to approximate working time in a year.
+    # 52 / 46 approximates a 46 working-week year, with a salary that covers the unworked time
+    # 22 is a typical work month, and 0.8 is our standard allocation amount
+    consultants["Cost to cover"] = consultants["Total cost"].apply(lambda x: (x + sharedCosts) * (52 / 47))
+    consultants["Monthly Hours"] = consultants["Consulting Hours"].apply(lambda hours: hours * 22 * 0.8)
+    consultants["Hour Rate EUR"] = consultants["Cost to cover"] / consultants["Monthly Hours"]
+    consultants["Hour Rate SEK"] = consultants["Hour Rate EUR"] * EURinSEK
+
+    avEUR = consultants["Hour Rate EUR"].mean()
+    avSEK = consultants["Hour Rate SEK"].mean()
+
+    period_names = ["Now", "Next Month", "2 Months"]
+    period_dates = [TODAY, TODAY + pd.offsets.MonthBegin(), TODAY + pd.offsets.MonthBegin(2)]
+    consultants["Period"] = [period_names for _ in range(len(consultants))]
+    consultants = consultants.explode("Period")
+
+    def generateAllocationSlice(day, period):
+        current_allocations = allocations_df[
+            lambda df: (df["Start"] <= day) & (df["Stop"] >= day) & (df["Unconfirmed"] == False)
+        ]
+        current_allocations["Key"] = current_allocations["JiraID"]
+        current_allocations = current_allocations[["User", "Allocation", "Key"]]
+        current_allocations = current_allocations.merge(supplementary_data.rates, on=["Key", "User"], how="left")
+        current_allocations["Current Rate EUR"] = current_allocations.apply(
+            lambda x: x["Rate"] / (EURinSEK if x["Currency"] == "SEK" else 1) * x["Allocation"] / 0.8, axis=1
+        )
+        current_allocations = current_allocations[["User", "Allocation", "Current Rate EUR"]]
+        current_allocations = (
+            current_allocations.groupby(["User"])
+            .agg(
+                {
+                    "Allocation": "sum",
+                    "Current Rate EUR": "sum",
+                }
+            )
+            .reset_index()
+        )
+        current_allocations["Period"] = [period for _ in range(len(current_allocations))]
+        return current_allocations
+
+    periods = []
+    for i in range(len(period_dates)):
+        periods.append(generateAllocationSlice(period_dates[i], period_names[i]))
+
+    consultants = consultants.sort_values(by=["Hour Rate EUR"])
+    figure = px.bar(
+        consultants,
+        x="User",
+        y=["Hour Rate EUR", "Hour Rate SEK"],
+        facet_row="variable",
+        facet_col="Period",
+        category_orders={"Period": period_names},
+    )
+    figure.update_yaxes(matches=None)
+
+    figure.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
+
+    for i in range(len(periods)):
+        period = periods[i]
+        well_allocated = period[lambda df: (df["Allocation"] >= 0.5)]
+
+        avEUR_current = well_allocated["Current Rate EUR"].mean()
+        avSEK_current = avEUR_current * EURinSEK
+
+        avEUR_common = period["Current Rate EUR"].sum() / consultant_count
+
+        avEUR_target = ((avEUR * consultant_count) - well_allocated["Current Rate EUR"].sum()) / (
+            consultant_count - well_allocated.index.size
+        )
+        avSEK_target = avEUR_target * EURinSEK
+
+        positions = ["bottom left", "top right"]
+        if avEUR_target < avEUR:
+            positions = ["top left", "bottom right"]
+
+        figure.add_hline(
+            y=avEUR_current,
+            line_dash="dash",
+            line_color="blue",
+            row=0,
+            col=i + 1,
+            annotation_text=f"Allocated: {avEUR_current:.2f} €",
+            annotation_position="bottom right",
+        )
+        figure.add_hline(
+            y=avSEK_current,
+            line_dash="dash",
+            line_color="red",
+            row=1,
+            col=i + 1,
+            annotation_text=f"Allocated: {avSEK_current:.2f} SEK",
+            annotation_position="bottom right",
+        )
+
+        figure.add_hline(y=avEUR_common, line_color="blue", row=0, col=i + 1)
+        figure.add_hline(y=avEUR_common * EURinSEK, line_color="red", row=1, col=i + 1)
+
+        figure.add_hline(
+            y=avEUR,
+            line_dash="dot",
+            row=0,
+            col=i + 1,
+            annotation_text=f"Average: {avEUR:.2f} €",
+            annotation_position=positions[0],
+        )
+        figure.add_hline(
+            y=avSEK,
+            line_dash="dot",
+            row=1,
+            col=i + 1,
+            annotation_text=f"Average: {avSEK:.2f} SEK",
+            annotation_position=positions[0],
+        )
+
+        figure.add_hline(
+            y=avEUR_target,
+            line_dash="dot",
+            row=0,
+            col=i + 1,
+            annotation_text=f"Target Avg Rate of New Contracts: {avEUR_target:.2f} €",
+            annotation_position=positions[1],
+        )
+        figure.add_hline(
+            y=avSEK_target,
+            line_dash="dot",
+            row=1,
+            col=i + 1,
+            annotation_text=f"Target Avg Rate of New Contracts: {avSEK_target:.2f} SEK",
+            annotation_position=positions[1],
+        )
+
+    # TODO: Individual's current hourly rates as lines
+
+    return figure
+
+
 # =========================================================
 # Figure: Remaining Runway
 # =========================================================
@@ -686,7 +831,7 @@ def figureRunway(
         # I'm sure there's a nice clever one-liner to do this. I'm apparently not that clever.
         rate = 0
         for _, raterow in supplemental.rates[lambda df: (df["Key"] == task_id) & (df["User"] == user)].iterrows():
-            rate = raterow["Rate"] / (11.43 if raterow["Currency"] == "SEK" else 1)  # TODO: Constant or helper for SEK
+            rate = raterow["Rate"] / (EURinSEK if raterow["Currency"] == "SEK" else 1)
             break
 
         prevm = start
@@ -1006,6 +1151,12 @@ if not allocations_df.empty:
     [figure_allocations] = figureAllocations(allocations_df)
     main_list.append(figure_allocations)
 delta("Allocations building")
+
+# Break-Even Average Rage
+# Requires Notion Allocations & Crew DBs, and rates file
+if not allocations_df.empty and not crew_df.empty and not supplementary_data.rates.empty:
+    main_list.append(figureAverageRate(crew_df, allocations_df, supplementary_data))
+delta("Break-even rate building")
 
 # Runway
 # Requires rates file, financials, crew, and allocations
