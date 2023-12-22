@@ -140,13 +140,6 @@ class Financials(Notion):
 
         self.data = data.sort_values(by=["Month"])
 
-        current_finances = 0
-        for i in range(len(self.data) - 1, 0, -1):
-            start = self.data["Starting_amount"][i]
-            current_finances += self.data["Real_income"][i] - self.data["External_cost"][i] + start
-            if start != 0:
-                break
-
         # Add 5 projected cost entries based on recent average
         extaverage = sum(self.data["External_cost"][-5:]) / 5
         y, m = list(map(int, self.data.tail(1)["Month"][self.data.index.max()].split("-")))
@@ -158,7 +151,7 @@ class Financials(Notion):
             m_ = f"0{m}" if m < 10 else str(m)
             month = f"{y}-{m_}"
 
-            self.data.loc[-1] = [month, extcost, 0, current_finances]
+            self.data.loc[-1] = [month, extcost, 0, 0]
             self.data.index = self.data.index + 1
             current_finances = 0
 

@@ -772,21 +772,41 @@ def figureAverageRate(crew_df: pd.DataFrame, allocations_df: pd.DataFrame, suppl
 def figureRunway(
     tempo_data: TempoData, supplemental: SupplementaryData, crew_df: pd.DataFrame, allocations_df: pd.DataFrame
 ):
-    start_date = pd.Timestamp(supplemental.financials["Month"][-5])
-    invoiced_cutoff = start_date - pd.offsets.MonthBegin()
-
-    current_amount = supplemental.financials["Starting_amount"][-5]
     monthly_salaries = crew_df["Total cost"].sum()
 
-    flattened_df = pd.DataFrame(columns=["Date", "costs only", "incl. known", "incl. allocated"])
+    reported_account_balances = supplemental.financials[["Month", "Starting_amount"]][lambda df: (df["Starting_amount"] != 0)]
+    start_date = pd.Timestamp(reported_account_balances["Month"][-1])
+    current_amount = reported_account_balances["Starting_amount"][-1]
+
+    flattened_df = pd.DataFrame(columns=["Date", "costs only", "incl. billable", "incl. allocated"])
     flattened_df.loc[-1] = [lookBack(1, start_date), current_amount, current_amount, current_amount]
     flattened_df.index = flattened_df.index + 1
 
     max_enddate = pd.Timestamp(allocations_df["Stop"].max())
+    invoiced_cutoff = start_date - pd.offsets.MonthBegin()
+
+    # TODO: Incomes in Financials are invoiced amounts, but not received amounts. Financials database does not show money in the bank.
+    #       Maybe the solution to this is to start the graph from the point we have the actual amount in the bank and apply any values that should be paid after that date?
+    # TODO: Better estimate of invoicing date
+    # TODO: Change "Start" amounts for "End"
 
     # known costs
-    for day in pd.date_range(start_date, max_enddate + pd.offsets.MonthBegin(), freq="M"):
-        cost = monthly_salaries
+    for _, row in supplemental.financials.iterrows():
+        day = pd.Timestamp(row["Month"])
+        if day < start_date + pd.offsets.MonthBegin():
+            continue
+        cost = row["External_cost"]
+
+        flattened_df.loc[-1] = [day, -cost, -cost, -cost]
+        flattened_df.index = flattened_df.index + 1
+        flattened_df.loc[-1] = [lookBack(1, day), 0, 0, 0]
+        flattened_df.index = flattened_df.index + 1
+
+    # projected costs
+    last_estimated_month = pd.Timestamp(supplemental.financials["Month"][-1])
+    estimated_costs = supplemental.financials["External_cost"][-1]
+    for day in pd.date_range(last_estimated_month, max_enddate + pd.offsets.MonthBegin(), freq="M"):
+        cost = max(estimated_costs, monthly_salaries)
 
         flattened_df.loc[-1] = [day, -cost, -cost, -cost]
         flattened_df.index = flattened_df.index + 1
