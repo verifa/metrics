@@ -814,21 +814,20 @@ def figureRunway(
         flattened_df.index = flattened_df.index + 1
 
     # hours worked
-    total_known = 0
+    total_billable = 0
     daily_sum = tempo_data.data.groupby(["Date"], as_index=False)["Income"].sum()
     for _, row in daily_sum.iterrows():
-        day = row["Date"]
-        if day < invoiced_cutoff:
+        billing_date = (
+            pd.Timestamp(row["Date"]) + pd.offsets.MonthBegin() + pd.offsets.Week(2)
+        )
+        if billing_date <= start_date:
             continue
-        day = (
-            pd.Timestamp(day) + pd.offsets.MonthBegin() + pd.offsets.Week(2)
-        )  # TODO: Better estimate of invoicing date
-        known = row["Income"]
-        total_known += known
+        billable = row["Income"]
+        total_billable += billable
 
-        flattened_df.loc[-1] = [day, 0, known, 0]
+        flattened_df.loc[-1] = [billing_date, 0, billable, 0]
         flattened_df.index = flattened_df.index + 1
-        flattened_df.loc[-1] = [lookBack(1, day), 0, 0, 0]
+        flattened_df.loc[-1] = [lookBack(1, billing_date), 0, 0, 0]
         flattened_df.index = flattened_df.index + 1
 
     # hours allocated
@@ -873,7 +872,7 @@ def figureRunway(
     flattened_df = flattened_df.sort_values(by=["Date"])
 
     flattened_df["cum costs only"] = flattened_df["costs only"].cumsum().round(4)
-    flattened_df["cum known"] = flattened_df["incl. known"].cumsum().round(4)
+    flattened_df["cum billable"] = flattened_df["incl. billable"].cumsum().round(4)
     flattened_df["cum allocated"] = flattened_df["incl. allocated"].cumsum().round(4)
 
     figure = px.scatter(height=600)
@@ -889,7 +888,7 @@ def figureRunway(
     figure.add_trace(
         go.Scatter(
             x=flattened_df["Date"],
-            y=flattened_df["cum known"],
+            y=flattened_df["cum billable"],
             mode="lines",
             line=go.scatter.Line(color="darkgreen"),
             name="Billable",
@@ -912,7 +911,7 @@ def figureRunway(
     clamped = go.Figure(figure)
     clamped.update_layout(
         title="Runway",
-        yaxis_range=[0, current_amount + total_known * 1.2],
+        yaxis_range=[0, current_amount + total_billable * 1.2],
     )
 
     return [clamped, figure]
