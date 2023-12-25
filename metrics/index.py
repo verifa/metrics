@@ -782,8 +782,7 @@ def figureRunway(
     flattened_df.loc[-1] = [lookBack(1, start_date), current_amount, current_amount, current_amount]
     flattened_df.index = flattened_df.index + 1
 
-    max_enddate = pd.Timestamp(allocations_df["Stop"].max())
-    invoiced_cutoff = start_date - pd.offsets.MonthBegin()
+    max_enddate = pd.Timestamp(allocations_df["Stop"].max()) + pd.offsets.Day(40) #TODO: Largest invoice delay
 
     # TODO: Incomes in Financials are invoiced amounts, but not received amounts. Financials database does not show money in the bank.
     #       Maybe the solution to this is to start the graph from the point we have the actual amount in the bank and apply any values that should be paid after that date?
@@ -839,10 +838,11 @@ def figureRunway(
         start = pd.Timestamp(row["Start"])
         stop = pd.Timestamp(row["Stop"])
         task_id = row["JiraID"]
-        if stop != None and stop < start_date:
-            continue
-        if start == None or start < invoiced_cutoff:
-            start = invoiced_cutoff
+        invoice_delay = 15
+        first_next_invoice = start_date.floor("D") - pd.offsets.MonthBegin() - pd.offsets.Day(invoice_delay)
+
+        if start == None or start < first_next_invoice:
+            start = first_next_invoice
 
         if stop == None:
             stop = max_enddate
@@ -853,20 +853,27 @@ def figureRunway(
             rate = raterow["Rate"] / (EURinSEK if raterow["Currency"] == "SEK" else 1)
             break
 
-        prevm = start
-        nextm = start + pd.offsets.MonthBegin()
-        while nextm <= stop:
-            invoice_date = nextm + pd.offsets.Week(2)  # TODO: Better estimate of invoicing date
-            workdays = (
-                len(pd.bdate_range(prevm, nextm)) - 3
-            )  # Slightly conservative estimate, as holidays and sick days are not factored otherwise
-            amount = allocation * workdays * 7.5 * rate
-            flattened_df.loc[-1] = [invoice_date, 0, 0, amount]
-            flattened_df.index = flattened_df.index + 1
-            flattened_df.loc[-1] = [lookBack(1, invoice_date), 0, 0, 0]
-            flattened_df.index = flattened_df.index + 1
+        padded_stop = stop + pd.offsets.Day(invoice_delay) + pd.offsets.MonthEnd()
+        prevm = start - pd.offsets.MonthBegin()
+        nextm = prevm + pd.offsets.MonthBegin()
+        while nextm <= padded_stop:
+            billing_date = (
+                nextm + pd.offsets.Day(invoice_delay)
+            )
+            if billing_date > start_date:
+                days_range_start = prevm if prevm >= start else start
+                days_range_end = nextm if nextm <= stop else stop
+                workdays = (
+                    len(pd.bdate_range(days_range_start, days_range_end))
+                )  # Slightly optimistic estimate, as holidays and sick days are not factored in
+                amount = allocation * workdays * 7.5 * rate #TODO: Work hours for this person
+                print(f"{user}- {task_id} => {rate} * {allocation} * {workdays} => {amount} on {billing_date}")
+                flattened_df.loc[-1] = [billing_date, 0, 0, amount]
+                flattened_df.index = flattened_df.index + 1
+                flattened_df.loc[-1] = [lookBack(1, billing_date), 0, 0, 0]
+                flattened_df.index = flattened_df.index + 1
             prevm = nextm
-            nextm = nextm + pd.offsets.MonthBegin()
+            nextm = prevm + pd.offsets.MonthBegin()
 
     flattened_df = flattened_df.groupby(["Date"], as_index=False).sum()
     flattened_df = flattened_df.sort_values(by=["Date"])
