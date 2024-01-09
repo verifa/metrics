@@ -154,7 +154,7 @@ class TempoData:
             user_data["Trend"] = [
                 last_week - 5 * daily for daily, last_week in zip(user_data["Daily"], user_data["Last 7 days"])
             ]
-            logging.info("\n" + user_data.to_string())
+            logging.debug("\n" + user_data.to_string())
             user_data = user_data.drop(["Daily", "Start", "Stop", "First", "Days", "Expected", "Total"], axis="columns")
 
         else:
