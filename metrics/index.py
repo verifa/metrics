@@ -448,7 +448,7 @@ def figureFinancialTotal(year=None):
     monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["External_cost"].sum()
     monthly_sum_in = monthly_result.rolling(12, min_periods=1)["Real_income"].sum()
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
-    logging.info(monthly_result)
+    logging.debug(monthly_result)
 
     figure_rolling_total.add_trace(
         go.Scatter(
