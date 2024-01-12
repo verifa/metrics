@@ -110,12 +110,12 @@ def tableHeight(table, base_height=208):
 # =========================================================
 
 start = datetime.now()
-print(f"\nStarting {start}")
+logging.info(f"Starting {start}")
 
 
 def delta(txt):
     delta = datetime.now() - start
-    print(f"{delta} : {txt}")
+    logging.info(f"{delta} : {txt}")
 
 
 # ---------------------------------------------------------
