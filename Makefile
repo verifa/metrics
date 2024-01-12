@@ -6,6 +6,7 @@ TAG := $(shell git describe --tags --always --dirty=-dev)
 IMAGE := $(REPO)/metrics-dashboard
 DOCKER := docker
 PIP := pip3
+PIP_INSTALL := $(PIP) install --upgrade
 
 # Static
 CLOUDRUN_SERVICE=metrics-dashboard
@@ -54,7 +55,7 @@ tests: install
 ##
 .PHONY: black-check
 black-check:
-	$(PIP) install black > black-install.log
+	$(PIP_INSTALL) black > black-install.log
 	black --check --diff .
 
 ## black:
@@ -62,21 +63,21 @@ black-check:
 ##
 .PHONY: black
 black:
-	$(PIP) install black > black-install.log
+	$(PIP_INSTALL) black > black-install.log
 	black .
 
 ## isort
 ##	uses isort to check the import declarations
 .PHONY: isort
 isort:
-	$(PIP) install isort > black-install.log
+	$(PIP_INSTALL) isort > black-install.log
 	isort . -c --diff
 
 ## mypy
 ##	uses mypy to check the project
 .PHONY: mypy
 mypy:
-	$(PIP) install mypy > mypy-install.log
+	$(PIP_INSTALL) mypy > mypy-install.log
 	mypy .
 
 ## pylint
@@ -84,7 +85,7 @@ mypy:
 ##
 .PHONY: pylint
 pylint:
-	$(PIP) install pylint > pylint-install.log
+	$(PIP_INSTALL) pylint > pylint-install.log
 	pylint --recursive=y --exit-zero .
 
 ## lint:
