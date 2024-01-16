@@ -23,6 +23,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 
 TEMPO_CONFIG_PATH = os.environ.get("TEMPO_CONFIG_PATH", "/tempo")
+TEMPO_DAILY_HOURS = os.environ.get("TEMPO_DAILY_HOURS", 8)
 
 TEMPO_LOG_LEVEL = os.environ.get("TEMPO_LOG_LEVEL", "WARNING")
 if TEMPO_LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
@@ -75,11 +76,23 @@ def rollingAverage(frame, to_mean, days, offset=7):
 
 
 def normaliseUserRolling7(frame, working_hours):
-    if working_hours.empty:
-        result = frame
-        result["Daily"] = 8
-    else:
-        result = frame.merge(working_hours[["User", "Daily"]], on=["User"])
+    first_date = START_DATE
+    last_date = TODAY
+    result = frame
+    result["Daily"] = float(TEMPO_DAILY_HOURS)
+    if not working_hours.empty:
+        for _, row in working_hours.iterrows():
+            if row["Daily"] != float(TEMPO_DAILY_HOURS):
+                logging.debug(row["User"], row["Daily"])
+                if row["Start"] != "*":
+                    first_date = row["Start"]
+                if row["Stop"] != "*":
+                    last_date = row["Stop"]
+                result.loc[
+                    (result["User"] == row["User"]) & (result["Date"] >= first_date) & (result["Date"] <= last_date),
+                    "Daily",
+                ] = row["Daily"]
+
     result["%-billable"] = 100 * (result["Billable"] / (5 * result["Daily"]))
     result["%-internal"] = 100 * (result["Internal"] / (5 * result["Daily"]))
 
