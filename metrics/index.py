@@ -970,28 +970,136 @@ def figurePopularProjects(data):
 # =========================================================
 
 
-def figureEggBaskets(data, supplementary_data):
+# support function for the egg baskets
+def crewCost(crew_data):
+    if not crew_data.empty:
+        crew_cost = crew_data
+        #  6 weeks vacay
+        crew_cost["My Cost"] = crew_cost["Total cost"] * (52 / 44)
+        # select the part that do internal projects
+        staff_cost = crew_cost.loc[crew_cost["Role"] == "Staff"]
+        # keep only the consultants
+        crew_cost = crew_cost.loc[crew_cost["Role"] == "Consultant"]
+        shared_staff_cost = staff_cost["My Cost"].sum() / crew_cost.index.size
+        crew_cost["My Share"] = crew_cost["My Cost"] + shared_staff_cost
+        crew_cost["Sustainable"] = crew_cost["My Share"] * 1.1
+    else:
+        crew_cost = pd.DataFrame()
+
+    return crew_cost
+
+
+def figureEggBaskets(data, supplementary_data, crew_data):
     eggs_days_ago = 90
     if supplementary_data.rates.empty:
         yAxisTitle = "Sum of billable time"
-        figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="Group", y="Billable", color="User")
+        figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="User", y="Billable", color="Group")
         figure_eggbaskets.update_xaxes(categoryorder="total ascending")
         figure_eggbaskets.update_layout(
             title="Sum of billable time (" + str(eggs_days_ago) + " days back)",
         )
     else:
+        if not crew_data.empty:
+            crew_cost = crewCost(crew_data)
+            basket_data = data.byEggBaskets().merge(crew_cost, on="User", validate="many_to_one")
+            basket_data = basket_data.sort_values(by=["TimeBasket", "Sustainable"])
+        else:
+            basket_data = data.byEggBaskets()
+
         yAxisTitle = "Sum of Income (Euro)"
-        figure_eggbaskets = px.histogram(
-            data.byEggBaskets(),
-            x="Group",
+        figure_eggbaskets = px.bar(
+            basket_data,
+            x="User",
             y="Income",
-            color="User",
+            color="Group",
             facet_col="TimeBasket",
             facet_col_wrap=3,
             category_orders={"TimeBasket": ["60-90 days ago", "30-60 days ago", "0-30 days ago"]},
         )
+        if not crew_data.empty:
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["My Cost"],
+                name="My Cost",
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="Black")),
+                row=1,
+                col=1,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["My Cost"],
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="Black")),
+                showlegend=False,
+                row=1,
+                col=2,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["My Cost"],
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="Black")),
+                showlegend=False,
+                row=1,
+                col=3,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["My Share"],
+                name="Break Even",
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkRed")),
+                row=1,
+                col=1,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["My Share"],
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkRed")),
+                showlegend=False,
+                row=1,
+                col=2,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["My Share"],
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkRed")),
+                showlegend=False,
+                row=1,
+                col=3,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["Sustainable"],
+                name="Sustainable",
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkGreen")),
+                row=1,
+                col=1,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["Sustainable"],
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkGreen")),
+                showlegend=False,
+                row=1,
+                col=2,
+            )
+            figure_eggbaskets.add_scatter(
+                x=basket_data["User"],
+                y=basket_data["Sustainable"],
+                mode="markers",
+                marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkGreen")),
+                showlegend=False,
+                row=1,
+                col=3,
+            )
         figure_eggbaskets.update_layout(
-            title="Baskets for our eggs (" + str(eggs_days_ago) + " days back)",
+            title="Eggs to share (" + str(eggs_days_ago) + " days back)",
         )
     figure_eggbaskets.update_layout(
         height=600,
@@ -1011,7 +1119,7 @@ delta("Starting Rendering")
 main_list = [table_working_hours]
 if not supplementary_data.rates.empty:
     main_list.append(table_missing_rates)
-main_list.append(figureEggBaskets(data, supplementary_data))
+main_list.append(figureEggBaskets(data, supplementary_data, crew_df))
 
 # Allocations
 # Requires Notion Allocations DB
