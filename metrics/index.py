@@ -1110,6 +1110,50 @@ def figureEggBaskets(data, supplementary_data, crew_data):
     return figure_eggbaskets
 
 
+def figureMinumumRates(crew_data):
+    if not crew_data.empty:
+        crew_cost = crewCost(crew_data.sort_values(by="Total cost"))
+
+        crew_cost["Cost Rate"] = crew_cost["My Cost"] * (12 / 52) / (crew_cost["Hours"] * 4)
+        crew_cost["Share Rate"] = crew_cost["My Share"] * (12 / 52) / (crew_cost["Hours"] * 4)
+        crew_cost["Sust Rate"] = crew_cost["Sustainable"] * (12 / 52) / (crew_cost["Hours"] * 4)
+
+        figure_minimum_rates = px.scatter()
+
+        figure_minimum_rates.add_scatter(
+            x=crew_cost["User"],
+            y=crew_cost["Sust Rate"],
+            name="Sustainable",
+            mode="lines+markers",
+            line=dict(color="DarkGreen", dash="dot"),
+            marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkGreen")),
+        )
+        figure_minimum_rates.add_scatter(
+            x=crew_cost["User"],
+            y=crew_cost["Share Rate"],
+            name="Break even",
+            mode="lines+markers",
+            line=dict(color="DarkRed", dash="dot"),
+            marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkRed")),
+        )
+        figure_minimum_rates.add_scatter(
+            x=crew_cost["User"],
+            y=crew_cost["Cost Rate"],
+            name="Salary",
+            mode="lines+markers",
+            line=dict(color="Black", dash="dot"),
+            marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="Black")),
+        )
+        figure_minimum_rates.update_traces(hovertemplate="EUR: %{y:.2f}")
+        figure_minimum_rates.update_layout(
+            title="Minimum rates (assuming 80% billable)", yaxis_title="Hourly rates [€]", hovermode="x"
+        )
+    else:
+        figure_minimum_rates = px.scatter()
+
+    return figure_minimum_rates
+
+
 # =========================================================
 # Base rendering (only requires TEMPO_KEY)
 # =========================================================
@@ -1248,6 +1292,7 @@ if (
     # Add tab
     if SHOWTAB_COMPARISON:
         figures = []
+        figures.append(figureMinumumRates(crew_df))
         if "Real_income" in supplementary_data.costs and not crew_df.empty and not allocations_df.empty:
             figures.append(figure_runway_unclamped)
         figures.append(figureEarningsVersusWorkload(df_comparison))
