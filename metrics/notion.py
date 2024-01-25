@@ -91,7 +91,7 @@ class Crew(Notion):
 
     def get_crew(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
-        data = pd.DataFrame(columns=["User", "Role", "Total cost"])
+        data = pd.DataFrame(columns=["User", "Role", "Hours", "Total cost"])
 
         for item in result_dict["results"]:
             user = item["properties"]["Person"]["people"][0]["name"]
@@ -100,8 +100,9 @@ class Crew(Notion):
             cost = item["properties"]["Total Cost"]["number"] / (
                 11.43 if currency == "SEK" else 1
             )  # TODO: constant or helper method for SEK to EUR
+            hours = item["properties"]["Consulting Hours"]["number"]
 
-            data.loc[-1] = [user, role, cost]
+            data.loc[-1] = [user, role, hours, cost]
             data.index = data.index + 1
 
         self.data = data.sort_values(by=["User"])
