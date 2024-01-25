@@ -1,4 +1,5 @@
 """Tempo related functions and classes"""
+
 import json
 import logging
 import os

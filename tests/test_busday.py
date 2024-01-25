@@ -1,4 +1,5 @@
 """ Some simple tests for busday"""
+
 import unittest
 
 import numpy as np
