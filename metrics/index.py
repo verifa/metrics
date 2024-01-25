@@ -1,4 +1,5 @@
 """System module."""
+
 import logging
 import os
 from datetime import date, datetime, timedelta
@@ -11,7 +12,10 @@ from dash import dcc, html
 from metrics.date_utils import lastMonthDay, lookBack
 from metrics.notion import OKR, Allocations, Crew, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
-from metrics.tempo_config import ROLLING_DATE, START_DATE, TODAY, YESTERDAY
+# fmt: off
+from metrics.tempo_config import (EUR2SEK, ROLLING_DATE, START_DATE, TODAY,
+                                  YESTERDAY)
+# fmt: on
 from metrics.tempo_data import TempoData
 
 # happy hack until we can fix these
@@ -699,7 +703,7 @@ def figureRunway(
         # I'm sure there's a nice clever one-liner to do this. I'm apparently not that clever.
         rate = 0
         for _, raterow in supplemental.rates[lambda df: (df["Key"] == task_id) & (df["User"] == user)].iterrows():
-            rate = raterow["Rate"] / (11.43 if raterow["Currency"] == "SEK" else 1)  # TODO: Constant or helper for SEK
+            rate = raterow["Rate"] / (EUR2SEK if raterow["Currency"] == "SEK" else 1)
             break
 
         prevm = start
@@ -1144,7 +1148,7 @@ def figureMinumumRates(crew_data):
             line=dict(color="Black", dash="dot"),
             marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="Black")),
         )
-        figure_minimum_rates.update_traces(hovertemplate="EUR: %{y:.2f}")
+        figure_minimum_rates.update_traces(hovertemplate="EUR: %{y:.0f}")
         figure_minimum_rates.update_layout(
             title="Minimum rates (assuming 80% billable)", yaxis_title="Hourly rates [€]", hovermode="x"
         )
@@ -1152,6 +1156,38 @@ def figureMinumumRates(crew_data):
         figure_minimum_rates = px.scatter()
 
     return figure_minimum_rates
+
+
+def sustainableHours(crew_data):
+    hours_df = pd.DataFrame()
+
+    if not crew_data.empty:
+        crew_cost = crewCost(crew_data.sort_values(by="Total cost", ascending=False))
+
+        hours_df = hours_df.assign(Rate=lambda x: range(75, 175, 5))
+        for _, row in crew_cost.iterrows():
+            hours_df[row["User"]] = row["Sustainable"] * (12 / 52) / hours_df["Rate"]
+
+        hours_df.set_index("Rate", inplace=True)
+
+        figure_sustainable_hours = px.scatter(hours_df, color_discrete_sequence=px.colors.qualitative.Antique)
+        figure_sustainable_hours.update_traces(mode="lines+markers")
+        figure_sustainable_hours.update_layout(
+            height=600,
+            title=f"Sustainable Working Hours (weekly) <br> 1 EUR = {EUR2SEK} SEK",
+            xaxis_title="Rate [€]",
+            yaxis_title="Hours per week",
+            legend_title_text="",
+        )
+        figure_sustainable_hours.update_traces(hovertemplate="Hours %{y:.1f} Rate: %{x:.0f} €")
+
+        figure_sustainable_hours.update_xaxes(showspikes=True)
+        figure_sustainable_hours.update_yaxes(showspikes=True)
+
+    else:
+        figure_sustainable_hours = px.scatter()
+
+    return figure_sustainable_hours
 
 
 # =========================================================
@@ -1293,6 +1329,7 @@ if (
     if SHOWTAB_COMPARISON:
         figures = []
         figures.append(figureMinumumRates(crew_df))
+        figures.append(sustainableHours(crew_df))
         if "Real_income" in supplementary_data.costs and not crew_df.empty and not allocations_df.empty:
             figures.append(figure_runway_unclamped)
         figures.append(figureEarningsVersusWorkload(df_comparison))

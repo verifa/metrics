@@ -1,4 +1,5 @@
 """Tempo related functions and classes"""
+
 import logging
 import os
 import sys
@@ -11,7 +12,7 @@ import plotly.graph_objects as go
 from tempoapiclient import client as Client
 
 from metrics.date_utils import lookBack, weekdays
-from metrics.tempo_config import YESTERDAY
+from metrics.tempo_config import EUR2SEK, YESTERDAY
 
 
 class TempoData:
@@ -51,7 +52,7 @@ class TempoData:
     def injectRates(self, rates: pd.DataFrame) -> None:
         """Modify data by merging in the given rates data"""
         uprated = self.data.merge(rates, on=["Key", "User"], how="left")
-        uprated["Rate"] = uprated.apply(lambda x: x["Rate"] / 11.43 if x["Currency"] == "SEK" else x["Rate"], axis=1)
+        uprated["Rate"] = uprated.apply(lambda x: x["Rate"] / EUR2SEK if x["Currency"] == "SEK" else x["Rate"], axis=1)
         uprated["Income"] = uprated["Rate"] * uprated["Billable"]
         self.data = uprated
 

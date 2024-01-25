@@ -1,5 +1,5 @@
 """Notion related functions and classes"""
-import json
+
 import logging
 import os
 import sys
@@ -9,6 +9,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import requests
+
+from metrics.tempo_config import EUR2SEK
 
 
 class Notion:
@@ -97,9 +99,7 @@ class Crew(Notion):
             user = item["properties"]["Person"]["people"][0]["name"]
             role = item["properties"]["Role"]["select"]["name"]
             currency = item["properties"]["Currency"]["select"]["name"]
-            cost = item["properties"]["Total Cost"]["number"] / (
-                11.43 if currency == "SEK" else 1
-            )  # TODO: constant or helper method for SEK to EUR
+            cost = item["properties"]["Total Cost"]["number"] / (EUR2SEK if currency == "SEK" else 1)
             hours = item["properties"]["Consulting Hours"]["number"]
 
             data.loc[-1] = [user, role, hours, cost]
@@ -128,7 +128,7 @@ class Financials(Notion):
             eurstart = item["properties"]["EUR Start"]["number"]
             start = 0
             if sekstart != None:
-                start += sekstart / 11.43  # TODO: constant or helper for SEK
+                start += sekstart / EUR2SEK
             if eurstart != None:
                 start += eurstart
 
