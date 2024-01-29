@@ -1,10 +1,16 @@
+"""
+Unit tests for the notion class
+"""
+
 import os
 import unittest
 
-import metrics.notion as notion
+from metrics import notion
 
 
 class TestNotion(unittest.TestCase):
+    "the unit tests"
+
     def test_fetch_data(self):
         os.environ.pop("NOTION_KEY", None)
 
