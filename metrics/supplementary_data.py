@@ -44,7 +44,7 @@ class SupplementaryData:
         else:
             self.costs = self.financials
             self.raw_costs = splitMonthTable(self.costs)
-            logging.debug(f"Raw costs\n{self.raw_costs}")
+            logging.debug("Raw costs\n%s", self.raw_costs)
             self.costs.index.name = "Month"
             self.costs.index = self.costs["Month"]
             self.costs.index = self.costs.index.map(str)
@@ -66,11 +66,12 @@ class SupplementaryData:
             logging.info("Loaded financials")
 
         if not os.path.exists(self.rates_path):
-            logging.warning("Rates file path does not exist: " + self.rates_path)
+            logging.warning("Rates file path does not exist: %s", self.rates_path)
         else:
-            rates_data = json.load(open(self.rates_path))
+            with open(self.rates_path, "r", encoding="utf8") as rates_file:
+                rates_data = json.load(rates_file)
             self.rates = pd.json_normalize(rates_data, record_path="Default")
-            logging.info("Loaded " + self.rates_path)
+            logging.info("Loaded %s", self.rates_path)
 
             self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
             self.rates = self.rates.explode("User")

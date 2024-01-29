@@ -155,7 +155,7 @@ class TempoData:
             user_data["Trend"] = [
                 last_week - 5 * daily for daily, last_week in zip(user_data["Daily"], user_data["Last 7 days"])
             ]
-            logging.debug("\n" + user_data.to_string())
+            logging.debug("\n%s", user_data.to_string())
             user_data = user_data.drop(["Daily", "Start", "Stop", "First", "Days", "Expected", "Total"], axis="columns")
 
         else:
@@ -278,7 +278,7 @@ class TempoData:
         """
         self.padded_data = self.data
         if not working_hours.empty:
-            for index, row in working_hours.iterrows():
+            for _, row in working_hours.iterrows():
                 df_user = pd.DataFrame()
                 user = row["User"]
                 if row["Start"] == "*":
@@ -369,6 +369,6 @@ class TempoData:
         """
         if not keys.empty:
             for key in keys["Key"]:
-                logging.debug("Internal Key: " + key)
+                logging.debug("Internal Key: %s", key)
                 self.data.loc[self.data["Group"] == key, ("Billable")] = 0
                 self.data.loc[self.data["Group"] == key, ("Internal")] = self.data[self.data["Group"] == key]["Time"]

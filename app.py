@@ -1,3 +1,7 @@
+"""
+The metrics dash app with data from tempo
+"""
+
 import os
 
 from dash import Dash, html

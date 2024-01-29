@@ -35,10 +35,8 @@ class Notion:
 
 
 class WorkingHours(Notion):
+    "The class for working hour handling"
     data: pd.DataFrame
-
-    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
-        super().__init__(token, database_id)
 
     def get_workinghours(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
@@ -58,10 +56,8 @@ class WorkingHours(Notion):
 
 
 class Allocations(Notion):
+    "The class for allocations"
     data: pd.DataFrame
-
-    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
-        super().__init__(token, database_id)
 
     def get_allocations(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
@@ -86,10 +82,8 @@ class Allocations(Notion):
 
 
 class Crew(Notion):
+    "The class for crew data"
     data: pd.DataFrame
-
-    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
-        super().__init__(token, database_id)
 
     def get_crew(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
@@ -109,10 +103,8 @@ class Crew(Notion):
 
 
 class Financials(Notion):
+    "The class for finance data"
     data: pd.DataFrame
-
-    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
-        super().__init__(token, database_id)
 
     def get_financials(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
@@ -127,15 +119,15 @@ class Financials(Notion):
             sekstart = item["properties"]["SEK Start"]["number"]
             eurstart = item["properties"]["EUR Start"]["number"]
             start = 0
-            if sekstart != None:
+            if sekstart is not None:
                 start += sekstart / EUR2SEK
-            if eurstart != None:
+            if eurstart is not None:
                 start += eurstart
 
             abcost = item["properties"]["AB-Cost"]["number"]
             oycost = item["properties"]["OY-Cost"]["number"]
 
-            if oycost != None and abcost != None:
+            if oycost is not None and abcost is not None:
                 data.loc[-1] = [month, extcost, income, start]
                 data.index = data.index + 1
 
@@ -163,14 +155,12 @@ class Financials(Notion):
             self.data.index = self.data.index + 1
             current_finances = 0
 
-        logging.debug(f"Financial data\n{self.data}")
+        logging.debug("Financial data\n%s", self.data)
 
 
 class OKR(Notion):
+    "The class for OKR's"
     data: pd.DataFrame
-
-    def __init__(self, token: Optional[str] = None, database_id: str = "") -> None:
-        super().__init__(token, database_id)
 
     def get_okr(self) -> None:
         result_dict = self.fetch_data(self.database_id).json()
@@ -196,7 +186,7 @@ class OKR(Notion):
                     data.loc[-1] = [title, current_value, target_value, objective, assignee, period, scope, notes]
                     data.index = data.index + 1
         self.data = data.sort_index()
-        logging.debug(f"OKR data\n{self.data}")
+        logging.debug("OKR data\n%s", self.data)
 
     def get_figure_key_result(self, search_period=None) -> px.bar:
         keyresults = self.data[self.data["scope"] == "Company"]
@@ -206,7 +196,7 @@ class OKR(Notion):
             fig_title = f"{fig_title} {search_period}"
             keyresults = keyresults[keyresults["period"].isin([search_period])]
 
-        logging.debug(f"Key Results\n{keyresults}")
+        logging.debug("Key Results\n%s", keyresults)
 
         keyresults["Progress (%)"] = keyresults["current_value"] / keyresults["target_value"] * 100
 
@@ -234,7 +224,7 @@ class OKR(Notion):
             fig_title = f"{fig_title} {search_period}"
             initiatives = initiatives[initiatives["period"].isin([search_period])]
 
-        logging.debug(f"Initiatives\n{initiatives}")
+        logging.debug("Initiatives\n%s", initiatives)
 
         initiatives = initiatives.drop(
             ["current_value", "target_value", "objective", "scope", "period"], axis="columns"

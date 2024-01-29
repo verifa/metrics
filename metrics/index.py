@@ -1,15 +1,15 @@
-"""System module."""
+"""The metrics module."""
 
 import logging
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, html
 
-from metrics.date_utils import lastMonthDay, lookBack
+from metrics.date_utils import lookBack
 from metrics.notion import OKR, Allocations, Crew, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
 # fmt: off
@@ -33,7 +33,7 @@ TEMPO_LOG_LEVEL = os.environ.get("TEMPO_LOG_LEVEL", "WARNING")
 if TEMPO_LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
     logging.basicConfig(level=logging.getLevelName(TEMPO_LOG_LEVEL))
 else:
-    logging.warning(f"{TEMPO_LOG_LEVEL} is not a valid log level, using default: WARNING")
+    logging.warning("%s {} is not a valid log level, using default: WARNING", TEMPO_LOG_LEVEL)
 
 NOTION_KEY = os.environ.get("NOTION_KEY", "")
 NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
@@ -87,7 +87,7 @@ def normaliseUserRolling7(frame, working_hours):
     if not working_hours.empty:
         for _, row in working_hours.iterrows():
             if row["Daily"] != float(TEMPO_DAILY_HOURS):
-                logging.debug(row["User"], row["Daily"])
+                logging.debug("%s %s", row["User"], row["Daily"])
                 if row["Start"] != "*":
                     first_date = row["Start"]
                 if row["Stop"] != "*":
@@ -127,12 +127,12 @@ def tableHeight(table, base_height=208):
 # =========================================================
 
 start = datetime.now()
-logging.info(f"Starting {start}")
+logging.info("Starting %s", start)
 
 
 def delta(txt):
     delta = datetime.now() - start
-    logging.info(f"{delta} : {txt}")
+    logging.info("%s: %s", delta, txt)
 
 
 # ---------------------------------------------------------
@@ -205,7 +205,7 @@ if not supplementary_data.working_hours.empty:
 table_working_hours = data.tableByUser(supplementary_data.working_hours, tableHeight, COLOR_HEAD, COLOR_ONE)
 delta("Table Working Hours")
 last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
-logging.info(f"Last common day: {last_reported}")
+logging.info("Last common day: %s", last_reported)
 
 if not supplementary_data.working_hours.empty:
     df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
@@ -465,7 +465,7 @@ def figureFinancialTotal(year=None):
     monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["External_cost"].sum()
     monthly_sum_in = monthly_result.rolling(12, min_periods=1)["Real_income"].sum()
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
-    logging.debug(monthly_result)
+    logging.debug("%s", monthly_result)
 
     figure_rolling_total.add_trace(
         go.Scatter(
@@ -562,24 +562,26 @@ def figureAllocations(allocations_df):
 
     # Define a function to determine color based on conditions
     def determine_color(row):
+        result = ""
         if row["Unconfirmed"]:
             if row["Allocation"] < 0.4:
-                return "Unconfirmed (< 40%)"
+                result = "Unconfirmed (< 40%)"
             elif row["Allocation"] > 0.8:
-                return "Unconfirmed (> 80%)"
-            return "Unconfirmed"
+                result = "Unconfirmed (> 80%)"
+            result = "Unconfirmed"
         elif "?" in row["JiraID"]:
             if row["Allocation"] < 0.4:
-                return "Missing Jira (< 40%)"
+                result = "Missing Jira (< 40%)"
             elif row["Allocation"] > 0.8:
-                return "Missing Jira (> 80%)"
-            return "Missing Jira"
+                result = "Missing Jira (> 80%)"
+            result = "Missing Jira"
         elif row["Allocation"] < 0.4:
-            return "Less than 40%"
+            result = "Less than 40%"
         elif row["Allocation"] > 0.8:
-            return "More than 80%"
+            result = "More than 80%"
         else:
-            return "OK"
+            result = "OK"
+        return result
 
     color_mapping = {
         "Unconfirmed": "red",
@@ -692,12 +694,12 @@ def figureRunway(
         start = pd.Timestamp(row["Start"])
         stop = pd.Timestamp(row["Stop"])
         task_id = row["JiraID"]
-        if stop != None and stop < start_date:
+        if stop is not None and stop < start_date:
             continue
-        if start == None or start < invoiced_cutoff:
+        if start is None or start < invoiced_cutoff:
             start = invoiced_cutoff
 
-        if stop == None:
+        if stop is None:
             stop = max_enddate
 
         # I'm sure there's a nice clever one-liner to do this. I'm apparently not that clever.

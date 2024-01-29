@@ -70,7 +70,7 @@ black:
 ##	uses isort to check the import declarations
 .PHONY: isort
 isort:
-	$(PIP_INSTALL) isort > black-install.log
+	$(PIP_INSTALL) isort > isort-install.log
 	isort . -c --diff
 
 ## mypy
@@ -84,9 +84,15 @@ mypy:
 ##	uses pylint to lint the files
 ##
 .PHONY: pylint
+LINT_DISABLE := --disable=fixme,no-name-in-module,redefined-outer-name,use-dict-literal
+ifeq (true, $(CI))
+EXIT_ZERO := --exit-zero
+else
+EXIT_ZERO :=
+endif
 pylint:
 	$(PIP_INSTALL) pylint > pylint-install.log
-	pylint --recursive=y --exit-zero .
+	pylint --recursive=y $(EXIT_ZERO) $(LINT_DISABLE) .
 
 ## lint:
 ##	a PHONY rule to run all linters
