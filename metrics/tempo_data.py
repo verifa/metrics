@@ -216,6 +216,7 @@ class TempoData:
                 )
             ]
         )
+        fig.update_layout(title="Working Hours")
         if fnTableHeight:
             fig.update_layout(height=fnTableHeight(table_working_hours))
         return fig

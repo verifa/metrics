@@ -779,9 +779,15 @@ def figureRunway(
 
 def figureRollingEarnings(df_team_earn_rolling_total):
     figure_rolling_earnings = px.scatter(
-        df_team_earn_rolling_total,
+        df_team_earn_rolling_total.rename(
+            columns={
+                "Rolling Weekly Average": "Weekly",
+                "Rolling Monthly Average": "Monthly",
+                "Rolling Yearly Average": "Yearly",
+            }
+        ),
         x="Date",
-        y=["Rolling Weekly Average", "Rolling Monthly Average", "Rolling Yearly Average"],
+        y=["Weekly", "Monthly", "Yearly"],
         color_discrete_sequence=["#C8E6C9", "#77AEE0", "#1B5E20"],
         height=600,
     )
@@ -817,6 +823,9 @@ def figureRollingEarnings(df_team_earn_rolling_total):
     figure_rolling_earnings.update_layout(
         title="Income normalized with cost",
         yaxis_title="Income / Cost",
+    )
+    figure_rolling_earnings.update_layout(
+        legend=dict(title="Rolling Averages", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
     )
     return figure_rolling_earnings
 
@@ -1197,11 +1206,11 @@ def sustainableHours(crew_data):
 # =========================================================
 
 delta("Starting Rendering")
-
-main_list = [table_working_hours]
+main_list = []
+main_list.append(figureEggBaskets(data, supplementary_data, crew_df))
+main_list.append(table_working_hours)
 if not supplementary_data.rates.empty:
     main_list.append(table_missing_rates)
-main_list.append(figureEggBaskets(data, supplementary_data, crew_df))
 
 # Allocations
 # Requires Notion Allocations DB
@@ -1301,7 +1310,7 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
         figure_rolling_earnings = figureRollingEarnings(df_team_earn_rolling_total)
         # Update main page
         (head, plots) = figure_tabs["start_page"]
-        plots.append(figure_rolling_earnings)
+        plots.insert(0, figure_rolling_earnings)
         figure_tabs["start_page"] = (head, plots)
 
 
