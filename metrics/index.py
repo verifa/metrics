@@ -366,7 +366,7 @@ def figureRollingIncomeTeam(df_average_income_rolling_30, last_date):
     )
     figure_rolling_income_team.update_layout(
         title="Rolling income (average/person)",
-        yaxis_title="Income (euro)",
+        yaxis_title="Income [ € ]",
     )
     figure_rolling_income_team.update_layout(
         xaxis_rangeslider_visible=True,
@@ -411,7 +411,7 @@ def figureRollingTotal(df_team_rolling_total, df_raw_costs):
         )
     figure_rolling_total.update_layout(
         title="Rolling income (total)",
-        yaxis_title="Income (euro)",
+        yaxis_title="Income [ € ]",
     )
     return figure_rolling_total
 
@@ -478,8 +478,12 @@ def figureFinancialTotal(year=None):
     )
     figure_rolling_total.update_layout(
         title=f"Financial numbers for {year}",
-        yaxis_title="Income/Cost/Result (euro)",
+        yaxis_title="Income/Cost/Result [ € ]",
     )
+    figure_rolling_total.update_layout(
+        legend=dict(title="Monthly", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
+    )
+
     return figure_rolling_total
 
 
@@ -1021,7 +1025,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
         else:
             basket_data = data.byEggBaskets()
 
-        yAxisTitle = "Sum of Income (Euro)"
+        yAxisTitle = "Sum of Income [ € ]"
         figure_eggbaskets = px.bar(
             basket_data,
             x="User",
