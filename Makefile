@@ -84,7 +84,7 @@ mypy:
 ##	uses pylint to lint the files
 ##
 .PHONY: pylint
-LINT_DISABLE := --disable=fixme,no-name-in-module,redefined-outer-name,use-dict-literal
+LINT_DISABLE := --disable=fixme,no-name-in-module,use-dict-literal
 ifeq (true, $(CI))
 EXIT_ZERO := --exit-zero
 else

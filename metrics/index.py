@@ -259,9 +259,9 @@ if not supplementary_data.working_hours.empty:
 
 
 def figureEarningsVersusWorkload(user_data):
-    figure_earnings_versus_workload = px.scatter(height=600)
+    figure = px.scatter(height=600)
 
-    figure_earnings_versus_workload.add_trace(
+    figure.add_trace(
         go.Scatter(
             x=user_data["%-billable"],
             y=user_data["Rolling Weekly Average"],
@@ -270,7 +270,7 @@ def figureEarningsVersusWorkload(user_data):
             name="Weekly",
         )
     )
-    figure_earnings_versus_workload.add_trace(
+    figure.add_trace(
         go.Scatter(
             x=user_data["%-billable30"],
             y=user_data["Rolling Monthly Average"],
@@ -279,8 +279,9 @@ def figureEarningsVersusWorkload(user_data):
             name="Monthly",
         )
     )
-    figure_earnings_versus_workload.update_layout(xaxis_title="Billable fraction [%]", yaxis_title="Income / Cost")
-    return figure_earnings_versus_workload
+    figure.update_layout(xaxis_title="Billable fraction [%]", yaxis_title="Income / Cost")
+    figure.update_layout(legend=dict(title="", orientation="v", y=0.99, x=0.01, font_size=16))
+    return figure
 
 
 # =========================================================
@@ -289,7 +290,7 @@ def figureEarningsVersusWorkload(user_data):
 
 
 def figureNormalisedIndividual(user_data):
-    figure_normalised_individual = px.scatter(
+    figure = px.scatter(
         user_data[user_data["Date"] > ROLLING_DATE],
         x="Date",
         y=["%-billable", "%-internal"],
@@ -298,8 +299,8 @@ def figureNormalisedIndividual(user_data):
         color_discrete_sequence=["#8FBC8F", "#FF7F50"],
         height=1200,
     )
-    figure_normalised_individual.update_layout(title="Normalised data, rolling 7 days", yaxis_title="Work time [%]")
-    return figure_normalised_individual
+    figure.update_layout(title="Normalised data, rolling 7 days", yaxis_title="Work time [%]")
+    return figure
 
 
 # =========================================================
@@ -308,19 +309,26 @@ def figureNormalisedIndividual(user_data):
 
 
 def figureNormalisedTeam(team_data, last_date):
-    figure_normalised_team = px.scatter(
-        team_data,
+    figure = px.scatter(
+        team_data.rename(
+            columns={
+                "%-billable": "Weekly Billable",
+                "%-internal": "Weekly Internal",
+                "%-billable30": "Monthly Billable",
+                "%-internal30": "Monthly Internal",
+            }
+        ),
         x="Date",
-        y=["%-billable", "%-internal", "%-billable30", "%-internal30"],
+        y=["Weekly Billable", "Weekly Internal", "Monthly Billable", "Monthly Internal"],
         color_discrete_sequence=["#8FBC8F", "#FF7F50", "#006400", "#A52A2A"],
         height=800,
     )
-    figure_normalised_team.update_layout(title="Normalised team data", yaxis_title="Work time [%]")
-    figure_normalised_team.update_layout(
+    figure.update_layout(title="Normalised team data", yaxis_title="Work time [%]")
+    figure.update_layout(
         xaxis_rangeslider_visible=True,
         xaxis_range=[ROLLING_DATE, str(date.today())],
     )
-    figure_normalised_team.add_vrect(
+    figure.add_vrect(
         x0=last_date,
         x1=max(team_data["Date"]),
         annotation_text="Incomplete reported data ᐅ",
@@ -329,8 +337,12 @@ def figureNormalisedTeam(team_data, last_date):
         opacity=0.10,
         line_width=0,
     )
+    figure.update_layout(
+        legend=dict(title="Rolling fractions", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
+    )
+    figure.add_hline(y=50, fillcolor="darkslategrey")
 
-    return figure_normalised_team
+    return figure
 
 
 # =========================================================
@@ -339,7 +351,7 @@ def figureNormalisedTeam(team_data, last_date):
 
 
 def figureRollingIncomeIndividual(df_user_income_rolling):
-    figure_rolling_income_individual = px.scatter(
+    figure = px.scatter(
         df_user_income_rolling[df_user_income_rolling["Date"] > ROLLING_DATE],
         x="Date",
         y="Income",
@@ -347,8 +359,8 @@ def figureRollingIncomeIndividual(df_user_income_rolling):
         facet_col_wrap=3,
         height=800,
     )
-    figure_rolling_income_individual.update_layout(title="Rolling 7 days (income)")
-    return figure_rolling_income_individual
+    figure.update_layout(title="Rolling 7 days (income)")
+    return figure
 
 
 # =========================================================
@@ -357,22 +369,23 @@ def figureRollingIncomeIndividual(df_user_income_rolling):
 
 
 def figureRollingIncomeTeam(df_average_income_rolling_30, last_date):
-    figure_rolling_income_team = px.scatter(
+    figure = px.scatter(
         df_average_income_rolling_30,
         x="Date",
         y=["Income", "Income30"],
         color_discrete_sequence=["#8FBC8F", "#006400"],
         height=600,
     )
-    figure_rolling_income_team.update_layout(
-        title="Rolling income (average/person)",
+    figure.update_layout(
+        title="Rolling weekly income (average/person)",
         yaxis_title="Income [ € ]",
     )
-    figure_rolling_income_team.update_layout(
+    figure.update_layout(
         xaxis_rangeslider_visible=True,
         xaxis_range=[ROLLING_DATE, str(date.today())],
     )
-    figure_rolling_income_team.add_vrect(
+    figure.update_layout(legend=dict(title="", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75))
+    figure.add_vrect(
         x0=last_date,
         x1=max(df_average_income_rolling_30["Date"]),
         annotation_text="Incomplete reported data ᐅ",
@@ -381,7 +394,7 @@ def figureRollingIncomeTeam(df_average_income_rolling_30, last_date):
         opacity=0.10,
         line_width=0,
     )
-    return figure_rolling_income_team
+    return figure
 
 
 # =========================================================
@@ -390,7 +403,7 @@ def figureRollingIncomeTeam(df_average_income_rolling_30, last_date):
 
 
 def figureRollingTotal(df_team_rolling_total, df_raw_costs):
-    figure_rolling_total = px.scatter(
+    figure = px.scatter(
         df_team_rolling_total,
         x="Date",
         y=["Income", "Income30"],
@@ -398,7 +411,7 @@ def figureRollingTotal(df_team_rolling_total, df_raw_costs):
         height=600,
     )
     if not df_raw_costs.empty:
-        figure_rolling_total.add_trace(
+        figure.add_trace(
             go.Scatter(
                 x=df_raw_costs["Month"],
                 y=df_raw_costs["WeeklyExtCost"],
@@ -409,11 +422,22 @@ def figureRollingTotal(df_team_rolling_total, df_raw_costs):
                 name="Costs",
             )
         )
-    figure_rolling_total.update_layout(
-        title="Rolling income (total)",
+    figure.update_layout(
+        title="Rolling weekly income (total)",
         yaxis_title="Income [ € ]",
     )
-    return figure_rolling_total
+    figure.update_layout(legend=dict(title="", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75))
+    uncertain_area = supplementary_data.costs[supplementary_data.costs["Real_income"] == 0]
+    figure.add_vrect(
+        x0=min(uncertain_area["Date"]),
+        x1=max(uncertain_area["Date"]) + pd.Timedelta(1, "D"),
+        annotation_text="Uncertain ᐅ",
+        annotation_position="bottom left",
+        fillcolor="grey",
+        opacity=0.15,
+        line_width=0,
+    )
+    return figure
 
 
 # =========================================================
@@ -422,11 +446,11 @@ def figureRollingTotal(df_team_rolling_total, df_raw_costs):
 
 
 def figureFinancialTotal(year=None):
-    figure_rolling_total = px.scatter(height=600)
+    figure = px.scatter(height=600)
     monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]
     monthly_result = monthly_result[monthly_result["Year"] == str(year)]
 
-    figure_rolling_total.add_trace(
+    figure.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
             y=monthly_result["Real_income"],
@@ -437,7 +461,7 @@ def figureFinancialTotal(year=None):
             name="Income",
         )
     )
-    figure_rolling_total.add_trace(
+    figure.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
             y=-monthly_result["External_cost"],
@@ -448,7 +472,7 @@ def figureFinancialTotal(year=None):
             name="Costs",
         )
     )
-    figure_rolling_total.add_trace(
+    figure.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
             y=monthly_result["Real_income"] - monthly_result["External_cost"],
@@ -467,7 +491,7 @@ def figureFinancialTotal(year=None):
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
     logging.debug("%s", monthly_result)
 
-    figure_rolling_total.add_trace(
+    figure.add_trace(
         go.Scatter(
             x=monthly_result["Month"],
             y=monthly_result["Result"],
@@ -476,15 +500,15 @@ def figureFinancialTotal(year=None):
             name="Cumulative sum 1 year",
         )
     )
-    figure_rolling_total.update_layout(
+    figure.update_layout(
         title=f"Financial numbers for {year}",
         yaxis_title="Income/Cost/Result [ € ]",
     )
-    figure_rolling_total.update_layout(
+    figure.update_layout(
         legend=dict(title="Monthly", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
     )
 
-    return figure_rolling_total
+    return figure
 
 
 # =========================================================
@@ -493,9 +517,9 @@ def figureFinancialTotal(year=None):
 
 
 # Requires config: rates
-def figureSpentTimePercentage(data):
-    df_by_group = data.byTimeType().sort_values("Group")
-    figure_projects_team = px.histogram(
+def figureSpentTimePercentage(tempo_data):
+    df_by_group = tempo_data.byTimeType().sort_values("Group")
+    figure = px.histogram(
         df_by_group[df_by_group["Date"] > ROLLING_DATE],
         x="Date",
         y="Time",
@@ -503,8 +527,11 @@ def figureSpentTimePercentage(data):
         height=400,
         barnorm="percent",
     )
-    figure_projects_team.update_layout(bargap=0.1)
-    return figure_projects_team
+    figure.update_layout(bargap=0.1, xaxis_title="", yaxis_title="Fractions [%]")
+    figure.update_layout(
+        legend=dict(title="Project Key", orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5, font_size=16)
+    )
+    return figure
 
 
 # =========================================================
@@ -603,7 +630,7 @@ def figureAllocations(allocations_df):
     allocations_df["Color"] = allocations_df.apply(determine_color, axis=1)
 
     # Create a Gantt chart
-    figure_allocated = px.timeline(
+    figure = px.timeline(
         allocations_df,
         x_start="Start",
         x_end="Stop",
@@ -615,7 +642,7 @@ def figureAllocations(allocations_df):
     )
 
     # Add vertical line for current date
-    figure_allocated.add_shape(
+    figure.add_shape(
         dict(
             type="line",
             x0=TODAY,
@@ -628,7 +655,7 @@ def figureAllocations(allocations_df):
     )
 
     # Add text annotation above the red line
-    figure_allocated.add_annotation(
+    figure.add_annotation(
         text="Today",
         x=TODAY,
         y=1.1,
@@ -637,10 +664,13 @@ def figureAllocations(allocations_df):
         font=dict(color="red"),
     )
 
-    figure_allocated.update_xaxes(title_text="Date")
-    figure_allocated.update_yaxes(title_text="User")
+    figure.update_xaxes(title_text="")
+    figure.update_yaxes(title_text="User")
+    figure.update_layout(
+        legend=dict(title="", orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5, font_size=16)
+    )
 
-    return [figure_allocated]
+    return [figure]
 
 
 # =========================================================
@@ -649,7 +679,7 @@ def figureAllocations(allocations_df):
 
 
 def figureRollingEarnings(df_team_earn_rolling_total):
-    figure_rolling_earnings = px.scatter(
+    figure = px.scatter(
         df_team_earn_rolling_total.rename(
             columns={
                 "Rolling Weekly Average": "Weekly",
@@ -660,10 +690,10 @@ def figureRollingEarnings(df_team_earn_rolling_total):
         x="Date",
         y=["Weekly", "Monthly", "Yearly"],
         color_discrete_sequence=["#C8E6C9", "#77AEE0", "#1B5E20"],
-        height=600,
+        height=800,
     )
-    figure_rolling_earnings.add_hline(y=1, fillcolor="indigo")
-    figure_rolling_earnings.add_vrect(
+    figure.add_hline(y=1, fillcolor="indigo")
+    figure.add_vrect(
         x0=max(df_team_earn_rolling_total["Date"]) - pd.Timedelta(365, "D"),
         x1=max(df_team_earn_rolling_total["Date"]),
         annotation_text="One Year",
@@ -672,7 +702,17 @@ def figureRollingEarnings(df_team_earn_rolling_total):
         opacity=0.05,
         line_width=0,
     )
-    figure_rolling_earnings.add_vrect(
+    uncertain_area = supplementary_data.costs[supplementary_data.costs["Real_income"] == 0]
+    figure.add_vrect(
+        x0=min(uncertain_area["Date"]),
+        x1=max(uncertain_area["Date"]) + pd.Timedelta(1, "D"),
+        annotation_text="Uncertain ᐅ",
+        annotation_position="bottom left",
+        fillcolor="grey",
+        opacity=0.15,
+        line_width=0,
+    )
+    figure.add_vrect(
         x0=max(df_team_earn_rolling_total["Date"]) - pd.Timedelta(30, "D"),
         x1=max(df_team_earn_rolling_total["Date"]),
         annotation_text="30 days",
@@ -681,35 +721,26 @@ def figureRollingEarnings(df_team_earn_rolling_total):
         opacity=0.05,
         line_width=0,
     )
-    uncertain_area = supplementary_data.costs[supplementary_data.costs["Real_income"] == 0]
-    figure_rolling_earnings.add_vrect(
-        x0=min(uncertain_area["Date"]),
-        x1=min(uncertain_area["Date"]) + pd.Timedelta(1, "D"),
-        annotation_text="Uncertain ᐅ",
-        annotation_position="bottom left",
-        fillcolor="red",
-        opacity=0.55,
-        line_width=0,
-    )
-    figure_rolling_earnings.update_layout(
+    figure.update_layout(
         title="Income normalized with cost",
         yaxis_title="Income / Cost",
     )
-    figure_rolling_earnings.update_layout(
+    figure.update_layout(
         legend=dict(title="Rolling Averages", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
     )
-    return figure_rolling_earnings
+    figure.update_layout(
+        xaxis_rangeslider_visible=True,
+        xaxis_range=[ROLLING_DATE, str(date.today())],
+    )
+    return figure
 
 
 # =========================================================
 # Figure: Projects
 # =========================================================
-
-
-def figureProjects(data):
-    df_by_group = data.byGroup().sort_values("Group")
-    figure_projects_individual = px.histogram(
-        df_by_group[df_by_group["Date"] > ROLLING_DATE],
+def figureProjectsIndividual(grouped_data):
+    figure = px.histogram(
+        grouped_data,
         x="Date",
         y="Time",
         color="Group",
@@ -717,50 +748,50 @@ def figureProjects(data):
         facet_col_wrap=3,
         height=800,
     )
-    figure_projects_individual.update_layout(bargap=0.1)
+    figure.update_layout(bargap=0.1, xaxis_title="", yaxis_title="Time [h]", showlegend=False)
 
-    df_by_group = data.byGroup().sort_values("Group")
-    figure_projects_team = px.histogram(
-        df_by_group[df_by_group["Date"] > ROLLING_DATE], x="Date", y="Time", color="Group", height=600
+    return figure
+
+
+def figureProjects(tempo_data):
+    df_by_group = tempo_data.byGroup().sort_values("Group")
+    df_by_group = df_by_group[df_by_group["Date"] > ROLLING_DATE]
+    figure = px.histogram(df_by_group, x="Date", y="Time", color="Group", height=600)
+    figure.update_layout(bargap=0.1, xaxis_title="", yaxis_title="Time [h]")
+    figure.update_layout(
+        legend=dict(title="Project Key", orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5, font_size=16)
     )
-    figure_projects_team.update_layout(bargap=0.1)
 
-    return [figure_projects_team, figure_projects_individual]
+    return [figure, figureProjectsIndividual(df_by_group)]
 
 
 # =========================================================
 # Figure: Billable time
 # =========================================================
+def figureBillableOneYear(tempo_data, this_year=True):
+    if this_year:
+        year_data = tempo_data.thisYear().sort_values("Key")
+        year = tempo_data.this_year
+    else:
+        year_data = tempo_data.lastYear().sort_values("Key")
+        year = tempo_data.last_year
 
-
-def figureBillable(data):
-    # a figure for this year
-    figure_billable_this_year = px.histogram(
-        data.thisYear().sort_values("Key"),
+    figure = px.histogram(
+        year_data,
         x="User",
         y="Billable",
         color="Key",
         height=600,
-        title=f"Billable entries for {data.this_year}",
+        title=f"Billable entries for {year}",
     )
+    figure.update_xaxes(categoryorder="total ascending")
+    figure.update_layout(yaxis_title="Billable entries [h]")
 
-    figure_billable_this_year.update_xaxes(categoryorder="total ascending")
-    figure_billable_this_year.update_layout(yaxis_title="Billable entries [h]")
+    return figure
 
-    # a figure for last year
-    figure_billable_last_year = px.histogram(
-        data.lastYear().sort_values("Key"),
-        x="User",
-        y="Billable",
-        color="Key",
-        height=600,
-        title=f"Billable entries for {data.last_year}",
-    )
 
-    figure_billable_last_year.update_xaxes(categoryorder="total ascending")
-    figure_billable_last_year.update_layout(yaxis_title="Billable entries [h]")
-
-    return [figure_billable_this_year, figure_billable_last_year]
+def figureBillable(tempo_data):
+    return [figureBillableOneYear(tempo_data), figureBillableOneYear(tempo_data, False)]
 
 
 # =========================================================
@@ -768,32 +799,30 @@ def figureBillable(data):
 # =========================================================
 
 
-def figureInternal(data):
-    figure_internal_this_year = px.histogram(
-        data.thisYear().sort_values("Key"),
+def figureInternalOneYear(tempo_data, this_year=True):
+    if this_year:
+        year_data = tempo_data.thisYear().sort_values("Key")
+        year = tempo_data.this_year
+    else:
+        year_data = tempo_data.lastYear().sort_values("Key")
+        year = tempo_data.last_year
+
+    figure = px.histogram(
+        year_data,
         x="User",
         y="Internal",
         color="Key",
         height=600,
-        title=f"Internal entries for {data.this_year}",
+        title=f"Internal entries for {year}",
     )
+    figure.update_xaxes(categoryorder="total descending")
+    figure.update_layout(yaxis_title="Internal entries [h]")
 
-    figure_internal_this_year.update_xaxes(categoryorder="total descending")
-    figure_internal_this_year.update_layout(yaxis_title="Internal entries [h]")
+    return figure
 
-    figure_internal_last_year = px.histogram(
-        data.lastYear().sort_values("Key"),
-        x="User",
-        y="Internal",
-        color="Key",
-        height=600,
-        title=f"Internal entries for {data.last_year}",
-    )
 
-    figure_internal_last_year.update_xaxes(categoryorder="total descending")
-    figure_internal_last_year.update_layout(yaxis_title="Internal entries [h]")
-
-    return [figure_internal_this_year, figure_internal_last_year]
+def figureInternal(tempo_data):
+    return [figureInternalOneYear(tempo_data), figureInternalOneYear(tempo_data, False)]
 
 
 # =========================================================
@@ -801,19 +830,22 @@ def figureInternal(data):
 # =========================================================
 
 
-def figurePayingProjects(data, year=None):
-    figure_paying_projects_this_year = px.histogram(
-        data.getYear(year).sort_values("Key"),
+def figurePayingProjects(tempo_data, year=None):
+    figure = px.histogram(
+        tempo_data.getYear(year).sort_values("Key"),
         x="Group",
         y="Income",
         color="User",
         height=600,
-        title=f"Paying projects for {year}",
+        title="",
     )
-    figure_paying_projects_this_year.update_xaxes(categoryorder="total ascending")
-    figure_paying_projects_this_year.update_layout(yaxis_title="Income [€]")
+    figure.update_xaxes(categoryorder="total ascending")
+    figure.update_layout(yaxis_title="Income [€]")
+    figure.update_layout(
+        legend=dict(title=f"{year}", orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=-0.035)
+    )
 
-    return figure_paying_projects_this_year
+    return figure
 
 
 # =========================================================
@@ -821,30 +853,33 @@ def figurePayingProjects(data, year=None):
 # =========================================================
 
 
+def figurePopularProjectsOneYear(tempo_data, this_year=True):
+    if this_year:
+        year_data = tempo_data.thisYear().sort_values("Key")
+        year = tempo_data.this_year
+    else:
+        year_data = tempo_data.lastYear().sort_values("Key")
+        year = tempo_data.last_year
+
+    figure = px.histogram(
+        year_data,
+        x="Group",
+        y="Time",
+        color="User",
+        height=600,
+        title="",
+    )
+    figure.update_xaxes(categoryorder="total ascending")
+    figure.update_layout(yaxis_title="Popular project entries [h]")
+    figure.update_layout(
+        legend=dict(title=f"{year}", orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=-0.035)
+    )
+
+    return figure
+
+
 def figurePopularProjects(data):
-    figure_popular_projects_this_year = px.histogram(
-        data.thisYear().sort_values("Key"),
-        x="Group",
-        y="Time",
-        color="User",
-        height=600,
-        title=f"Popular projects for {data.this_year}",
-    )
-    figure_popular_projects_this_year.update_xaxes(categoryorder="total ascending")
-    figure_popular_projects_this_year.update_layout(yaxis_title="Popular project entries [h]")
-
-    figure_popular_projects_last_year = px.histogram(
-        data.lastYear().sort_values("Key"),
-        x="Group",
-        y="Time",
-        color="User",
-        height=600,
-        title=f"Popular projects for {data.last_year}",
-    )
-    figure_popular_projects_last_year.update_xaxes(categoryorder="total ascending")
-    figure_popular_projects_last_year.update_layout(yaxis_title="Popular project entries [h]")
-
-    return [figure_popular_projects_this_year, figure_popular_projects_last_year]
+    return [figurePopularProjectsOneYear(data), figurePopularProjectsOneYear(data, False)]
 
 
 # =========================================================
@@ -879,9 +914,9 @@ def figureEggBaskets(data, supplementary_data, crew_data):
     eggs_days_ago = 90
     if supplementary_data.rates.empty:
         yAxisTitle = "Sum of billable time"
-        figure_eggbaskets = px.histogram(data.byTotalGroup(eggs_days_ago), x="User", y="Billable", color="Group")
-        figure_eggbaskets.update_xaxes(categoryorder="total ascending")
-        figure_eggbaskets.update_layout(
+        figure = px.histogram(data.byTotalGroup(eggs_days_ago), x="User", y="Billable", color="Group")
+        figure.update_xaxes(categoryorder="total ascending")
+        figure.update_layout(
             title="Sum of billable time (" + str(eggs_days_ago) + " days back)",
         )
     else:
@@ -893,7 +928,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
             basket_data = data.byEggBaskets()
 
         yAxisTitle = "Sum of Income [ € ]"
-        figure_eggbaskets = px.bar(
+        figure = px.bar(
             basket_data,
             x="User",
             y="Income",
@@ -903,7 +938,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
             category_orders={"TimeBasket": ["60-90 days ago", "30-60 days ago", "0-30 days ago"]},
         )
         if not crew_data.empty:
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["My Cost"],
                 name="My Cost",
@@ -912,7 +947,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=1,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["My Cost"],
                 mode="markers",
@@ -921,7 +956,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=2,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["My Cost"],
                 mode="markers",
@@ -930,7 +965,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=3,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["My Share"],
                 name="Break Even",
@@ -939,7 +974,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=1,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["My Share"],
                 mode="markers",
@@ -948,7 +983,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=2,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["My Share"],
                 mode="markers",
@@ -957,7 +992,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=3,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["Sustainable"],
                 name="Sustainable",
@@ -966,7 +1001,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=1,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["Sustainable"],
                 mode="markers",
@@ -975,7 +1010,7 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=2,
             )
-            figure_eggbaskets.add_scatter(
+            figure.add_scatter(
                 x=basket_data["User"],
                 y=basket_data["Sustainable"],
                 mode="markers",
@@ -984,16 +1019,16 @@ def figureEggBaskets(data, supplementary_data, crew_data):
                 row=1,
                 col=3,
             )
-        figure_eggbaskets.update_layout(
+        figure.update_layout(
             title="Eggs to share (" + str(eggs_days_ago) + " days back)",
         )
-    figure_eggbaskets.update_layout(
+    figure.update_layout(
         height=600,
         yaxis_title=yAxisTitle,
         bargap=0.1,
     )
 
-    return figure_eggbaskets
+    return figure
 
 
 def figureMinumumRates(crew_data):
@@ -1004,9 +1039,9 @@ def figureMinumumRates(crew_data):
         crew_cost["Share Rate"] = crew_cost["My Share"] * (12 / 52) / (crew_cost["Hours"] * 4)
         crew_cost["Sust Rate"] = crew_cost["Sustainable"] * (12 / 52) / (crew_cost["Hours"] * 4)
 
-        figure_minimum_rates = px.scatter()
+        figure = px.scatter()
 
-        figure_minimum_rates.add_scatter(
+        figure.add_scatter(
             x=crew_cost["User"],
             y=crew_cost["Sust Rate"],
             name="Sustainable",
@@ -1014,7 +1049,7 @@ def figureMinumumRates(crew_data):
             line=dict(color="DarkGreen", dash="dot"),
             marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkGreen")),
         )
-        figure_minimum_rates.add_scatter(
+        figure.add_scatter(
             x=crew_cost["User"],
             y=crew_cost["Share Rate"],
             name="Break even",
@@ -1022,7 +1057,7 @@ def figureMinumumRates(crew_data):
             line=dict(color="DarkRed", dash="dot"),
             marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="DarkRed")),
         )
-        figure_minimum_rates.add_scatter(
+        figure.add_scatter(
             x=crew_cost["User"],
             y=crew_cost["Cost Rate"],
             name="Salary",
@@ -1030,14 +1065,15 @@ def figureMinumumRates(crew_data):
             line=dict(color="Black", dash="dot"),
             marker=dict(size=24, symbol="line-ew", line=dict(width=3, color="Black")),
         )
-        figure_minimum_rates.update_traces(hovertemplate="EUR: %{y:.0f}")
-        figure_minimum_rates.update_layout(
+        figure.update_traces(hovertemplate="EUR: %{y:.0f}")
+        figure.update_layout(
             title="Minimum rates (assuming 80% billable)", yaxis_title="Hourly rates [€]", hovermode="x"
         )
+        figure.update_layout(legend=dict(title="", orientation="v", y=0.99, x=0.01, font_size=16))
     else:
-        figure_minimum_rates = px.scatter()
+        figure = px.scatter()
 
-    return figure_minimum_rates
+    return figure
 
 
 def sustainableHours(crew_data):
@@ -1052,24 +1088,25 @@ def sustainableHours(crew_data):
 
         hours_df.set_index("Rate", inplace=True)
 
-        figure_sustainable_hours = px.scatter(hours_df, color_discrete_sequence=px.colors.qualitative.Antique)
-        figure_sustainable_hours.update_traces(mode="lines+markers")
-        figure_sustainable_hours.update_layout(
+        figure = px.scatter(hours_df, color_discrete_sequence=px.colors.qualitative.Antique)
+        figure.update_traces(mode="lines+markers")
+        figure.update_layout(
             height=600,
             title=f"Sustainable Working Hours (weekly) <br> 1 EUR = {EUR2SEK} SEK",
             xaxis_title="Rate [€]",
             yaxis_title="Hours per week",
             legend_title_text="",
         )
-        figure_sustainable_hours.update_traces(hovertemplate="Hours %{y:.1f} Rate: %{x:.0f} €")
+        figure.update_traces(hovertemplate="Hours %{y:.1f} Rate: %{x:.0f} €")
 
-        figure_sustainable_hours.update_xaxes(showspikes=True)
-        figure_sustainable_hours.update_yaxes(showspikes=True)
+        figure.update_xaxes(showspikes=True)
+        figure.update_yaxes(showspikes=True)
+        figure.update_layout(legend=dict(title="", orientation="v", y=0.99, xanchor="right", x=0.99, font_size=16))
 
     else:
-        figure_sustainable_hours = px.scatter()
+        figure = px.scatter()
 
-    return figure_sustainable_hours
+    return figure
 
 
 # =========================================================
