@@ -644,139 +644,6 @@ def figureAllocations(allocations_df):
 
 
 # =========================================================
-# Figure: Remaining Runway
-# =========================================================
-# Requires config: rates
-def figureRunway(
-    tempo_data: TempoData, supplemental: SupplementaryData, crew_df: pd.DataFrame, allocations_df: pd.DataFrame
-):
-    start_date = pd.Timestamp(supplemental.financials["Month"][-5])
-    invoiced_cutoff = start_date - pd.offsets.MonthBegin()
-
-    current_amount = supplemental.financials["Starting_amount"][-5]
-    monthly_salaries = crew_df["Total cost"].sum()
-
-    flattened_df = pd.DataFrame(columns=["Date", "costs only", "incl. known", "incl. allocated"])
-    flattened_df.loc[-1] = [lookBack(1, start_date), current_amount, current_amount, current_amount]
-    flattened_df.index = flattened_df.index + 1
-
-    max_enddate = pd.Timestamp(allocations_df["Stop"].max())
-
-    # known costs
-    for day in pd.date_range(start_date, max_enddate + pd.offsets.MonthBegin(), freq="M"):
-        cost = monthly_salaries
-
-        flattened_df.loc[-1] = [day, -cost, -cost, -cost]
-        flattened_df.index = flattened_df.index + 1
-        flattened_df.loc[-1] = [lookBack(1, day), 0, 0, 0]
-        flattened_df.index = flattened_df.index + 1
-
-    # hours worked
-    total_known = 0
-    daily_sum = tempo_data.data.groupby(["Date"], as_index=False)["Income"].sum()
-    for _, row in daily_sum.iterrows():
-        day = row["Date"]
-        if day < invoiced_cutoff:
-            continue
-        day = (
-            pd.Timestamp(day) + pd.offsets.MonthBegin() + pd.offsets.Week(2)
-        )  # TODO: Better estimate of invoicing date
-        known = row["Income"]
-        total_known += known
-
-        flattened_df.loc[-1] = [day, 0, known, 0]
-        flattened_df.index = flattened_df.index + 1
-        flattened_df.loc[-1] = [lookBack(1, day), 0, 0, 0]
-        flattened_df.index = flattened_df.index + 1
-
-    # hours allocated
-    for _, row in allocations_df.iterrows():
-        if row["Unconfirmed"]:
-            continue
-        user = row["User"]
-        allocation = row["Allocation"]
-        start = pd.Timestamp(row["Start"])
-        stop = pd.Timestamp(row["Stop"])
-        task_id = row["JiraID"]
-        if stop is not None and stop < start_date:
-            continue
-        if start is None or start < invoiced_cutoff:
-            start = invoiced_cutoff
-
-        if stop is None:
-            stop = max_enddate
-
-        # I'm sure there's a nice clever one-liner to do this. I'm apparently not that clever.
-        rate = 0
-        for _, raterow in supplemental.rates[lambda df: (df["Key"] == task_id) & (df["User"] == user)].iterrows():
-            rate = raterow["Rate"] / (EUR2SEK if raterow["Currency"] == "SEK" else 1)
-            break
-
-        prevm = start
-        nextm = start + pd.offsets.MonthBegin()
-        while nextm <= stop:
-            invoice_date = nextm + pd.offsets.Week(2)  # TODO: Better estimate of invoicing date
-            workdays = (
-                len(pd.bdate_range(prevm, nextm)) - 3
-            )  # Slightly conservative estimate, as holidays and sick days are not factored otherwise
-            amount = allocation * workdays * 7.5 * rate
-            flattened_df.loc[-1] = [invoice_date, 0, 0, amount]
-            flattened_df.index = flattened_df.index + 1
-            flattened_df.loc[-1] = [lookBack(1, invoice_date), 0, 0, 0]
-            flattened_df.index = flattened_df.index + 1
-            prevm = nextm
-            nextm = nextm + pd.offsets.MonthBegin()
-
-    flattened_df = flattened_df.groupby(["Date"], as_index=False).sum()
-    flattened_df = flattened_df.sort_values(by=["Date"])
-
-    flattened_df["cum costs only"] = flattened_df["costs only"].cumsum().round(4)
-    flattened_df["cum known"] = flattened_df["incl. known"].cumsum().round(4)
-    flattened_df["cum allocated"] = flattened_df["incl. allocated"].cumsum().round(4)
-
-    figure = px.scatter(height=600)
-    figure.add_trace(
-        go.Scatter(
-            x=flattened_df["Date"],
-            y=flattened_df["cum costs only"],
-            mode="lines",
-            line=go.scatter.Line(color="salmon"),
-            name="Costs Only (salaries)",
-        )
-    )
-    figure.add_trace(
-        go.Scatter(
-            x=flattened_df["Date"],
-            y=flattened_df["cum known"],
-            mode="lines",
-            line=go.scatter.Line(color="darkgreen"),
-            name="Billable",
-        )
-    )
-    figure.add_trace(
-        go.Scatter(
-            x=flattened_df["Date"],
-            y=flattened_df["cum allocated"],
-            mode="lines",
-            line=go.scatter.Line(color="darkblue"),
-            name="Allocations",
-        )
-    )
-
-    figure.update_layout(
-        title="Unclamped Runway",
-    )
-
-    clamped = go.Figure(figure)
-    clamped.update_layout(
-        title="Runway",
-        yaxis_range=[0, current_amount + total_known * 1.2],
-    )
-
-    return [clamped, figure]
-
-
-# =========================================================
 # Figure: Rolling Income vs. Cost
 # =========================================================
 
@@ -1223,13 +1090,6 @@ if not allocations_df.empty:
     main_list.append(figure_allocations)
 delta("Allocations building")
 
-# Runway
-# Requires rates file, financials, crew, and allocations
-if "Real_income" in supplementary_data.costs and not crew_df.empty and not allocations_df.empty:
-    [figure_runway_clamped, figure_runway_unclamped] = figureRunway(data, supplementary_data, crew_df, allocations_df)
-    main_list.append(figure_runway_clamped)
-delta("Runway building")
-
 tab_children = [dcc.Tab(label="Main", value="start_page")]
 figure_tabs = {"start_page": ("Main", main_list)}
 
@@ -1345,8 +1205,6 @@ if (
         figures = []
         figures.append(figureMinumumRates(crew_df))
         figures.append(sustainableHours(crew_df))
-        if "Real_income" in supplementary_data.costs and not crew_df.empty and not allocations_df.empty:
-            figures.append(figure_runway_unclamped)
         figures.append(figureEarningsVersusWorkload(df_comparison))
 
         figure_tabs["comparison"] = (
