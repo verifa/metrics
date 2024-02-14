@@ -79,13 +79,13 @@ def rollingAverage(frame, to_mean, days, offset=7):
     )
 
 
-def normaliseUserRolling7(frame, working_hours):
+def normaliseUserRolling7(frame, working_hours_data):
     first_date = START_DATE
     last_date = TODAY
     result = frame
     result["Daily"] = float(TEMPO_DAILY_HOURS)
-    if not working_hours.empty:
-        for _, row in working_hours.iterrows():
+    if not working_hours_data.empty:
+        for _, row in working_hours_data.iterrows():
             if row["Daily"] != float(TEMPO_DAILY_HOURS):
                 logging.debug("%s %s", row["User"], row["Daily"])
                 if row["Start"] != "*":
@@ -131,8 +131,8 @@ logging.info("Starting %s", start)
 
 
 def delta(txt):
-    delta = datetime.now() - start
-    logging.info("%s: %s", delta, txt)
+    diff = datetime.now() - start
+    logging.info("%s: %s", diff, txt)
 
 
 # ---------------------------------------------------------
@@ -173,27 +173,27 @@ else:
 
 delta("Notion Crew")
 
-data = TempoData()
-data.load(from_date=START_DATE, to_date=YESTERDAY)
+tempo = TempoData()
+tempo.load(from_date=START_DATE, to_date=YESTERDAY)
 delta("TempoData")
 
-supplementary_data = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df)
-supplementary_data.load(data.getUsers())
+supplementary = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df)
+supplementary.load(tempo.getUsers())
 delta("Supplementary Data")
 
-data.zeroOutBillableTime(supplementary_data.internal_keys)
+tempo.zeroOutBillableTime(supplementary.internal_keys)
 delta("ZeroOutBillable")
 
-if not supplementary_data.rates.empty:
-    data.injectRates(supplementary_data.rates)
+if not supplementary.rates.empty:
+    tempo.injectRates(supplementary.rates)
     delta("InjectRates")
-    table_rates = data.ratesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
+    table_rates = tempo.ratesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
     delta("Table Rates")
-    table_missing_rates = data.missingRatesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
+    table_missing_rates = tempo.missingRatesTable(tableHeight, COLOR_HEAD, COLOR_ONE)
     delta("Table Missing Rates")
 
-if not supplementary_data.working_hours.empty:
-    data.padTheData(supplementary_data.working_hours)
+if not supplementary.working_hours.empty:
+    tempo.padTheData(supplementary.working_hours)
     delta("Data Padding")
 
 
@@ -202,20 +202,20 @@ if not supplementary_data.working_hours.empty:
 # =========================================================
 
 
-table_working_hours = data.tableByUser(supplementary_data.working_hours, tableHeight, COLOR_HEAD, COLOR_ONE)
+table_working_hours = tempo.tableByUser(supplementary.working_hours, tableHeight, COLOR_HEAD, COLOR_ONE)
 delta("Table Working Hours")
-last_reported = pd.to_datetime(min(data.byUser(supplementary_data.working_hours)["Last"]))
+last_reported = pd.to_datetime(min(tempo.byUser(supplementary.working_hours)["Last"]))
 logging.info("Last common day: %s", last_reported)
 
-if not supplementary_data.working_hours.empty:
-    df_user_time_rolling = data.userRolling7(["Billable", "Internal"])
+if not supplementary.working_hours.empty:
+    df_user_time_rolling = tempo.userRolling7(["Billable", "Internal"])
     delta("User Time Rolling")
-    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary_data.working_hours)
+    df_user_normalised = normaliseUserRolling7(df_user_time_rolling, supplementary.working_hours)
     delta("User Normalised")
     df_team_normalised = normaliseTeamAverage(df_user_normalised)
     delta("Team Normalised")
-    if not supplementary_data.rates.empty:
-        df_user_income_rolling = data.userRolling7("Income")
+    if not supplementary.rates.empty:
+        df_user_income_rolling = tempo.userRolling7("Income")
         delta("User Income Rolling")
         # Average user data
         df_average_income_rolling_7 = teamRollingAverage7(df_user_income_rolling, "Income")
@@ -224,15 +224,15 @@ if not supplementary_data.working_hours.empty:
         df_average_income_rolling_30 = df_average_income_rolling_30.merge(df_average_income_rolling_7, on=["Date"])
         delta("Average Income Rolling")
         # Team total data
-        df_team_income_rolling = data.teamRolling7("Income")
+        df_team_income_rolling = tempo.teamRolling7("Income")
         df_team_income_rolling_30 = rollingAverage(df_team_income_rolling, "Income", 30)
         df_team_income_rolling_30.columns = ["Date", "Income30"]
         df_team_income_rolling_30 = df_team_income_rolling_30.merge(df_team_income_rolling, on=["Date"])
         df_team_rolling_total = df_team_income_rolling_30
         delta("User Income Rolling")
         # data for rolling earnings
-        if not supplementary_data.costs.empty:
-            df_team_earn_rolling = data.teamRolling7Relative(supplementary_data.costs)
+        if not supplementary.costs.empty:
+            df_team_earn_rolling = tempo.teamRolling7Relative(supplementary.costs)
             df_team_earn_rolling_30 = rollingAverage(df_team_earn_rolling, "Diff", 30)
             df_team_earn_rolling_30.columns = ["Date", "Diff30"]
             df_team_earn_rolling_30 = df_team_earn_rolling_30.merge(df_team_earn_rolling, on=["Date"])
@@ -402,7 +402,8 @@ def figureRollingIncomeTeam(df_average_income_rolling_30, last_date):
 # =========================================================
 
 
-def figureRollingTotal(df_team_rolling_total, df_raw_costs):
+def figureRollingTotal(df_team_rolling_total, supplementary_data):
+    df_raw_costs = supplementary_data.raw_costs
     figure = px.scatter(
         df_team_rolling_total,
         x="Date",
@@ -445,7 +446,7 @@ def figureRollingTotal(df_team_rolling_total, df_raw_costs):
 # =========================================================
 
 
-def figureFinancialTotal(year=None):
+def figureFinancialTotal(supplementary_data, year=None):
     figure = px.scatter(height=600)
     monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]
     monthly_result = monthly_result[monthly_result["Year"] == str(year)]
@@ -538,17 +539,17 @@ def figureSpentTimePercentage(tempo_data):
 # Figure: Allocations over time
 # =========================================================
 # Requires config: rates
-def figureAllocations(allocations_df):
-    allocations_df["Start"] = pd.to_datetime(allocations_df["Start"])
-    allocations_df["Stop"] = pd.to_datetime(allocations_df["Stop"])
-    allocations_df["Allocation"] = pd.to_numeric(allocations_df["Allocation"], errors="coerce")
-    allocations_df = allocations_df[allocations_df["Stop"] >= ROLLING_DATE]
-    allocations_df.loc[allocations_df["Start"] <= ROLLING_DATE, "Start"] = ROLLING_DATE
+def figureAllocations(allocation_data):
+    allocation_data["Start"] = pd.to_datetime(allocation_data["Start"])
+    allocation_data["Stop"] = pd.to_datetime(allocation_data["Stop"])
+    allocation_data["Allocation"] = pd.to_numeric(allocation_data["Allocation"], errors="coerce")
+    allocation_data = allocation_data[allocation_data["Stop"] >= ROLLING_DATE]
+    allocation_data.loc[allocation_data["Start"] <= ROLLING_DATE, "Start"] = ROLLING_DATE
 
     # Create a list to store rows for each day
     rows = []
 
-    for _, row in allocations_df.iterrows():
+    for _, row in allocation_data.iterrows():
         user = row["User"]
         allocation = row["Allocation"]
         unconfirmed = row["Unconfirmed"]
@@ -585,7 +586,7 @@ def figureAllocations(allocations_df):
     )
 
     # Group by relevant columns and aggregate date ranges into timelines
-    allocations_df = (
+    allocation_data = (
         result_df.groupby(["User", "Allocation", "Unconfirmed", "JiraID"])
         .agg(Start=("Date", "min"), Stop=("Date", "max"))
         .reset_index()
@@ -627,11 +628,11 @@ def figureAllocations(allocations_df):
     }
 
     # Apply the function to create a new 'Color' column
-    allocations_df["Color"] = allocations_df.apply(determine_color, axis=1)
+    allocation_data["Color"] = allocation_data.apply(determine_color, axis=1)
 
     # Create a Gantt chart
     figure = px.timeline(
-        allocations_df,
+        allocation_data,
         x_start="Start",
         x_end="Stop",
         y="User",
@@ -678,7 +679,7 @@ def figureAllocations(allocations_df):
 # =========================================================
 
 
-def figureRollingEarnings(df_team_earn_rolling_total):
+def figureRollingEarnings(df_team_earn_rolling_total, supplementary_data):
     figure = px.scatter(
         df_team_earn_rolling_total.rename(
             columns={
@@ -878,8 +879,8 @@ def figurePopularProjectsOneYear(tempo_data, this_year=True):
     return figure
 
 
-def figurePopularProjects(data):
-    return [figurePopularProjectsOneYear(data), figurePopularProjectsOneYear(data, False)]
+def figurePopularProjects(tempo_data):
+    return [figurePopularProjectsOneYear(tempo_data), figurePopularProjectsOneYear(tempo_data, False)]
 
 
 # =========================================================
@@ -910,11 +911,11 @@ def crewCost(crew_data):
     return crew_cost
 
 
-def figureEggBaskets(data, supplementary_data, crew_data):
+def figureEggBaskets(tempo_data, supplementary_data, crew_data):
     eggs_days_ago = 90
     if supplementary_data.rates.empty:
         yAxisTitle = "Sum of billable time"
-        figure = px.histogram(data.byTotalGroup(eggs_days_ago), x="User", y="Billable", color="Group")
+        figure = px.histogram(tempo_data.byTotalGroup(eggs_days_ago), x="User", y="Billable", color="Group")
         figure.update_xaxes(categoryorder="total ascending")
         figure.update_layout(
             title="Sum of billable time (" + str(eggs_days_ago) + " days back)",
@@ -922,10 +923,10 @@ def figureEggBaskets(data, supplementary_data, crew_data):
     else:
         if not crew_data.empty:
             crew_cost = crewCost(crew_data)
-            basket_data = data.byEggBaskets().merge(crew_cost, on="User", validate="many_to_one")
+            basket_data = tempo_data.byEggBaskets().merge(crew_cost, on="User", validate="many_to_one")
             basket_data = basket_data.sort_values(by=["TimeBasket", "Sustainable"])
         else:
-            basket_data = data.byEggBaskets()
+            basket_data = tempo_data.byEggBaskets()
 
         yAxisTitle = "Sum of Income [ € ]"
         figure = px.bar(
@@ -1115,9 +1116,9 @@ def sustainableHours(crew_data):
 
 delta("Starting Rendering")
 main_list = []
-main_list.append(figureEggBaskets(data, supplementary_data, crew_df))
+main_list.append(figureEggBaskets(tempo, supplementary, crew_df))
 main_list.append(table_working_hours)
-if not supplementary_data.rates.empty:
+if not supplementary.rates.empty:
     main_list.append(table_missing_rates)
 
 # Allocations
@@ -1132,21 +1133,21 @@ figure_tabs = {"start_page": ("Main", main_list)}
 
 if SHOWTAB_PROJECTS:
     tab_children.append(dcc.Tab(label="Time spent on...", value="projects"))
-    figures_project = figureProjects(data)
+    figures_project = figureProjects(tempo)
     figure_tabs["projects"] = ("What we work on", figures_project)
 if SHOWTAB_BILLABLE:
     tab_children.append(dcc.Tab(label="Billable", value="billable"))
-    figure_tabs["billable"] = ("Billable work", figureBillable(data))
+    figure_tabs["billable"] = ("Billable work", figureBillable(tempo))
 if SHOWTAB_INTERNAL:
     tab_children.append(dcc.Tab(label="Internal", value="internal"))
-    figure_tabs["internal"] = ("Internal work", figureInternal(data))
+    figure_tabs["internal"] = ("Internal work", figureInternal(tempo))
 if SHOWTAB_POPULAR_PROJECTS:
     tab_children.append(dcc.Tab(label="Popular projects", value="popular_projects"))
-    figure_tabs["popular_projects"] = ("Popular projects", figurePopularProjects(data))
+    figure_tabs["popular_projects"] = ("Popular projects", figurePopularProjects(tempo))
 if SHOWTAB_PAYING_PROJECTS:
-    if "Real_income" in supplementary_data.costs:
-        max_year = int(supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]["Year"].max())
-        figures = [figurePayingProjects(data, year) for year in range(START_DATE.year, max_year + 1)]
+    if "Real_income" in supplementary.costs:
+        max_year = int(supplementary.raw_costs[supplementary.raw_costs["Real_income"] != 0]["Year"].max())
+        figures = [figurePayingProjects(tempo, year) for year in range(START_DATE.year, max_year + 1)]
         figure_tabs["paying_projects"] = ("Paying projects", figures[::-1])
         tab_children.append(dcc.Tab(label="Paying projects", value="paying_projects"))
 
@@ -1169,8 +1170,8 @@ if not allocations_df.empty:
 # ---------------------------------------------------------
 # Time spent groupings
 # Requires rates file
-if not supplementary_data.rates.empty:
-    figure_time_spent = figureSpentTimePercentage(data)
+if not supplementary.rates.empty:
+    figure_time_spent = figureSpentTimePercentage(tempo)
     # Update projects page
     (head, plots) = figure_tabs["projects"]
     plots.append(figure_time_spent)
@@ -1179,10 +1180,10 @@ if not supplementary_data.rates.empty:
 # ---------------------------------------------------------
 # Financial data
 # Requires income and costs in config files
-if "Real_income" in supplementary_data.costs:
-    max_year = int(supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]["Year"].max())
+if "Real_income" in supplementary.costs:
+    max_year = int(supplementary.raw_costs[supplementary.raw_costs["Real_income"] != 0]["Year"].max())
 
-    figures = [figureFinancialTotal(year) for year in range(START_DATE.year, max_year + 1)]
+    figures = [figureFinancialTotal(supplementary, year) for year in range(START_DATE.year, max_year + 1)]
 
     # Add tabs
     if SHOWTAB_FINANCE:
@@ -1192,7 +1193,7 @@ if "Real_income" in supplementary_data.costs:
 # ---------------------------------------------------------
 # Project rates
 # Requires config: rates, workinghours and costs
-if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty):
+if not (supplementary.rates.empty or supplementary.working_hours.empty):
     # Add tabs
     if SHOWTAB_RATES:
         figure_tabs["rates"] = ("Rates", [table_rates])
@@ -1201,14 +1202,14 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
         figure_tabs["rolling_income"] = (
             "Rolling income",
             [
-                figureRollingTotal(df_team_rolling_total, supplementary_data.raw_costs),
+                figureRollingTotal(df_team_rolling_total, supplementary),
                 figureRollingIncomeTeam(df_average_income_rolling_30, last_reported),
                 figureRollingIncomeIndividual(df_user_income_rolling),
             ],
         )
         tab_children.append(dcc.Tab(label="Income analysis", value="rolling_income"))
-    if not supplementary_data.costs.empty:
-        figure_rolling_earnings = figureRollingEarnings(df_team_earn_rolling_total)
+    if not supplementary.costs.empty:
+        figure_rolling_earnings = figureRollingEarnings(df_team_earn_rolling_total, supplementary)
         # Update main page
         (head, plots) = figure_tabs["start_page"]
         plots.insert(0, figure_rolling_earnings)
@@ -1218,7 +1219,7 @@ if not (supplementary_data.rates.empty or supplementary_data.working_hours.empty
 # ---------------------------------------------------------
 # Normalised working time
 # Requires config files: workinghours
-if not supplementary_data.working_hours.empty:
+if not supplementary.working_hours.empty:
     # Add tab
     if SHOWTAB_NORMALISED_WORKTIME:
         figure_tabs["normalised_worktime"] = (
@@ -1232,9 +1233,9 @@ if not supplementary_data.working_hours.empty:
 # Break even
 # Requires config files: workinghours, rates, finances
 if (
-    not supplementary_data.working_hours.empty
-    and not supplementary_data.rates.empty
-    and not supplementary_data.costs.empty
+    not supplementary.working_hours.empty
+    and not supplementary.rates.empty
+    and not supplementary.costs.empty
     and not df_comparison.empty
 ):
     # Add tab
