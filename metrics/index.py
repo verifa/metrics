@@ -449,7 +449,10 @@ def figureRollingTotal(df_team_rolling_total, supplementary_data):
 def figureFinancialTotal(supplementary_data, year=None):
     figure = px.scatter(height=600)
     monthly_result = supplementary_data.raw_costs[supplementary_data.raw_costs["Real_income"] != 0]
-    monthly_result = monthly_result[monthly_result["Year"] == str(year)]
+    if not year is None:
+        monthly_result = monthly_result[monthly_result["Year"] == str(year)]
+    else:
+        monthly_result = monthly_result.tail(24)
 
     figure.add_trace(
         go.Scatter(
@@ -501,8 +504,13 @@ def figureFinancialTotal(supplementary_data, year=None):
             name="Cumulative sum 1 year",
         )
     )
+    if year is None:
+        title = "12 months"
+    else:
+        title = year
+
     figure.update_layout(
-        title=f"Financial numbers for {year}",
+        title=f"Financial numbers for {title}",
         yaxis_title="Income/Cost/Result [ € ]",
     )
     figure.update_layout(
@@ -1213,6 +1221,7 @@ if not (supplementary.rates.empty or supplementary.working_hours.empty):
         # Update main page
         (head, plots) = figure_tabs["start_page"]
         plots.insert(0, figure_rolling_earnings)
+        plots.insert(0, figureFinancialTotal(supplementary))
         figure_tabs["start_page"] = (head, plots)
 
 
