@@ -452,7 +452,7 @@ def figureFinancialTotal(supplementary_data, year=None):
     if not year is None:
         monthly_result = monthly_result[monthly_result["Year"] == str(year)]
     else:
-        monthly_result = monthly_result.tail(24)
+        monthly_result = monthly_result.tail(6)
 
     figure.add_trace(
         go.Scatter(
@@ -493,7 +493,21 @@ def figureFinancialTotal(supplementary_data, year=None):
     monthly_sum_cost = monthly_result.rolling(12, min_periods=1)["External_cost"].sum()
     monthly_sum_in = monthly_result.rolling(12, min_periods=1)["Real_income"].sum()
     monthly_result["Result"] = monthly_sum_in - monthly_sum_cost
+    monthly_result["Name"] = monthly_result["Month"].dt.strftime("%Y-%m-01")
     logging.debug("%s", monthly_result)
+
+    starting_bank = monthly_result["Starting_amount"].values[:1][0]
+    if starting_bank != 0:
+        monthly_result["First"] = pd.to_datetime(monthly_result["Name"])
+        figure.add_trace(
+            go.Scatter(
+                x=monthly_result["First"],
+                y=monthly_result["Starting_amount"],
+                mode="lines+markers",
+                line=go.scatter.Line(color="Green"),
+                name="Bank",
+            )
+        )
 
     figure.add_trace(
         go.Scatter(
@@ -501,18 +515,15 @@ def figureFinancialTotal(supplementary_data, year=None):
             y=monthly_result["Result"],
             mode="lines+markers",
             line=go.scatter.Line(color="black"),
-            name="Cumulative sum 1 year",
+            name="Cumulative result",
         )
     )
     if year is None:
-        title = "12 months"
+        title = "last 3 months"
     else:
         title = year
 
-    figure.update_layout(
-        title=f"Financial numbers for {title}",
-        yaxis_title="Income/Cost/Result [ € ]",
-    )
+    figure.update_layout(title=f"Financial numbers for {title}", yaxis_title="Income/Cost/Result [ € ]", hovermode="x")
     figure.update_layout(
         legend=dict(title="Monthly", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
     )
