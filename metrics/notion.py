@@ -141,7 +141,11 @@ class Financials(Notion):
                 break
 
         # Add 5 projected cost entries based on recent average
-        extaverage = sum(self.data["External_cost"][-5:]) / 5
+        extaverage = (
+            sum(self.data["External_cost"][-3:])
+            + sum(self.data["External_cost"][-2:])
+            + sum(self.data["External_cost"][-1:])
+        ) / 6
         y, m = list(map(int, self.data.tail(1)["Month"][self.data.index.max()].split("-")))
         for i in range(5):
             extcost = extaverage

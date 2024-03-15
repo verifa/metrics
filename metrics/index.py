@@ -736,15 +736,12 @@ def figureRollingEarnings(df_team_earn_rolling_total, supplementary_data):
         x0=max(df_team_earn_rolling_total["Date"]) - pd.Timedelta(30, "D"),
         x1=max(df_team_earn_rolling_total["Date"]),
         annotation_text="30 days",
-        annotation_position="top right",
+        annotation_position="top left",
         fillcolor="darkgreen",
         opacity=0.05,
         line_width=0,
     )
-    figure.update_layout(
-        title="Income normalized with cost",
-        yaxis_title="Income / Cost",
-    )
+    figure.update_layout(title="Income normalized with cost", yaxis_title="Income / Cost", hovermode="x")
     figure.update_layout(
         legend=dict(title="Rolling Averages", orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.75)
     )
