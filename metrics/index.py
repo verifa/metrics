@@ -698,7 +698,7 @@ def figureAllocations(allocation_data):
 # =========================================================
 
 
-def figureRollingEarnings(df_team_earn_rolling_total, supplementary_data):
+def figureRollingEarnings(df_team_earn_rolling_total, supplementary_data, last_day=None):
     figure = px.scatter(
         df_team_earn_rolling_total.rename(
             columns={
@@ -709,7 +709,7 @@ def figureRollingEarnings(df_team_earn_rolling_total, supplementary_data):
         ),
         x="Date",
         y=["Weekly", "Monthly", "Yearly"],
-        color_discrete_sequence=["#C8E6C9", "#77AEE0", "#1B5E20"],
+        color_discrete_sequence=["#909F90", "#9090B0", "#508050"],
         height=800,
     )
     figure.add_hline(y=1, fillcolor="indigo")
@@ -749,6 +749,22 @@ def figureRollingEarnings(df_team_earn_rolling_total, supplementary_data):
         xaxis_rangeslider_visible=True,
         xaxis_range=[ROLLING_DATE, str(date.today())],
     )
+    if last_day is not None:
+        figure.add_vline(
+            x=last_day,
+            fillcolor="indigo",
+            line_dash="dot",
+        )
+        figure.add_annotation(
+            text="Last fully reported day",
+            x=last_day,
+            xanchor="right",
+            y=0.8,
+            yref="paper",
+            showarrow=True,
+            font=dict(color="indigo"),
+        )
+
     return figure
 
 
@@ -1225,7 +1241,7 @@ if not (supplementary.rates.empty or supplementary.working_hours.empty):
         )
         tab_children.append(dcc.Tab(label="Income analysis", value="rolling_income"))
     if not supplementary.costs.empty:
-        figure_rolling_earnings = figureRollingEarnings(df_team_earn_rolling_total, supplementary)
+        figure_rolling_earnings = figureRollingEarnings(df_team_earn_rolling_total, supplementary, last_reported)
         # Update main page
         (head, plots) = figure_tabs["start_page"]
         plots.insert(0, figure_rolling_earnings)
