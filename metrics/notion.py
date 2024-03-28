@@ -30,7 +30,9 @@ class Notion:
 
     def fetch_data(self, database_id) -> requests.Response:
         url = f"https://api.notion.com/v1/databases/{database_id}/query"
-        response = requests.post(url, headers={"Authorization": f"Bearer {self.token}", "Notion-Version": "2022-06-28"})
+        response = requests.post(
+            url, headers={"Authorization": f"Bearer {self.token}", "Notion-Version": "2022-06-28"}, timeout=30
+        )
         return response
 
 
