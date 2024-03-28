@@ -37,6 +37,12 @@ vars:
 	@echo ""
 	$(foreach v, $(.VARIABLES), $(if $(filter file,$(origin $(v))), $(info $(v)=$($(v)))))
 
+## check_notion:
+##  uses the environment variable to fetch data from notion dB's
+.PHONY: check_notion
+check_notion:
+	@scripts/test-notion-keys.sh
+
 ## install:
 ## 	installs the dependencies with potry
 ##
