@@ -185,7 +185,7 @@ class TempoData:
     def tableByUser(
         self, working_hours, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender"
     ) -> go.Figure:
-        table_working_hours = self.byUser(working_hours).round(2)
+        table_working_hours = self.byUser(working_hours).sort_values(by="Last").round(2)
         if not working_hours.empty:
             cell_values = [
                 table_working_hours["User"],
