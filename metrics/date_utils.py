@@ -14,7 +14,11 @@ def lookAhead(offset: int, from_date: str = pd.Timestamp("today")):
 
 
 def lookBack(offset: int, from_date: str = pd.Timestamp("today")):
-    return pd.Timestamp(from_date).floor("D") - pd.offsets.Day(offset)
+    return (
+        pd.Timestamp(from_date).floor("D")
+        - pd.offsets.Day(offset)
+        - pd.offsets.Day(int(pd.Timestamp.today().strftime("%d")))
+    )
 
 
 def leapYear(year: int) -> bool:
