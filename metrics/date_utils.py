@@ -9,12 +9,17 @@ def weekdays(from_date: str, to_date: str):
     return np.busday_count(from_date, str(lookAhead(1, to_date).date()), weekmask="1111100")
 
 
-def lookAhead(offset: int, from_date: str = pd.Timestamp("today")):
+def lookAhead(offset: int, from_date: str = pd.Timestamp.today()):
     return pd.Timestamp(from_date).floor("D") + pd.offsets.Day(offset)
 
 
-def lookBack(offset: int, from_date: str = pd.Timestamp("today")):
+def lookBack(offset: int, from_date: str = pd.Timestamp.today()):
     return pd.Timestamp(from_date).floor("D") - pd.offsets.Day(offset)
+
+
+def monthBegin(from_date: str = pd.Timestamp.today()):
+    """Return with the first for the date"""
+    return pd.Timestamp(from_date).strftime("%Y-%m-01")
 
 
 def leapYear(year: int) -> bool:
