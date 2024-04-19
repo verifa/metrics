@@ -13,8 +13,8 @@ from metrics.date_utils import lookBack
 from metrics.notion import OKR, Allocations, Crew, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
 # fmt: off
-from metrics.tempo_config import (ALLOCATION_START, EUR2SEK, ROLLING_DATE,
-                                  START_DATE, TODAY, YESTERDAY)
+from metrics.tempo_config import (EUR2SEK, ROLLING_DATE, START_DATE, TODAY,
+                                  YESTERDAY)
 # fmt: on
 from metrics.tempo_data import TempoData
 
@@ -196,15 +196,7 @@ if not supplementary.working_hours.empty:
     tempo.padTheData(supplementary.working_hours)
     delta("Data Padding")
 
-# a quick test
-td = tempo.data[tempo.data["Income"] > 0]
-print(td)
-print(pd.Timestamp("today").strftime("%Y-%m-01"))
-print(lookBack(180).strftime("%Y-%m-01"))
-td = td[td["Date"] >= lookBack(180).strftime("%Y-%m-01")]
-td["Month"] = td["Date"].dt.month
-print(td)
-print(td.groupby(["Year", "Month", "Key"], as_index=False)["Income"].sum())
+
 # =========================================================
 # Table: User working hours
 # =========================================================
@@ -570,8 +562,8 @@ def figureAllocations(allocation_data):
     allocation_data["Start"] = pd.to_datetime(allocation_data["Start"])
     allocation_data["Stop"] = pd.to_datetime(allocation_data["Stop"])
     allocation_data["Allocation"] = pd.to_numeric(allocation_data["Allocation"], errors="coerce")
-    allocation_data = allocation_data[allocation_data["Stop"] >= ALLOCATION_START]
-    allocation_data.loc[allocation_data["Start"] <= ALLOCATION_START, "Start"] = ALLOCATION_START
+    allocation_data = allocation_data[allocation_data["Stop"] >= ROLLING_DATE]
+    allocation_data.loc[allocation_data["Start"] <= ROLLING_DATE, "Start"] = ROLLING_DATE
 
     # Create a list to store rows for each day
     rows = []
