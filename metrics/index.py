@@ -304,8 +304,9 @@ def figureNormalisedIndividual(user_data):
         y=["%-billable", "%-internal"],
         facet_col="User",
         facet_col_wrap=2,
+        facet_row_spacing=0.03,
         color_discrete_sequence=["#8FBC8F", "#FF7F50"],
-        height=1200,
+        height=1600,
     )
     figure.update_layout(title="Normalised data, rolling 7 days", yaxis_title="Work time [%]")
     return figure
@@ -364,8 +365,9 @@ def figureRollingIncomeIndividual(df_user_income_rolling):
         x="Date",
         y="Income",
         facet_col="User",
-        facet_col_wrap=3,
-        height=800,
+        facet_col_wrap=2,
+        facet_row_spacing=0.03,
+        height=1600,
     )
     figure.update_layout(title="Rolling 7 days (income)")
     return figure
