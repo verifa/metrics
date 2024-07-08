@@ -69,6 +69,8 @@ Docker for Windows satisfies the Docker requirement.
 
 To find the ID for a specific database in Notion, see [this](https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion) link.
 
+To check that the dB ID's are correct there is a simple test script in the `scripts` folder. When running it will fetch the dB content and save it in local JSON files for further perusal.
+
 ## Configuration files
 
 Metrics is expecting a simple layout for the optional configuration files. A folder structure found in `/tempo` or, if set, in ${TEMPO_CONFIG_PATH}.
