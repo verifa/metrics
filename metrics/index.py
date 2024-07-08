@@ -36,12 +36,10 @@ else:
     logging.warning("%s {} is not a valid log level, using default: WARNING", TEMPO_LOG_LEVEL)
 
 NOTION_KEY = os.environ.get("NOTION_KEY", "")
-NOTION_OKR_DATABASE_ID = os.environ.get("NOTION_OKR_DATABASE_ID", "")
 NOTION_FINANCIAL_DATABASE_ID = os.environ.get("NOTION_FINANCIAL_DATABASE_ID", "")
 NOTION_WORKINGHOURS_DATABASE_ID = os.environ.get("NOTION_WORKINGHOURS_DATABASE_ID", "")
 NOTION_ALLOCATION_DATABASE_ID = os.environ.get("NOTION_ALLOCATIONS_DATABASE_ID", "")
 NOTION_CREW_DATABASE_ID = os.environ.get("NOTION_CREW_DATABASE_ID", "")
-NOTION_OKR_LABELS = [["2023VH"], ["2023VC"], ["2023EY"]]
 
 COLOR_HEAD = "#ad9ce3"
 COLOR_ONE = "#ccecef"
@@ -58,8 +56,6 @@ SHOWTAB_FINANCE = True
 SHOWTAB_RATES = False
 SHOWTAB_ROLLING_INCOME = True
 SHOWTAB_NORMALISED_WORKTIME = True
-SHOWTAB_OKR_FIG = False
-SHOWMAIN_OKR_FIG = False
 
 # =========================================================
 # Helpers
