@@ -1295,30 +1295,6 @@ if (
         tab_children.append(dcc.Tab(label="Break even", value="comparison"))
 
 
-# ---------------------------------------------------------
-# OKR data from NOTION
-if NOTION_KEY and NOTION_OKR_DATABASE_ID:
-    okr = OKR(NOTION_KEY, NOTION_OKR_DATABASE_ID)
-    okr.get_okr()
-
-    okr_figs_kr = [okr.get_figure_key_result(label) for label in NOTION_OKR_LABELS]
-    okr_figs_ini = [
-        okr.get_figure_initiatives(label, tableHeight, COLOR_HEAD, COLOR_ONE) for label in NOTION_OKR_LABELS
-    ]
-
-    # Add tab
-    if SHOWTAB_OKR_FIG:
-        figure_tabs["okr_fig"] = ("OKR", okr_figs_kr + okr_figs_ini)
-        tab_children.append(dcc.Tab(label="OKR", value="okr_fig"))
-
-    # Update main page with NOTION_OKR_LABELS
-    if SHOWMAIN_OKR_FIG:
-        (head, plots) = figure_tabs["start_page"]
-        plots += okr_figs_kr
-        plots.append(okr_figs_ini[0])
-        figure_tabs["start_page"] = (head, plots)
-
-
 # =========================================================
 # Rendering
 # =========================================================
