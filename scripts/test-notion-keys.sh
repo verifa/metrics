@@ -4,8 +4,7 @@ pushd $(dirname ${0}) > /dev/null
 
 echo "fetches Notion data to the $(dirname ${0}) folder"
 
-NOTION_IDS="NOTION_OKR_DATABASE_ID \
-    NOTION_FINANCIAL_DATABASE_ID \
+NOTION_IDS="NOTION_FINANCIAL_DATABASE_ID \
     NOTION_WORKINGHOURS_DATABASE_ID \
     NOTION_TASKS_DATABASE_ID \
     NOTION_CREW_DATABASE_ID \
