@@ -2,6 +2,11 @@
 line-length = 120
 target-version = ['py37']
 
+[tool.isort]
+profile = "black"
+src_paths = ["metrics","test"]
+skip = ["bin", "lib", "etc", "share"]
+
 [tool.mypy]
 ignore_missing_imports = true
 namespace_packages = true

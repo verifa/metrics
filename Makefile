@@ -84,6 +84,7 @@ isort:
 .PHONY: mypy
 mypy:
 	$(PIP_INSTALL) mypy > mypy-install.log
+	mypy --install-types --non-interactive
 	mypy .
 
 ## pylint
