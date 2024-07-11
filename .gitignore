@@ -9,6 +9,13 @@ __pycache__
 .pytest_cache
 .mypy_cache
 
+# python venv
+bin/
+etc/
+lib/
+share/
+pyvenv.cfg
+
 # config files for development
 config/
 
@@ -22,4 +29,3 @@ docs
 !docs/conf.py
 !docs/index.rst
 !docs/Makefile
-

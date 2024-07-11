@@ -12,9 +12,17 @@ from dash import dcc, html
 from metrics.date_utils import lookBack
 from metrics.notion import Allocations, Crew, Financials, WorkingHours
 from metrics.supplementary_data import SupplementaryData
+
 # fmt: off
-from metrics.tempo_config import (ALLOCATION_START, EUR2SEK, ROLLING_DATE,
-                                  START_DATE, TODAY, YESTERDAY)
+from metrics.tempo_config import (
+    ALLOCATION_START,
+    EUR2SEK,
+    ROLLING_DATE,
+    START_DATE,
+    TODAY,
+    YESTERDAY,
+)
+
 # fmt: on
 from metrics.tempo_data import TempoData
 
