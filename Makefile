@@ -82,7 +82,7 @@ isort:
 ## mypy
 ##	uses mypy to check the project
 .PHONY: mypy
-ifeq (true, $(CI))
+ifeq (, $(strip $(VIRTUAL_ENV)))
 MYPY_TYPES :=
 else
 MYPY_TYPES := mypy --install-types --non-interactive
