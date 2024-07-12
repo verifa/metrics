@@ -82,9 +82,14 @@ isort:
 ## mypy
 ##	uses mypy to check the project
 .PHONY: mypy
+ifeq (true, $(CI))
+MYPY_TYPES :=
+else
+MYPY_TYPES := mypy --install-types --non-interactive
+endif
 mypy:
 	$(PIP_INSTALL) mypy > mypy-install.log
-	mypy --install-types --non-interactive
+	$(MYPY_TYPES)
 	mypy .
 
 ## pylint
