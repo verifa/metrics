@@ -31,7 +31,9 @@ jobs:
         with:
           poetry-version: 1.4.0
       - name: unittests
-        run: make tests -j$(nproc)
+        run: make tests
+      - name: notion
+        run: make check_notion
 
   ci:
     needs: [lint, tests]
