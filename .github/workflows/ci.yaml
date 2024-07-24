@@ -34,6 +34,12 @@ jobs:
         run: make tests
       - name: notion
         run: make check_notion
+        env:
+          NOTION_KEY: ${{ secrets.NOTION_KEY }}
+          NOTION_ALLOCATIONS_DATABASE_ID: ${{ secrets.NOTION_ALLOCATIONS_DATABASE_ID }}
+          NOTION_CREW_DATABASE_ID: ${{ secrets.NOTION_CREW_DATABASE_ID }}
+          NOTION_FINANCIAL_DATABASE_ID: ${{ secrets.NOTION_FINANCIAL_DATABASE_ID }}
+          NOTION_WORKINGHOURS_DATABASE_ID: ${{ secrets.NOTION_WORKINGHOURS_DATABASE_ID }}
 
   ci:
     needs: [lint, tests]

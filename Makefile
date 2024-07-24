@@ -11,6 +11,7 @@ PIP_INSTALL := $(PIP) install --upgrade
 # Static
 CLOUDRUN_SERVICE=metrics-dashboard
 MAKEFLAGS += -j2
+SHELL = /bin/bash
 
 ##
 ## 		Makefile targets
