@@ -9,4 +9,4 @@ TODAY = pd.Timestamp("today")
 YESTERDAY = TODAY - pd.to_timedelta("1day")
 ROLLING_DATE = lookBack(360)
 ALLOCATION_START = monthBegin(lookBack(90))
-EUR2SEK = 11.62
+EUR2SEK = 11.70
