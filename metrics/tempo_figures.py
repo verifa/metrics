@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from metrics.tempo_config import ROLLING_DATE
+from metrics.tempo_config import EUR2DKK, EUR2SEK, ROLLING_DATE
 
 
 # =========================================================
@@ -308,4 +308,38 @@ def figureSpentTimePercentage(tempo_data):
     figure.update_layout(
         legend=dict(title="Project Key", orientation="h", yanchor="top", y=-0.05, xanchor="center", x=0.5, font_size=16)
     )
+    return figure
+
+
+# =================================
+# Figure: rates to EUR
+# =================================
+def figureRatesToEUR():
+    """Simple plot to show € for rates in SEK and DKK"""
+    df_rates = pd.DataFrame()
+    df_rates["Rates"] = range(750, 1500, 25)
+    df_rates["SEK"] = df_rates["Rates"] / EUR2SEK
+    df_rates["DKK"] = df_rates["Rates"] / EUR2DKK
+
+    figure = px.scatter(height=400)
+    figure.add_scatter(
+        x=df_rates["Rates"],
+        y=df_rates["SEK"],
+        name="SEK",
+        mode="lines+markers",
+        line=dict(color="DarkBlue", dash="dot"),
+    )
+    figure.add_scatter(
+        x=df_rates["Rates"], y=df_rates["DKK"], name="DKK", mode="lines+markers", line=dict(color="crimson", dash="dot")
+    )
+    figure.update_traces(hovertemplate="EUR: %{y:.0f}, RATE: %{x:.0f}")
+    figure.update_xaxes(showspikes=True)
+    figure.update_yaxes(showspikes=True)
+    figure.update_layout(
+        title="Rate converter",
+        yaxis_title="Rates [€]",
+        xaxis_title="Hourly rates",
+        legend=dict(title="", orientation="v", y=0.99, x=0.01, font_size=16),
+    )
+
     return figure
