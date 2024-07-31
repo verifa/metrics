@@ -30,6 +30,7 @@ from metrics.tempo_figures import (
     figureFinancialTotal,
     figureNormalisedIndividual,
     figureNormalisedTeam,
+    figureRatesToEUR,
     figureRollingIncomeIndividual,
     figureRollingIncomeTeam,
     figureRollingTotal,
@@ -997,6 +998,7 @@ if (
     if SHOWTAB_COMPARISON:
         figures = []
         figures.append(figureMinumumRates(crew_df))
+        figures.append(figureRatesToEUR())
         figures.append(sustainableHours(crew_df))
         figures.append(figureEarningsVersusWorkload(df_comparison))
 
