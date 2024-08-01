@@ -795,7 +795,7 @@ def figureMinumumRates(crew_data):
         crew_cost["Share Rate"] = crew_cost["My Share"] * (12 / 52) / (crew_cost["Hours"] * 4)
         crew_cost["Sust Rate"] = crew_cost["Sustainable"] * (12 / 52) / (crew_cost["Hours"] * 4)
 
-        figure = px.scatter()
+        figure = px.scatter(height=400)
 
         figure.add_scatter(
             x=crew_cost["User"],
@@ -847,7 +847,7 @@ def sustainableHours(crew_data):
         figure = px.scatter(hours_df, color_discrete_sequence=px.colors.qualitative.Antique)
         figure.update_traces(mode="lines+markers")
         figure.update_layout(
-            height=600,
+            height=500,
             title=f"Sustainable Working Hours (weekly) <br> 1 EUR = {EUR2SEK} SEK",
             xaxis_title="Rate [€]",
             yaxis_title="Hours per week",
