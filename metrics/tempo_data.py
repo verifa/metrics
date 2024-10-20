@@ -25,7 +25,7 @@ class TempoData:
     this_year: int
     last_year: int
 
-    def __init__(self, base_url: str = "https://api.tempo.io/core/3", tempo_key: Optional[str] = None) -> None:
+    def __init__(self, base_url: str = "https://api.tempo.io/4", tempo_key: Optional[str] = None) -> None:
         tempo_key = tempo_key or os.environ.get("TEMPO_KEY")
         if tempo_key is None:
             sys.exit("Tempo key not provided or TEMPO_KEY not set")
