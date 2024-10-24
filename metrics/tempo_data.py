@@ -13,6 +13,7 @@ from tempoapiclient import client as Client
 
 from metrics.date_utils import lookBack, weekdays
 from metrics.tempo_config import EUR2SEK, YESTERDAY
+from metrics.supplementary_data import SupplementaryRatesData
 
 
 class TempoData:
@@ -25,29 +26,44 @@ class TempoData:
     this_year: int
     last_year: int
 
-    def __init__(self, base_url: str = "https://api.tempo.io/4", tempo_key: Optional[str] = None) -> None:
+    def __init__(self, config_path :str, base_url: str = "https://api.tempo.io/4", tempo_key: Optional[str] = None) -> None:
         tempo_key = tempo_key or os.environ.get("TEMPO_KEY")
         if tempo_key is None:
             sys.exit("Tempo key not provided or TEMPO_KEY not set")
         self.client = Client.Tempo(auth_token=tempo_key, base_url=base_url)
         self.raw = pd.DataFrame()
         self.data = pd.DataFrame()
+        self.issues = pd.DataFrame()
+        self.supp_rates_data = SupplementaryRatesData(config_path)
 
-    def load(self, from_date: str = "1970-01-01", to_date: str = str(date.today())) -> None:
+    def load(self, from_date: str = "1970-01-01", to_date: str = str(date.today()), crew=pd.DataFrame()) -> None:
         """Fetch and populate data from Tempo for the given date range"""
-        logs = self.client.get_worklogs(dateFrom=from_date, dateTo=to_date)
-        self.raw = pd.json_normalize(logs)
-        self.data = self.raw[["issue.key", "timeSpentSeconds", "billableSeconds", "startDate", "author.displayName"]]
-        self.data.columns = ["Key", "Time", "Billable", "Date", "User"]
+
+        # Fetch data from tempo
+        logs              = self.client.get_worklogs(dateFrom=from_date, dateTo=to_date)
+        self.raw          = pd.json_normalize(logs)
+        self.data         = self.raw[["issue.id", "timeSpentSeconds", "billableSeconds", "startDate", "author.accountId"]]
+        self.data.columns = ["IssueId", "Time", "Billable", "Date", "UserId"]
+
+        # Load the supplementary data to translate the IssueId->IssueKey and UserId->human-readable
+        # This is due to the changes to the new tempo api version
+        issues_json_data = self.supp_rates_data.load()
+        self.issues      = pd.json_normalize(issues_json_data, record_path="Issuemap")
+
+        # Merge the data
+        self.data = self.data.merge(self.issues, on='IssueId')
+        self.data = self.data.merge(crew, on='UserId')
+
+        # Process the data according to our needs
         df = pd.DataFrame(self.data.loc[:, ("Key")].str.split("-", n=1).tolist(), columns=["Group", "Number"])
-        self.data.loc[:, ("Group")] = df["Group"]
-        self.data.loc[:, ("Date")] = pd.to_datetime(self.data.loc[:, ("Date")], format="%Y-%m-%d")
-        self.data.loc[:, ("Time")] = self.data.loc[:, ("Time")] / 3600
+        self.data.loc[:, ("Group")]    = df["Group"]
+        self.data.loc[:, ("Date")]     = pd.to_datetime(self.data.loc[:, ("Date")], format="%Y-%m-%d")
+        self.data.loc[:, ("Time")]     = self.data.loc[:, ("Time")] / 3600
         self.data.loc[:, ("Billable")] = self.data.loc[:, ("Billable")] / 3600
         self.data.loc[:, ("Internal")] = self.data.loc[:, ("Time")] - self.data.loc[:, ("Billable")]
-        self.data.loc[:, ("Year")] = self.data.loc[:, ("Date")].dt.year
-        self.this_year = self.data["Year"].unique().max()
-        self.last_year = self.this_year - 1
+        self.data.loc[:, ("Year")]     = self.data.loc[:, ("Date")].dt.year
+        self.this_year                 = self.data["Year"].unique().max()
+        self.last_year                 = self.this_year - 1
 
     def injectRates(self, rates: pd.DataFrame) -> None:
         """Modify data by merging in the given rates data"""
