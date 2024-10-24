@@ -188,8 +188,11 @@ else:
 
 delta("Notion Crew")
 
-tempo = TempoData()
-tempo.load(from_date=START_DATE, to_date=YESTERDAY)
+# ---------------------------------------------------------
+# Data from TEMPO
+
+tempo = TempoData(TEMPO_CONFIG_PATH)
+tempo.load(from_date=START_DATE, to_date=YESTERDAY, crew=crew_df)
 delta("TempoData")
 
 supplementary = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df)

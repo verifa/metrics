@@ -12,8 +12,6 @@ from metrics.date_utils import splitMonthTable
 class SupplementaryData:
     """SupplementaryData data class"""
 
-    rates_path: str
-    rates: pd.DataFrame
     working_hours: pd.DataFrame
     costs: pd.DataFrame
     internal_keys: pd.DataFrame
@@ -28,6 +26,7 @@ class SupplementaryData:
         self.padding = pd.DataFrame()
         self.internal_keys = pd.DataFrame()
         self.financials = financials
+        self.supp_rates_data = SupplementaryRatesData(config_path)
 
     def load(self, users: pd.Series) -> None:
         if self.working_hours.empty:
@@ -65,21 +64,36 @@ class SupplementaryData:
             self.costs = self.costs.drop("Month", axis=1)
             logging.info("Loaded financials")
 
-        if not os.path.exists(self.rates_path):
-            logging.warning("Rates file path does not exist: %s", self.rates_path)
-        else:
-            with open(self.rates_path, "r", encoding="utf8") as rates_file:
-                rates_data = json.load(rates_file)
-            self.rates = pd.json_normalize(rates_data, record_path="Default")
-            logging.info("Loaded %s", self.rates_path)
+            rates_json_data = self.supp_rates_data.load()
+            self.rates = pd.json_normalize(rates_json_data, record_path="Default")
 
             self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
             self.rates = self.rates.explode("User")
-            exceptions = pd.json_normalize(rates_data, record_path="Exceptions")
+            exceptions = pd.json_normalize(rates_json_data, record_path="Exceptions")
             self.rates = self.rates.merge(exceptions, on=["Key", "User"], how="left")
             rcol = self.rates["Rate_y"].fillna(self.rates["Rate_x"])
             self.rates["Rate"] = rcol
             self.rates = self.rates.drop(columns=["Rate_x", "Rate_y"])
             self.rates = self.rates.astype({"Rate": "int"})
             # adds the internal keys
-            self.internal_keys = pd.json_normalize(rates_data, record_path="Internal")
+            self.internal_keys = pd.json_normalize(rates_json_data, record_path="Internal")
+
+#@TODO: Needs refining, loaded twice. May be use static?
+class SupplementaryRatesData:
+    rates_path: str
+    rates: pd.DataFrame
+
+    def __init__(self, config_path: str):
+        self.rates_path = config_path + "/rates/data.json"
+        self.rates_json_data = []
+
+    def load(self):
+        if not os.path.exists(self.rates_path):
+            logging.warning("Rates file path does not exist: %s", self.rates_path)
+        else:
+            with open(self.rates_path, "r", encoding="utf8") as rates_file:
+                self.rates_json_data = json.load(rates_file)
+            logging.info("Loaded %s", self.rates_path)
+        return self.rates_json_data
+
+
