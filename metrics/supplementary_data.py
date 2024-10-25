@@ -78,7 +78,8 @@ class SupplementaryData:
             # adds the internal keys
             self.internal_keys = pd.json_normalize(rates_json_data, record_path="Internal")
 
-#@TODO: Needs refining, loaded twice. May be use static?
+
+# @TODO: Needs refining, loaded twice. May be use static?
 class SupplementaryRatesData:
     rates_path: str
     rates: pd.DataFrame
@@ -95,5 +96,3 @@ class SupplementaryRatesData:
                 self.rates_json_data = json.load(rates_file)
             logging.info("Loaded %s", self.rates_path)
         return self.rates_json_data
-
-
