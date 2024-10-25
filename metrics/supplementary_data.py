@@ -82,11 +82,10 @@ class SupplementaryData:
 # @TODO: Needs refining, loaded twice. May be use static?
 class SupplementaryRatesData:
     rates_path: str
-    rates: pd.DataFrame
+    rates_json_data: dict
 
     def __init__(self, config_path: str):
         self.rates_path = config_path + "/rates/data.json"
-        self.rates_json_data = []
 
     def load(self):
         if not os.path.exists(self.rates_path):

@@ -12,8 +12,8 @@ import plotly.graph_objects as go
 from tempoapiclient import client as Client
 
 from metrics.date_utils import lookBack, weekdays
-from metrics.tempo_config import EUR2SEK, YESTERDAY
 from metrics.supplementary_data import SupplementaryRatesData
+from metrics.tempo_config import EUR2SEK, YESTERDAY
 
 
 class TempoData:
