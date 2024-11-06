@@ -37,6 +37,7 @@ types-requests = "^2.28.0"
 sphinx = "6.2.1"
 sphinx_rtd_theme = "1.2.0"
 sphinx-mdinclude = "0.5.3"
+jira = {extras = ["cli"], version = "^3.8.0"}
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.13.4"

@@ -10,8 +10,11 @@ Check the [pyproject.toml](./pyproject.toml) for Python requirements. These are 
 
 ## Development
 
-```TEMPO_KEY``` is required. See [Runtime environment](#runtime-environment) below.
-
+Many keys are required. See [Runtime environment](#runtime-environment) below.
+```bash
+# Ensure you have a working setup
+make setup
+```
 ```bash
 # Build the image
 make dev
@@ -59,6 +62,8 @@ Docker for Windows satisfies the Docker requirement.
 | **TEMPO_KEY** <br/> (required) | Tempo API key. Can be generated from **Tempo → Settings (left sidebar) → API Integration**. |
 | **TEMPO_CONFIG_PATH** <br/> (optional) | To be able to add secret configurations there is a default config path `/tempo` where secrets can be mounted as files. For development purposes the environment variable *TEMPO_CONFIG_PATH* overrides the default value for config files. |
 | **TEMPO_LOG_LEVEL** <br/> (optional) | Tempo uses `logging` for logging, with the default log level `WARNING`. This can be changed by setting the environment variable *TEMPO_LOG_LEVEL* to any value in `["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]` |
+| **JIRA_USER** <br/> (required) | A Jira user account . A valid jira user account of format user@domain.com |
+| **JIRA_API_KEY** <br/> (required) | Jira API key for JIRA_USER. Can be generated from here: https://id.atlassian.com/manage-profile/security/api-tokens **Jira → Create API token → give a meaningful name for future reference**. |
 | **NOTION_KEY** <br/> (optional) | Notion API key. Obtained from https://www.notion.so/my-integrations. You must be an owner of the workspace containing the databases. |
 | **NOTION_FINANCIAL_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/>  a database ID from notion is needed. The database should include the column names `Month`, `EUR Start`, `SEK Start`, `external-cost`, and `real-income`. |
 | **NOTION_WORKINGHOURS_DATABASE_ID** <br/> (optional) | *Requires: NOTION_KEY* <br/>  a database ID from notion is needed. The database should include the column names `User`, `Daily`, `Delta`, `Start`, and `Stop`. |
