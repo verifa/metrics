@@ -138,7 +138,7 @@ endif
 
 run: build
 	$(info Additional docker mounts: $(vmounts))
-	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} $(vmounts) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} -e JIRA_USER=${JIRA_USER} -e JIRA_API_TOKEN=${JIRA_API_TOKEN} $(vmounts) --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
 
 ## bare:
 ##	uses $(DOCKER) to run the metrics-dashboard image in a local container

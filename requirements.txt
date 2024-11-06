@@ -1,3 +1,0 @@
-# MKDocs requirements
-mkdocs-material==8.5.9
-mkdocs-awesome-pages-plugin
