@@ -9,6 +9,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from jira import JIRA
 from tempoapiclient import client as Client
 
 from metrics.date_utils import lookBack, weekdays
@@ -20,6 +21,7 @@ class TempoData:
     """Tempo data class."""
 
     client: Client.Tempo
+    jira_client: JIRA
     raw: pd.DataFrame
     data: pd.DataFrame
     padded_data: pd.DataFrame
@@ -27,12 +29,25 @@ class TempoData:
     last_year: int
 
     def __init__(
-        self, config_path: str, base_url: str = "https://api.tempo.io/4", tempo_key: Optional[str] = None
+        self,
+        config_path: str,
+        tempo_base_url: str = "https://api.tempo.io/4",
+        tempo_key: Optional[str] = None,
+        jira_base_url: str = "https://verifa.atlassian.net",
+        jira_user: Optional[str] = None,
+        jira_api_token: Optional[str] = None,
     ) -> None:
         tempo_key = tempo_key or os.environ.get("TEMPO_KEY")
         if tempo_key is None:
             sys.exit("Tempo key not provided or TEMPO_KEY not set")
-        self.client = Client.Tempo(auth_token=tempo_key, base_url=base_url)
+        jira_user = jira_user or os.environ.get("JIRA_USER")
+        if jira_user is None:
+            sys.exit("Jira User not provided or JIRA_USER not set")
+        jira_api_token = jira_api_token or os.environ.get("JIRA_API_TOKEN")
+        if jira_api_token is None:
+            sys.exit("Jira API token not provided or JIRA_API_TOKEN not set")
+        self.client = Client.Tempo(auth_token=tempo_key, base_url=tempo_base_url)
+        self.jira_client = JIRA(server=jira_base_url, basic_auth=(jira_user, jira_api_token))
         self.raw = pd.DataFrame()
         self.data = pd.DataFrame()
         self.issues = pd.DataFrame()
@@ -47,14 +62,11 @@ class TempoData:
         self.data = self.raw[["issue.id", "timeSpentSeconds", "billableSeconds", "startDate", "author.accountId"]]
         self.data.columns = ["IssueId", "Time", "Billable", "Date", "UserId"]
 
-        # Load the supplementary data to translate the IssueId->IssueKey and UserId->human-readable
-        # This is due to the changes to the new tempo api version
-        issues_json_data = self.supp_rates_data.load()
-        self.issues = pd.json_normalize(issues_json_data, record_path="Issuemap")
-
         # Merge the data
-        self.data = self.data.merge(self.issues, on="IssueId")
-        self.data = self.data.merge(crew, on="UserId")
+        issues = self.allJiraIssues()
+        users = self.allJiraUsers()
+        self.data = self.data.merge(issues, on="IssueId")
+        self.data = self.data.merge(users, on="UserId")
 
         # Process the data according to our needs
         df = pd.DataFrame(self.data.loc[:, ("Key")].str.split("-", n=1).tolist(), columns=["Group", "Number"])
@@ -66,6 +78,28 @@ class TempoData:
         self.data.loc[:, ("Year")] = self.data.loc[:, ("Date")].dt.year
         self.this_year = self.data["Year"].unique().max()
         self.last_year = self.this_year - 1
+
+    def allJiraIssues(self) -> pd.DataFrame:
+        start_at = 0
+        res_raw = []
+        while True:
+            issues = self.jira_client.search_issues(jql_str="ORDER BY created DESC", maxResults=1000, startAt=start_at) # this returns only 100 everytime
+            if len(issues) == 0:
+                break
+            res_raw += issues
+            start_at += len(issues)
+            issues = []
+        res = map(lambda r: [int(r.id), r.key], res_raw)
+        jira = pd.DataFrame(res)
+        jira.columns = ["IssueId", "Key"]
+        return jira
+
+    def allJiraUsers(self) -> pd.DataFrame:
+        raw_users = self.jira_client.search_users(query="*")
+        _res = map(lambda r: [r.displayName, r.accountId], raw_users)
+        users = pd.DataFrame(_res)
+        users.columns = ["User", "UserId"]
+        return users
 
     def injectRates(self, rates: pd.DataFrame) -> None:
         """Modify data by merging in the given rates data"""
