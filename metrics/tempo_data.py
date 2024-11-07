@@ -81,15 +81,16 @@ class TempoData:
         self.last_year = self.this_year - 1
 
     def allJiraIssues(self) -> pd.DataFrame:
+        """Fetches all the JIRA issues with IssueId and Key columns as DataFrame"""
         start_at = 0
-        res_raw: ResultList[Issue]
+        res_raw: ResultList[Issue] = ResultList([])
         while True:
             issues = self.jira_client.search_issues(
                 jql_str="ORDER BY created DESC", maxResults=1000, startAt=start_at
             )  # this returns only 100 everytime
             if len(issues) == 0:
                 break
-            res_raw.append(issues)
+            res_raw.extend(issues)
             start_at += len(issues)
         res = map(lambda r: [int(r.id), r.key], res_raw)
         jira = pd.DataFrame(res)
@@ -97,6 +98,7 @@ class TempoData:
         return jira
 
     def allJiraUsers(self) -> pd.DataFrame:
+        """Fetches all the JIRA users with UserId and User coloums as DataFrame"""
         raw_users = self.jira_client.search_users(query="*")
         _res = map(lambda r: [r.displayName, r.accountId], raw_users)
         users = pd.DataFrame(_res)
