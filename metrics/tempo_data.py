@@ -9,7 +9,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from jira import JIRA
+from jira import JIRA, Issue
+from jira.client import ResultList
 from tempoapiclient import client as Client
 
 from metrics.date_utils import lookBack, weekdays
@@ -81,14 +82,15 @@ class TempoData:
 
     def allJiraIssues(self) -> pd.DataFrame:
         start_at = 0
-        res_raw = []
+        res_raw: ResultList[Issue]
         while True:
-            issues = self.jira_client.search_issues(jql_str="ORDER BY created DESC", maxResults=1000, startAt=start_at) # this returns only 100 everytime
+            issues = self.jira_client.search_issues(
+                jql_str="ORDER BY created DESC", maxResults=1000, startAt=start_at
+            )  # this returns only 100 everytime
             if len(issues) == 0:
                 break
-            res_raw += issues
+            res_raw.append(issues)
             start_at += len(issues)
-            issues = []
         res = map(lambda r: [int(r.id), r.key], res_raw)
         jira = pd.DataFrame(res)
         jira.columns = ["IssueId", "Key"]
