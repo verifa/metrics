@@ -40,6 +40,8 @@ jobs:
           NOTION_CREW_DATABASE_ID: ${{ secrets.NOTION_CREW_DATABASE_ID }}
           NOTION_FINANCIAL_DATABASE_ID: ${{ secrets.NOTION_FINANCIAL_DATABASE_ID }}
           NOTION_WORKINGHOURS_DATABASE_ID: ${{ secrets.NOTION_WORKINGHOURS_DATABASE_ID }}
+          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
   ci:
     needs: [lint, tests]
