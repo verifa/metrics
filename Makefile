@@ -148,7 +148,7 @@ run: build
 ##	uses $(DOCKER), $(TEMPO_KEY), $(IMAGE) and $(TAG)
 ##
 bare: build
-	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
+	$(DOCKER) run --rm -ti -e TEMPO_KEY=${TEMPO_KEY} -e JIRA_USER=${JIRA_USER} -e JIRA_API_TOKEN=${JIRA_API_TOKEN} --name metrics-dashboard -p 8000:8000 $(IMAGE):$(TAG)
 
 ## build:
 ##	builds the metrics-dashboard image
