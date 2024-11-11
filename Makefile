@@ -173,8 +173,18 @@ push: build
 ##	deploys the built image to google cloud
 ##
 deploy:
-	gcloud run deploy $(CLOUDRUN_SERVICE) --image $(IMAGE):$(TAG) --region $(REGION) --labels=version=$(TAG)
-
+	gcloud run deploy $(CLOUDRUN_SERVICE) \
+	  --image $(IMAGE):$(TAG) \
+	  --region $(REGION) \
+	  --labels=version=$(TAG) \
+	  --set-env-vars=TEMPO_KEY="${TEMPO_KEY}",\
+JIRA_USER="${JIRA_USER}",\
+JIRA_API_TOKEN="${JIRA_API_TOKEN}",\
+NOTION_KEY="${NOTION_KEY}",\
+NOTION_ALLOCATIONS_DATABASE_ID="${NOTION_ALLOCATIONS_DATABASE_ID}"\
+NOTION_CREW_DATABASE_ID="${NOTION_CREW_DATABASE_ID}",\
+NOTION_FINANCIAL_DATABASE_ID="${NOTION_FINANCIAL_DATABASE_ID}",\
+NOTION_WORKINGHOURS_DATABASE_ID=${NOTION_WORKINGHOURS_DATABASE_ID}
 
 docs: install
 	poetry run sphinx-apidoc -o docs/ metrics/
