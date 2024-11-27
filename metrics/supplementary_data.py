@@ -18,7 +18,6 @@ class SupplementaryData:
     financials: pd.DataFrame
 
     def __init__(self, config_path: str, financials: pd.DataFrame, working_hours: pd.DataFrame) -> None:
-        self.rates_path = config_path + "/rates/data.json"
         self.rates = pd.DataFrame()
         self.working_hours = working_hours
         self.costs = pd.DataFrame()

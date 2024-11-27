@@ -32,6 +32,16 @@ jobs:
           poetry-version: 1.4.0
       - name: unittests
         run: make tests
+        env:
+          NOTION_KEY: ${{ secrets.NOTION_KEY }}
+          NOTION_ALLOCATIONS_DATABASE_ID: ${{ secrets.NOTION_ALLOCATIONS_DATABASE_ID }}
+          NOTION_CREW_DATABASE_ID: ${{ secrets.NOTION_CREW_DATABASE_ID }}
+          NOTION_FINANCIAL_DATABASE_ID: ${{ secrets.NOTION_FINANCIAL_DATABASE_ID }}
+          NOTION_WORKINGHOURS_DATABASE_ID: ${{ secrets.NOTION_WORKINGHOURS_DATABASE_ID }}
+          NOTION_RATES_DATABASE_ID: ${{ secrets.NOTION_RATES_DATABASE_ID }}
+          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      # TODO: This needs to be moved into proper unittests
       - name: notion
         run: make check_notion
         env:

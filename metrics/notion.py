@@ -161,3 +161,18 @@ class Financials(Notion):
             current_finances = 0
 
         logging.debug("Financial data\n%s", self.data)
+
+
+class Rates(Notion):
+    "The class for Rates data"
+    data: pd.DataFrame
+
+    def get_rates(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        self.data = pd.DataFrame(columns=["Key", "Rate", "Currency"])
+        for item in result_dict["results"]:
+            key = item["properties"]["Key"]["title"][0]["plain_text"]
+            rate = item["properties"]["Rate"]["number"]
+            currency = item["properties"]["Currency"]["select"]["name"]
+            self.data.loc[-1] = [key, rate, currency]
+            self.data.index += 1
