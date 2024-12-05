@@ -176,7 +176,7 @@ deploy:
 	gcloud run deploy $(CLOUDRUN_SERVICE) \
 	  --image $(IMAGE):$(TAG) \
 	  --region $(REGION) \
-	  --labels=version=$(TAG)"
+	  --labels=version=$(TAG)
 
 docs: install
 	poetry run sphinx-apidoc -o docs/ metrics/
