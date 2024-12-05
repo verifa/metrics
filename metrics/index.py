@@ -11,7 +11,7 @@ from dash import dcc, html
 
 from metrics.constants import *
 from metrics.date_utils import lookBack
-from metrics.notion import Allocations, Crew, Financials, WorkingHours
+from metrics.notion import Allocations, Crew, Financials, WorkingHours, Rates
 from metrics.supplementary_data import SupplementaryData
 
 # fmt: off
@@ -153,6 +153,15 @@ else:
 
 delta("Notion Crew")
 
+if NOTION_KEY and NOTION_RATES_DATABASE_ID:
+    rates = Rates(NOTION_KEY, NOTION_RATES_DATABASE_ID)
+    rates.get_rates()
+    rates_df = rates.data
+else:
+    rates_df = pd.DataFrame()
+
+delta("Notion Rates")
+
 # ---------------------------------------------------------
 # Data from TEMPO
 
@@ -160,7 +169,7 @@ tempo = TempoData(TEMPO_CONFIG_PATH)
 tempo.load(from_date=START_DATE, to_date=YESTERDAY, crew=crew_df)
 delta("TempoData")
 
-supplementary = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df)
+supplementary = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df, rates_df)
 supplementary.load(tempo.getUsers())
 delta("Supplementary Data")
 

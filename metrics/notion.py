@@ -163,8 +163,20 @@ class Financials(Notion):
         logging.debug("Financial data\n%s", self.data)
 
 
-class Rates(Notion):
-    "The class for Rates data"
+class RatesCurrency(Notion):
+    "The class for Currency conversion data"
+    data: pd.DataFrame
+
+    def get_rates(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        self.data = pd.DataFrame(columns=["SEK2EUR"])
+        for item in result_dict["results"]:
+            sek2euro = item["properties"]["SEK2EUR"]["number"]
+            self.data.loc[-1] = [sek2euro]
+            self.data.index += 1
+
+class RatesDefault(Notion):
+    "The class for Default Rates data"
     data: pd.DataFrame
 
     def get_rates(self) -> None:
@@ -175,4 +187,30 @@ class Rates(Notion):
             rate = item["properties"]["Rate"]["number"]
             currency = item["properties"]["Currency"]["select"]["name"]
             self.data.loc[-1] = [key, rate, currency]
+            self.data.index += 1
+
+class RatesExceptions(Notion):
+    "The class for Exceptional Rates data"
+    data: pd.DataFrame
+
+    def get_rates(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        self.data = pd.DataFrame(columns=["Key", "Rate", "User"])
+        for item in result_dict["results"]:
+            key = item["properties"]["Key"]["select"]["name"]
+            rate = item["properties"]["Rate"]["number"]
+            user = item["properties"]["User"]["title"][0]["plain_text"]
+            self.data.loc[-1] = [key, rate, user]
+            self.data.index += 1
+
+class RatesInternal(Notion):
+    "The class for Exceptional Rates data"
+    data: pd.DataFrame
+
+    def get_rates(self) -> None:
+        result_dict = self.fetch_data(self.database_id).json()
+        self.data = pd.DataFrame(columns=["Key"])
+        for item in result_dict["results"]:
+            key = item["properties"]["Key"]["title"][0]["plain_text"]
+            self.data.loc[-1] = [key]
             self.data.index += 1
