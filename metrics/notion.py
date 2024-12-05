@@ -175,6 +175,7 @@ class RatesCurrency(Notion):
             self.data.loc[-1] = [sek2euro]
             self.data.index += 1
 
+
 class RatesDefault(Notion):
     "The class for Default Rates data"
     data: pd.DataFrame
@@ -189,6 +190,7 @@ class RatesDefault(Notion):
             self.data.loc[-1] = [key, rate, currency]
             self.data.index += 1
 
+
 class RatesExceptions(Notion):
     "The class for Exceptional Rates data"
     data: pd.DataFrame
@@ -202,6 +204,7 @@ class RatesExceptions(Notion):
             user = item["properties"]["User"]["title"][0]["plain_text"]
             self.data.loc[-1] = [key, rate, user]
             self.data.index += 1
+
 
 class RatesInternal(Notion):
     "The class for Exceptional Rates data"

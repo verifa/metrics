@@ -11,7 +11,15 @@ from dash import dcc, html
 
 from metrics.constants import *
 from metrics.date_utils import lookBack
-from metrics.notion import Allocations, Crew, Financials, WorkingHours, Rates
+from metrics.notion import (
+    Allocations,
+    Crew,
+    Financials,
+    WorkingHours,
+    RatesDefault,
+    RatesExceptions,
+    RatesInternal,
+)
 from metrics.supplementary_data import SupplementaryData
 
 # fmt: off
@@ -153,12 +161,26 @@ else:
 
 delta("Notion Crew")
 
-if NOTION_KEY and NOTION_RATES_DATABASE_ID:
-    rates = Rates(NOTION_KEY, NOTION_RATES_DATABASE_ID)
-    rates.get_rates()
-    rates_df = rates.data
+if NOTION_KEY and NOTION_DEFAULT_RATES_DATABASE_ID:
+    default_rates = RatesDefault(NOTION_KEY, NOTION_DEFAULT_RATES_DATABASE_ID)
+    default_rates.get_rates()
+    default_rates_df = default_rates.data
 else:
-    rates_df = pd.DataFrame()
+    default_rates_df = pd.DataFrame()
+
+if NOTION_KEY and NOTION_EXCEPTIONS_RATES_DATABASE_ID:
+    exceptional_rates = RatesExceptions(NOTION_KEY, NOTION_EXCEPTIONS_RATES_DATABASE_ID)
+    exceptional_rates.get_rates()
+    exceptional_rates_df = exceptional_rates.data
+else:
+    exceptional_rates_df = pd.DataFrame()
+
+if NOTION_KEY and NOTION_INTERNAL_RATES_DATABASE_ID:
+    internal_keys = RatesInternal(NOTION_KEY, NOTION_INTERNAL_RATES_DATABASE_ID)
+    internal_keys.get_rates()
+    internal_keys_df = internal_keys.data
+else:
+    internal_keys_df = pd.DataFrame()
 
 delta("Notion Rates")
 
@@ -169,7 +191,9 @@ tempo = TempoData(TEMPO_CONFIG_PATH)
 tempo.load(from_date=START_DATE, to_date=YESTERDAY, crew=crew_df)
 delta("TempoData")
 
-supplementary = SupplementaryData(TEMPO_CONFIG_PATH, financials_df, working_hours_df, rates_df)
+supplementary = SupplementaryData(
+    TEMPO_CONFIG_PATH, financials_df, working_hours_df, default_rates_df, exceptional_rates_df, internal_keys_df
+)
 supplementary.load(tempo.getUsers())
 delta("Supplementary Data")
 
