@@ -14,7 +14,6 @@ from jira.client import ResultList
 from tempoapiclient import client as Client
 
 from metrics.date_utils import lookBack, weekdays
-from metrics.supplementary_data import SupplementaryRatesData
 from metrics.tempo_config import EUR2SEK, YESTERDAY
 
 
@@ -52,7 +51,6 @@ class TempoData:
         self.raw = pd.DataFrame()
         self.data = pd.DataFrame()
         self.issues = pd.DataFrame()
-        self.supp_rates_data = SupplementaryRatesData(config_path)
 
     def load(self, from_date: str = "1970-01-01", to_date: str = str(date.today()), crew=pd.DataFrame()) -> None:
         """Fetch and populate data from Tempo for the given date range"""

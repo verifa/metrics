@@ -17,15 +17,24 @@ class SupplementaryData:
     internal_keys: pd.DataFrame
     financials: pd.DataFrame
 
-    def __init__(self, config_path: str, financials: pd.DataFrame, working_hours: pd.DataFrame, rates: pd.DataFrame) -> None:
-        self.rates = rates
+    def __init__(
+        self,
+        config_path: str,
+        financials: pd.DataFrame,
+        working_hours: pd.DataFrame,
+        default_rates: pd.DataFrame,
+        exceptional_rates: pd.DataFrame,
+        internal_keys: pd.DataFrame,
+    ) -> None:
+        self.rates = default_rates
         self.working_hours = working_hours
         self.costs = pd.DataFrame()
         self.raw_costs = pd.DataFrame()
         self.padding = pd.DataFrame()
         self.internal_keys = pd.DataFrame()
         self.financials = financials
-        self.supp_data = SupplementaryRatesData(config_path)
+        self.exceptional_rates = exceptional_rates
+        self.internal_keys = internal_keys
 
     def load(self, users: pd.Series) -> None:
         if self.working_hours.empty:
@@ -64,29 +73,8 @@ class SupplementaryData:
             logging.info("Loaded financials")
             self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
             self.rates = self.rates.explode("User")
-            exceptions = pd.json_normalize(rates_json_data, record_path="Exceptions")
-            self.rates = self.rates.merge(exceptions, on=["Key", "User"], how="left")
+            self.rates = self.rates.merge(self.exceptional_rates, on=["Key", "User"], how="left")
             rcol = self.rates["Rate_y"].fillna(self.rates["Rate_x"])
             self.rates["Rate"] = rcol
             self.rates = self.rates.drop(columns=["Rate_x", "Rate_y"])
             self.rates = self.rates.astype({"Rate": "int"})
-            # adds the internal keys
-            self.internal_keys = pd.json_normalize(rates_json_data, record_path="Internal")
-
-
-# @TODO: Needs refining, loaded twice. May be use static?
-class SupplementaryRatesData:
-    rates_path: str
-    rates_json_data: dict
-
-    def __init__(self, config_path: str):
-        self.rates_path = config_path + "/rates/data.json"
-
-    def load(self):
-        if not os.path.exists(self.rates_path):
-            logging.warning("Rates file path does not exist: %s", self.rates_path)
-        else:
-            with open(self.rates_path, "r", encoding="utf8") as rates_file:
-                self.rates_json_data = json.load(rates_file)
-            logging.info("Loaded %s", self.rates_path)
-        return self.rates_json_data

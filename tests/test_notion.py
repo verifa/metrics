@@ -19,7 +19,16 @@ from metrics.constants import (
     NOTION_INTERNAL_RATES_DATABASE_ID,
     NOTION_WORKINGHOURS_DATABASE_ID,
 )
-from metrics.notion import Allocations, Crew, Financials, RatesCurrency, RatesDefault, RatesExceptions, RatesInternal, WorkingHours
+from metrics.notion import (
+    Allocations,
+    Crew,
+    Financials,
+    RatesCurrency,
+    RatesDefault,
+    RatesExceptions,
+    RatesInternal,
+    WorkingHours,
+)
 
 
 class TestWorkHours(unittest.TestCase):
