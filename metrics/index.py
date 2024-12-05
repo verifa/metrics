@@ -15,10 +15,10 @@ from metrics.notion import (
     Allocations,
     Crew,
     Financials,
-    WorkingHours,
     RatesDefault,
     RatesExceptions,
     RatesInternal,
+    WorkingHours,
 )
 from metrics.supplementary_data import SupplementaryData
 
