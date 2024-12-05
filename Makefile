@@ -176,10 +176,7 @@ deploy:
 	gcloud run deploy $(CLOUDRUN_SERVICE) \
 	  --image $(IMAGE):$(TAG) \
 	  --region $(REGION) \
-	  --labels=version=$(TAG) \
-	  --set-env-vars=\
-JIRA_USER=$(JIRA_USER),\
-JIRA_API_TOKEN="$(JIRA_API_TOKEN)"
+	  --labels=version=$(TAG)"
 
 docs: install
 	poetry run sphinx-apidoc -o docs/ metrics/
