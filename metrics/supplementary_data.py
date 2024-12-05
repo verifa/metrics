@@ -17,15 +17,15 @@ class SupplementaryData:
     internal_keys: pd.DataFrame
     financials: pd.DataFrame
 
-    def __init__(self, config_path: str, financials: pd.DataFrame, working_hours: pd.DataFrame) -> None:
-        self.rates = pd.DataFrame()
+    def __init__(self, config_path: str, financials: pd.DataFrame, working_hours: pd.DataFrame, rates: pd.DataFrame) -> None:
+        self.rates = rates
         self.working_hours = working_hours
         self.costs = pd.DataFrame()
         self.raw_costs = pd.DataFrame()
         self.padding = pd.DataFrame()
         self.internal_keys = pd.DataFrame()
         self.financials = financials
-        self.supp_rates_data = SupplementaryRatesData(config_path)
+        self.supp_data = SupplementaryRatesData(config_path)
 
     def load(self, users: pd.Series) -> None:
         if self.working_hours.empty:
@@ -62,10 +62,6 @@ class SupplementaryData:
             self.costs = self.costs.drop("days_in_month", axis=1)
             self.costs = self.costs.drop("Month", axis=1)
             logging.info("Loaded financials")
-
-            rates_json_data = self.supp_rates_data.load()
-            self.rates = pd.json_normalize(rates_json_data, record_path="Default")
-
             self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
             self.rates = self.rates.explode("User")
             exceptions = pd.json_normalize(rates_json_data, record_path="Exceptions")
