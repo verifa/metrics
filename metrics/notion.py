@@ -28,12 +28,21 @@ class Notion:
         self.token = token
         self.database_id = database_id
 
-    def fetch_data(self, database_id) -> requests.Response:
-        url = f"https://api.notion.com/v1/databases/{database_id}/query"
-        response = requests.post(
-            url, headers={"Authorization": f"Bearer {self.token}", "Notion-Version": "2022-06-28"}, timeout=30
-        )
-        return response
+    def fetch_data(self, payload: dict[str, str] = {}) -> map:
+        url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Notion-Version": "2022-06-28",
+            "Content-Type": "application/json",
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        json_data = response.json()
+        # Recursive until all rows are fetched, only 100 rows max allowed
+        if json_data["has_more"]:
+            next_cur = json_data["next_cursor"]
+            json_data["results"] += self.fetch_data({"start_cursor": next_cur})
+
+        return json_data["results"]
 
 
 class WorkingHours(Notion):
@@ -41,10 +50,10 @@ class WorkingHours(Notion):
     data: pd.DataFrame
 
     def get_workinghours(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         data = pd.DataFrame(columns=["User", "Daily", "Delta", "Start", "Stop"])
 
-        for item in result_dict["results"]:
+        for item in result_dict:
             user = item["properties"]["User"]["title"][0]["plain_text"]
             daily = item["properties"]["Daily"]["number"]
             delta = item["properties"]["Delta"]["number"]
@@ -62,10 +71,10 @@ class Allocations(Notion):
     data: pd.DataFrame
 
     def get_allocations(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         data = pd.DataFrame(columns=["User", "Allocation", "Start", "Stop", "Unconfirmed", "JiraID"])
 
-        for item in result_dict["results"]:
+        for item in result_dict:
             user = item["properties"]["Assign"]["people"][0]["name"]
             allocation = item["properties"]["Allocation"]["number"]
             start = item["properties"]["Date"]["date"]["start"]
@@ -88,9 +97,9 @@ class Crew(Notion):
     data: pd.DataFrame
 
     def get_crew(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         data = pd.DataFrame(columns=["User", "Role", "Hours", "Total cost", "UserId"])
-        for item in result_dict["results"]:
+        for item in result_dict:
             user = item["properties"]["Person"]["people"][0]["name"]
             jira_id = item["properties"]["JIRA ID"]["rich_text"][0]["plain_text"]
             role = item["properties"]["Role"]["select"]["name"]
@@ -108,11 +117,11 @@ class Financials(Notion):
     data: pd.DataFrame
 
     def get_financials(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
 
         data = pd.DataFrame(columns=["Month", "External_cost", "Real_income", "Starting_amount"])
 
-        for item in result_dict["results"]:
+        for item in result_dict:
             month = item["properties"]["Month"]["title"][0]["plain_text"]
             extcost = item["properties"]["external-cost"]["formula"]["number"]
             income = item["properties"]["real-income"]["formula"]["number"]
@@ -168,9 +177,9 @@ class RatesCurrency(Notion):
     data: pd.DataFrame
 
     def get_rates(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         self.data = pd.DataFrame(columns=["SEK2EUR"])
-        for item in result_dict["results"]:
+        for item in result_dict:
             sek2euro = item["properties"]["SEK2EUR"]["number"]
             self.data.loc[-1] = [sek2euro]
             self.data.index += 1
@@ -181,9 +190,9 @@ class RatesDefault(Notion):
     data: pd.DataFrame
 
     def get_rates(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         self.data = pd.DataFrame(columns=["Key", "Rate", "Currency"])
-        for item in result_dict["results"]:
+        for item in result_dict:
             key = item["properties"]["Key"]["title"][0]["plain_text"]
             rate = item["properties"]["Rate"]["number"]
             currency = item["properties"]["Currency"]["select"]["name"]
@@ -196,9 +205,9 @@ class RatesExceptions(Notion):
     data: pd.DataFrame
 
     def get_rates(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         self.data = pd.DataFrame(columns=["Key", "Rate", "User"])
-        for item in result_dict["results"]:
+        for item in result_dict:
             key = item["properties"]["Key"]["select"]["name"]
             rate = item["properties"]["Rate"]["number"]
             user = item["properties"]["User"]["title"][0]["plain_text"]
@@ -211,9 +220,9 @@ class RatesInternal(Notion):
     data: pd.DataFrame
 
     def get_rates(self) -> None:
-        result_dict = self.fetch_data(self.database_id).json()
+        result_dict = self.fetch_data()
         self.data = pd.DataFrame(columns=["Key"])
-        for item in result_dict["results"]:
+        for item in result_dict:
             key = item["properties"]["Key"]["title"][0]["plain_text"]
             self.data.loc[-1] = [key]
             self.data.index += 1

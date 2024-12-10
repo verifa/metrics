@@ -30,7 +30,6 @@ class TempoData:
 
     def __init__(
         self,
-        config_path: str,
         tempo_base_url: str = "https://api.tempo.io/4",
         tempo_key: Optional[str] = None,
         jira_base_url: str = "https://verifa.atlassian.net",
@@ -275,6 +274,7 @@ class TempoData:
             fig.update_layout(height=fnTableHeight(table_working_hours))
         return fig
 
+    # Collect the missing rates and replace with '???'
     def rawRatesTable(self) -> pd.DataFrame:
         rate_data = self.data[self.data["Billable"] > 0]
         rate_data = rate_data.groupby(["Key", "Rate"], dropna=False, as_index=False).agg(
@@ -304,6 +304,7 @@ class TempoData:
             fig.update_layout(height=fnTableHeight(rate_data))
         return fig
 
+    # Draw the missing rates table
     def missingRatesTable(self, fnTableHeight=None, color_head="paleturquoise", color_cells="lavender") -> go.Figure:
         rate_data = self.rawRatesTable()
         rate_data = rate_data[rate_data["Rate"] == "???"]
@@ -420,7 +421,7 @@ class TempoData:
 
     def zeroOutBillableTime(self, keys: pd.DataFrame) -> None:
         """
-        Sets billable time to zero (0) for internal project keys
+        Sets billable time to zero (0) and actual time to 'internal' for internal project keys
         """
         if not keys.empty:
             for key in keys["Key"]:
