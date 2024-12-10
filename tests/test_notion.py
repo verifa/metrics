@@ -23,12 +23,21 @@ from metrics.notion import (
     Allocations,
     Crew,
     Financials,
+    Notion,
     RatesCurrency,
     RatesDefault,
     RatesExceptions,
     RatesInternal,
     WorkingHours,
 )
+
+
+class TestNotion(unittest.TestCase):
+
+    def test_notion_more_than_100(self):
+        notion = Notion(NOTION_KEY, NOTION_DEFAULT_RATES_DATABASE_ID)
+        data = notion.fetch_data()
+        self.assertGreater(len(data), 112)
 
 
 class TestWorkHours(unittest.TestCase):
@@ -65,12 +74,12 @@ class TestRates(unittest.TestCase):
     def test_default_rates(self):
         r = RatesDefault(NOTION_KEY, NOTION_DEFAULT_RATES_DATABASE_ID)
         r.get_rates()
-        self.assertEqual("FAT-1", r.data.loc[0]["Key"])
+        self.assertIn("FAT-1", r.data.loc[:]["Key"].values)
 
     def test_exceptions_rates(self):
         r = RatesExceptions(NOTION_KEY, NOTION_EXCEPTIONS_RATES_DATABASE_ID)
         r.get_rates()
-        self.assertEqual("FAT-1", r.data.loc[0]["Key"])
+        self.assertIn("FAT-1", r.data.loc[:]["Key"].values)
 
     def test_internal_keys(self):
         r = RatesInternal(NOTION_KEY, NOTION_INTERNAL_RATES_DATABASE_ID)

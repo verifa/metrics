@@ -14,17 +14,14 @@ class SupplementaryData:
 
     working_hours: pd.DataFrame
     costs: pd.DataFrame
-    internal_keys: pd.DataFrame
     financials: pd.DataFrame
 
     def __init__(
         self,
-        config_path: str,
         financials: pd.DataFrame,
         working_hours: pd.DataFrame,
         default_rates: pd.DataFrame,
         exceptional_rates: pd.DataFrame,
-        internal_keys: pd.DataFrame,
     ) -> None:
         self.rates = default_rates
         self.working_hours = working_hours
@@ -34,13 +31,14 @@ class SupplementaryData:
         self.internal_keys = pd.DataFrame()
         self.financials = financials
         self.exceptional_rates = exceptional_rates
-        self.internal_keys = internal_keys
 
     def load(self, users: pd.Series) -> None:
         if self.working_hours.empty:
             logging.info("Notion working hours table does not exist")
         else:
             logging.debug(users)
+            logging.debug(self.working_hours)
+            # Remove users who are not active (alumini)
             for index, row in self.working_hours.iterrows():
                 not_matches = (users == row["User"]).value_counts().loc[False]
                 if not_matches == users.count():
@@ -70,6 +68,7 @@ class SupplementaryData:
             self.costs["Date"] = self.costs.index
             self.costs = self.costs.drop("days_in_month", axis=1)
             self.costs = self.costs.drop("Month", axis=1)
+            logging.debug("Modified costs%s", self.costs)
             logging.info("Loaded financials")
             self.rates["User"] = [users.values.tolist() for _ in range(len(self.rates))]
             self.rates = self.rates.explode("User")
@@ -78,3 +77,4 @@ class SupplementaryData:
             self.rates["Rate"] = rcol
             self.rates = self.rates.drop(columns=["Rate_x", "Rate_y"])
             self.rates = self.rates.astype({"Rate": "int"})
+            logging.debug("MOdified rates%s", self.rates)

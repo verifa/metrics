@@ -187,17 +187,15 @@ delta("Notion Rates")
 # ---------------------------------------------------------
 # Data from TEMPO
 
-tempo = TempoData(TEMPO_CONFIG_PATH)
+tempo = TempoData()
 tempo.load(from_date=START_DATE, to_date=YESTERDAY, crew=crew_df)
 delta("TempoData")
 
-supplementary = SupplementaryData(
-    TEMPO_CONFIG_PATH, financials_df, working_hours_df, default_rates_df, exceptional_rates_df, internal_keys_df
-)
+supplementary = SupplementaryData(financials_df, working_hours_df, default_rates_df, exceptional_rates_df)
 supplementary.load(tempo.getUsers())
 delta("Supplementary Data")
 
-tempo.zeroOutBillableTime(supplementary.internal_keys)
+tempo.zeroOutBillableTime(internal_keys_df)
 delta("ZeroOutBillable")
 
 if not supplementary.rates.empty:
