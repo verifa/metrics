@@ -8,6 +8,10 @@
 
 Check the [pyproject.toml](./pyproject.toml) for Python requirements. These are handled by Poetry.
 
+## Implementation architecture of metrics dashboard
+The metrics reads data from Jira and Notion APIs. For notion, those data are read as tables. The `metrics/index.py` collects all the data and converts them into a plots using plotly.
+![implementation architecture](./images/AppDiagram.png)
+
 ## Development
 
 Many keys are required. See [Runtime environment](#runtime-environment) below.
