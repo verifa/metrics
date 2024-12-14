@@ -96,7 +96,7 @@ class TempoData:
 
     def allJiraUsers(self) -> pd.DataFrame:
         """Fetches all the JIRA users with UserId and User coloums as DataFrame"""
-        raw_users = self.jira_client.search_users(startAt=0, maxResults=200, query="*")
+        raw_users = self.jira_client.search_users(query="*")
         _res = map(lambda r: [r.displayName, r.accountId], raw_users)
         users = pd.DataFrame(_res)
         users.columns = ["User", "UserId"]
