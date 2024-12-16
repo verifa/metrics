@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>metrics &mdash; metrics 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="metrics package" href="metrics.html" />
+    <link rel="prev" title="Verifa metrics" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            metrics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Module specification:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">metrics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html">metrics package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">metrics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">metrics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="metrics">
+<h1>metrics<a class="headerlink" href="#metrics" title="Permalink to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">metrics package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.constants">metrics.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.date_utils">metrics.date_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.lastMonthDay"><code class="docutils literal notranslate"><span class="pre">lastMonthDay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.leapYear"><code class="docutils literal notranslate"><span class="pre">leapYear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.lookAhead"><code class="docutils literal notranslate"><span class="pre">lookAhead()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.lookBack"><code class="docutils literal notranslate"><span class="pre">lookBack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.monthBegin"><code class="docutils literal notranslate"><span class="pre">monthBegin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.splitMonthTable"><code class="docutils literal notranslate"><span class="pre">splitMonthTable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.date_utils.weekdays"><code class="docutils literal notranslate"><span class="pre">weekdays()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#metrics-index-module">metrics.index module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.notion">metrics.notion module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.Allocations"><code class="docutils literal notranslate"><span class="pre">Allocations</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Allocations.data"><code class="docutils literal notranslate"><span class="pre">Allocations.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Allocations.get_allocations"><code class="docutils literal notranslate"><span class="pre">Allocations.get_allocations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.Crew"><code class="docutils literal notranslate"><span class="pre">Crew</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Crew.data"><code class="docutils literal notranslate"><span class="pre">Crew.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Crew.get_crew"><code class="docutils literal notranslate"><span class="pre">Crew.get_crew()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.Financials"><code class="docutils literal notranslate"><span class="pre">Financials</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Financials.data"><code class="docutils literal notranslate"><span class="pre">Financials.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Financials.get_financials"><code class="docutils literal notranslate"><span class="pre">Financials.get_financials()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.Notion"><code class="docutils literal notranslate"><span class="pre">Notion</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Notion.database_id"><code class="docutils literal notranslate"><span class="pre">Notion.database_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Notion.fetch_data"><code class="docutils literal notranslate"><span class="pre">Notion.fetch_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.Notion.token"><code class="docutils literal notranslate"><span class="pre">Notion.token</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.RatesCurrency"><code class="docutils literal notranslate"><span class="pre">RatesCurrency</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesCurrency.data"><code class="docutils literal notranslate"><span class="pre">RatesCurrency.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesCurrency.get_rates"><code class="docutils literal notranslate"><span class="pre">RatesCurrency.get_rates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.RatesDefault"><code class="docutils literal notranslate"><span class="pre">RatesDefault</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesDefault.data"><code class="docutils literal notranslate"><span class="pre">RatesDefault.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesDefault.get_rates"><code class="docutils literal notranslate"><span class="pre">RatesDefault.get_rates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.RatesExceptions"><code class="docutils literal notranslate"><span class="pre">RatesExceptions</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesExceptions.data"><code class="docutils literal notranslate"><span class="pre">RatesExceptions.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesExceptions.get_rates"><code class="docutils literal notranslate"><span class="pre">RatesExceptions.get_rates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.RatesInternal"><code class="docutils literal notranslate"><span class="pre">RatesInternal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesInternal.data"><code class="docutils literal notranslate"><span class="pre">RatesInternal.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.RatesInternal.get_rates"><code class="docutils literal notranslate"><span class="pre">RatesInternal.get_rates()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.notion.WorkingHours"><code class="docutils literal notranslate"><span class="pre">WorkingHours</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.WorkingHours.data"><code class="docutils literal notranslate"><span class="pre">WorkingHours.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.notion.WorkingHours.get_workinghours"><code class="docutils literal notranslate"><span class="pre">WorkingHours.get_workinghours()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.supplementary_data">metrics.supplementary_data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.supplementary_data.SupplementaryData"><code class="docutils literal notranslate"><span class="pre">SupplementaryData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.supplementary_data.SupplementaryData.costs"><code class="docutils literal notranslate"><span class="pre">SupplementaryData.costs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.supplementary_data.SupplementaryData.financials"><code class="docutils literal notranslate"><span class="pre">SupplementaryData.financials</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.supplementary_data.SupplementaryData.load"><code class="docutils literal notranslate"><span class="pre">SupplementaryData.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.supplementary_data.SupplementaryData.working_hours"><code class="docutils literal notranslate"><span class="pre">SupplementaryData.working_hours</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.tempo_config">metrics.tempo_config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.tempo_data">metrics.tempo_data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData"><code class="docutils literal notranslate"><span class="pre">TempoData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.allJiraIssues"><code class="docutils literal notranslate"><span class="pre">TempoData.allJiraIssues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.allJiraUsers"><code class="docutils literal notranslate"><span class="pre">TempoData.allJiraUsers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.byDay"><code class="docutils literal notranslate"><span class="pre">TempoData.byDay()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.byEggBaskets"><code class="docutils literal notranslate"><span class="pre">TempoData.byEggBaskets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.byGroup"><code class="docutils literal notranslate"><span class="pre">TempoData.byGroup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.byTimeType"><code class="docutils literal notranslate"><span class="pre">TempoData.byTimeType()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.byTotalGroup"><code class="docutils literal notranslate"><span class="pre">TempoData.byTotalGroup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.byUser"><code class="docutils literal notranslate"><span class="pre">TempoData.byUser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.client"><code class="docutils literal notranslate"><span class="pre">TempoData.client</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.data"><code class="docutils literal notranslate"><span class="pre">TempoData.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.firstEntry"><code class="docutils literal notranslate"><span class="pre">TempoData.firstEntry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.getUsers"><code class="docutils literal notranslate"><span class="pre">TempoData.getUsers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.getYear"><code class="docutils literal notranslate"><span class="pre">TempoData.getYear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.injectRates"><code class="docutils literal notranslate"><span class="pre">TempoData.injectRates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.jira_client"><code class="docutils literal notranslate"><span class="pre">TempoData.jira_client</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.lastEntry"><code class="docutils literal notranslate"><span class="pre">TempoData.lastEntry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.lastYear"><code class="docutils literal notranslate"><span class="pre">TempoData.lastYear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.last_year"><code class="docutils literal notranslate"><span class="pre">TempoData.last_year</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.load"><code class="docutils literal notranslate"><span class="pre">TempoData.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.missingRatesTable"><code class="docutils literal notranslate"><span class="pre">TempoData.missingRatesTable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.padTheData"><code class="docutils literal notranslate"><span class="pre">TempoData.padTheData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.padded_data"><code class="docutils literal notranslate"><span class="pre">TempoData.padded_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.ratesTable"><code class="docutils literal notranslate"><span class="pre">TempoData.ratesTable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.raw"><code class="docutils literal notranslate"><span class="pre">TempoData.raw</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.rawRatesTable"><code class="docutils literal notranslate"><span class="pre">TempoData.rawRatesTable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.tableByUser"><code class="docutils literal notranslate"><span class="pre">TempoData.tableByUser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.teamRolling7"><code class="docutils literal notranslate"><span class="pre">TempoData.teamRolling7()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.teamRolling7Relative"><code class="docutils literal notranslate"><span class="pre">TempoData.teamRolling7Relative()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.thisYear"><code class="docutils literal notranslate"><span class="pre">TempoData.thisYear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.this_year"><code class="docutils literal notranslate"><span class="pre">TempoData.this_year</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.totalHours"><code class="docutils literal notranslate"><span class="pre">TempoData.totalHours()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.userRolling7"><code class="docutils literal notranslate"><span class="pre">TempoData.userRolling7()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="metrics.html#metrics.tempo_data.TempoData.zeroOutBillableTime"><code class="docutils literal notranslate"><span class="pre">TempoData.zeroOutBillableTime()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics.tempo_figures">metrics.tempo_figures module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureEarningsVersusWorkload"><code class="docutils literal notranslate"><span class="pre">figureEarningsVersusWorkload()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureFinancialTotal"><code class="docutils literal notranslate"><span class="pre">figureFinancialTotal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureNormalisedIndividual"><code class="docutils literal notranslate"><span class="pre">figureNormalisedIndividual()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureNormalisedTeam"><code class="docutils literal notranslate"><span class="pre">figureNormalisedTeam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureRatesToEUR"><code class="docutils literal notranslate"><span class="pre">figureRatesToEUR()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureRollingIncomeIndividual"><code class="docutils literal notranslate"><span class="pre">figureRollingIncomeIndividual()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureRollingIncomeTeam"><code class="docutils literal notranslate"><span class="pre">figureRollingIncomeTeam()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureRollingTotal"><code class="docutils literal notranslate"><span class="pre">figureRollingTotal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="metrics.html#metrics.tempo_figures.figureSpentTimePercentage"><code class="docutils literal notranslate"><span class="pre">figureSpentTimePercentage()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#module-metrics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Verifa metrics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="metrics.html" class="btn btn-neutral float-right" title="metrics package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Verifa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

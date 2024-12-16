@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verifa metrics &mdash; metrics 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="metrics" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            metrics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Module specification:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">metrics</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">metrics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Verifa metrics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="verifa-metrics">
+<h1>Verifa metrics<a class="headerlink" href="#verifa-metrics" title="Permalink to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Module specification:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">metrics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html">metrics package</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="verifa-metrics-dashboard">
+<h1>Verifa Metrics Dashboard<a class="headerlink" href="#verifa-metrics-dashboard" title="Permalink to this heading"></a></h1>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Docker daemon or Podman (see below under Replacing Docker)</p></li>
+<li><p>Python 3 <span class="raw-html-md"><span style="color:red">**NOTE (2023.10.12): the project fails with Python 3.12 due to an issue with numpy**</span></span></p></li>
+<li><p><a class="reference external" href="https://python-poetry.org/">python-poetry</a> to manage dependencies. (Install: <a class="reference external" href="https://python-poetry.org/docs/#osx--linux--bashonwindows-install-instructions">https://python-poetry.org/docs/#osx–linux–bashonwindows-install-instructions</a>)</p></li>
+</ul>
+<p>Check the <a class="reference external" href="./pyproject.toml">pyproject.toml</a> for Python requirements. These are handled by Poetry.</p>
+</section>
+<section id="implementation-architecture-of-metrics-dashboard">
+<h2>Implementation architecture of metrics dashboard<a class="headerlink" href="#implementation-architecture-of-metrics-dashboard" title="Permalink to this heading"></a></h2>
+<p>The metrics reads data from Jira and Notion APIs. For notion, those data are read as tables. The <code class="docutils literal notranslate"><span class="pre">metrics/index.py</span></code> collects all the data and converts them into a plots using plotly.</p>
+<a class="reference external image-reference" href="./images/AppDiagram.png"><img alt="implementation architecture" src="images/AppDiagram.png" /></a>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this heading"></a></h2>
+<p>Many keys are required. See <span class="xref std std-ref">Runtime environment</span> below.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the image</span>
+make<span class="w"> </span>dev
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run a container with the built image</span>
+make<span class="w"> </span>run
+<span class="c1"># Browse http://localhost:8000</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For more details about the different make targets</span>
+make<span class="w"> </span><span class="nb">help</span>
+</pre></div>
+</div>
+<section id="tempo-config-path">
+<h3>TEMPO_CONFIG_PATH<a class="headerlink" href="#tempo-config-path" title="Permalink to this heading"></a></h3>
+<p>the run target uses the environment variable TEMPO_CONFIG_PATH, described below, as a mount point if set</p>
+<div class="highlight-Makefile notranslate"><div class="highlight"><pre><span></span><span class="cp">ifneq ($(TEMPO_CONFIG_PATH),)</span>
+<span class="w">  </span><span class="nv">vmounts</span><span class="o">=</span>-v<span class="w"> </span><span class="k">$(</span>TEMPO_CONFIG_PATH<span class="k">)</span>:/tempo
+<span class="cp">else</span>
+<span class="w">  </span><span class="nv">vmounts</span><span class="o">=</span>
+<span class="cp">endif</span>
+</pre></div>
+</div>
+<p>To run a container that ignores the optional environment variable</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>bare
+<span class="c1"># Browse http://localhost:8000</span>
+</pre></div>
+</div>
+</section>
+<section id="replacing-docker">
+<h3>Replacing Docker<a class="headerlink" href="#replacing-docker" title="Permalink to this heading"></a></h3>
+<p>To use <code class="docutils literal notranslate"><span class="pre">podman</span></code>, you can set the <code class="docutils literal notranslate"><span class="pre">DOCKER</span></code> variable to <code class="docutils literal notranslate"><span class="pre">podman</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">DOCKER=podman</span> <span class="pre">run</span></code></p>
+</section>
+<section id="running-on-windows">
+<h3>Running on Windows<a class="headerlink" href="#running-on-windows" title="Permalink to this heading"></a></h3>
+<p>To run on GitBash for Windows, you can set the <code class="docutils literal notranslate"><span class="pre">DOCKER</span></code> variable to <code class="docutils literal notranslate"><span class="pre">winpty</span> <span class="pre">docker</span></code>, e.g. <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">DOCKER='winpty</span> <span class="pre">docker'</span> <span class="pre">run</span></code>.</p>
+<p>Docker for Windows satisfies the Docker requirement.</p>
+</section>
+</section>
+<section id="runtime-environment">
+<h2>Runtime environment<a class="headerlink" href="#runtime-environment" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p> Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>TEMPO_KEY</strong> <span class="raw-html-md"><br/></span> (required)</p></td>
+<td><p>Tempo API key. Can be generated from <strong>Tempo → Settings (left sidebar) → API Integration</strong>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>TEMPO_CONFIG_PATH</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p>To be able to add secret configurations there is a default config path <code class="docutils literal notranslate"><span class="pre">/tempo</span></code> where secrets can be mounted as files. For development purposes the environment variable <em>TEMPO_CONFIG_PATH</em> overrides the default value for config files.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>TEMPO_LOG_LEVEL</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p>Tempo uses <code class="docutils literal notranslate"><span class="pre">logging</span></code> for logging, with the default log level <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>. This can be changed by setting the environment variable <em>TEMPO_LOG_LEVEL</em> to any value in <code class="docutils literal notranslate"><span class="pre">[&quot;DEBUG&quot;,</span> <span class="pre">&quot;INFO&quot;,</span> <span class="pre">&quot;WARNING&quot;,</span> <span class="pre">&quot;ERROR&quot;,</span> <span class="pre">&quot;CRITICAL&quot;]</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>JIRA_USER</strong> <span class="raw-html-md"><br/></span> (required)</p></td>
+<td><p>A Jira user account . A valid jira user account of format <a class="reference external" href="mailto:user&#37;&#52;&#48;domain&#46;com">user<span>&#64;</span>domain<span>&#46;</span>com</a></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>JIRA_API_TOKEN</strong> <span class="raw-html-md"><br/></span> (required)</p></td>
+<td><p>Jira API key for JIRA_USER. Can be generated from here: <a class="reference external" href="https://id.atlassian.com/manage-profile/security/api-tokens">https://id.atlassian.com/manage-profile/security/api-tokens</a> <strong>Jira → Create API token → give a meaningful name for future reference</strong>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>NOTION_KEY</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p>Notion API key. Obtained from <a class="reference external" href="https://www.notion.so/my-integrations">https://www.notion.so/my-integrations</a>. You must be an owner of the workspace containing the databases.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>NOTION_FINANCIAL_DATABASE_ID</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p><em>Requires: NOTION_KEY</em> <span class="raw-html-md"><br/></span>  a database ID from notion is needed. The database should include the column names <code class="docutils literal notranslate"><span class="pre">Month</span></code>, <code class="docutils literal notranslate"><span class="pre">EUR</span> <span class="pre">Start</span></code>, <code class="docutils literal notranslate"><span class="pre">SEK</span> <span class="pre">Start</span></code>, <code class="docutils literal notranslate"><span class="pre">external-cost</span></code>, and <code class="docutils literal notranslate"><span class="pre">real-income</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>NOTION_WORKINGHOURS_DATABASE_ID</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p><em>Requires: NOTION_KEY</em> <span class="raw-html-md"><br/></span>  a database ID from notion is needed. The database should include the column names <code class="docutils literal notranslate"><span class="pre">User</span></code>, <code class="docutils literal notranslate"><span class="pre">Daily</span></code>, <code class="docutils literal notranslate"><span class="pre">Delta</span></code>, <code class="docutils literal notranslate"><span class="pre">Start</span></code>, and <code class="docutils literal notranslate"><span class="pre">Stop</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>NOTION_ALLOCATIONS_DATABASE_ID</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p><em>Requires: NOTION_KEY</em> <span class="raw-html-md"><br/></span>  a database ID from notion is needed. The database should include the column names <code class="docutils literal notranslate"><span class="pre">Allocation</span></code>, <code class="docutils literal notranslate"><span class="pre">Assign</span></code>, <code class="docutils literal notranslate"><span class="pre">Task</span> <span class="pre">ID</span></code>, <code class="docutils literal notranslate"><span class="pre">Unconfirmed</span></code>, and <code class="docutils literal notranslate"><span class="pre">Date</span></code> (as a date range).</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>NOTION_CREW_DATABASE_ID</strong> <span class="raw-html-md"><br/></span> (optional)</p></td>
+<td><p><em>Requires: NOTION_KEY</em> <span class="raw-html-md"><br/></span> a database ID from notion is needed. The database should include the column names <code class="docutils literal notranslate"><span class="pre">Person</span></code>, <code class="docutils literal notranslate"><span class="pre">Currency</span></code>, and <code class="docutils literal notranslate"><span class="pre">Total</span> <span class="pre">Cost</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<section id="notion-database-id-s">
+<h3>Notion database ID’s<a class="headerlink" href="#notion-database-id-s" title="Permalink to this heading"></a></h3>
+<p>To find the ID for a specific database in Notion, see <a class="reference external" href="https://stackoverflow.com/questions/67728038/where-to-find-database-id-for-my-database-in-notion">this</a> link.</p>
+<p>To check that the dB ID’s are correct there is a simple test script in the <code class="docutils literal notranslate"><span class="pre">scripts</span></code> folder. When running it will fetch the dB content and save it in local JSON files for further perusal.</p>
+</section>
+</section>
+<section id="configuration-files">
+<h2>Configuration files<a class="headerlink" href="#configuration-files" title="Permalink to this heading"></a></h2>
+<p>Metrics is expecting a simple layout for the optional configuration files. A folder structure found in <code class="docutils literal notranslate"><span class="pre">/tempo</span></code> or, if set, in ${TEMPO_CONFIG_PATH}.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.
+└──<span class="w"> </span>rates
+<span class="w">    </span>└──<span class="w"> </span>data.json
+</pre></div>
+</div>
+<section id="rates">
+<h3>Rates<a class="headerlink" href="#rates" title="Permalink to this heading"></a></h3>
+<p>The rates file contains 4 lists</p>
+<ul class="simple">
+<li><p><em>Default</em> is a list with project issue keys, rate and currency</p></li>
+<li><p><em>Exceptions</em> is a list of with exceptions if different users have a different rate for the same issue key</p></li>
+<li><p><em>Internal</em> is a list of tempo project is considered internal, even if they are set to billable in tempo</p></li>
+<li><p><em>Currency</em> is a list of exchange rates, € is the currency used in the metrics, so for other currencies a simple conversion is used</p></li>
+</ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Default&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CUS-1&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EUR&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AB-1&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1000&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SEK&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Exceptions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CUS-1&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;125&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;User&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Alice Architect&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Internal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;Currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;SEK2EUR&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="locally-building-the-documentation">
+<h2>Locally building the documentation<a class="headerlink" href="#locally-building-the-documentation" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>docs
+</pre></div>
+</div>
+<p>Then open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-right" title="metrics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Verifa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

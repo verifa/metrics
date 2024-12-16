@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>metrics.tempo_figures &mdash; metrics 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            metrics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Module specification:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">metrics</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">metrics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">metrics.tempo_figures</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for metrics.tempo_figures</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The figures module&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+
+<span class="kn">from</span> <span class="nn">metrics.tempo_config</span> <span class="kn">import</span> <span class="n">EUR2DKK</span><span class="p">,</span> <span class="n">EUR2SEK</span><span class="p">,</span> <span class="n">ROLLING_DATE</span>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Comparing normalized worktime with normalized income</span>
+<span class="c1"># =========================================================</span>
+<div class="viewcode-block" id="figureEarningsVersusWorkload"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureEarningsVersusWorkload">[docs]</a><span class="k">def</span> <span class="nf">figureEarningsVersusWorkload</span><span class="p">(</span><span class="n">user_data</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;%-billable&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;Rolling Weekly Average&quot;</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkgreen&quot;</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Weekly&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;%-billable30&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;Rolling Monthly Average&quot;</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Monthly&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Billable fraction [%]&quot;</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Income / Cost&quot;</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Financial plots</span>
+<span class="c1"># =========================================================</span>
+
+
+<div class="viewcode-block" id="figureFinancialTotal"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureFinancialTotal">[docs]</a><span class="k">def</span> <span class="nf">figureFinancialTotal</span><span class="p">(</span><span class="n">supplementary_data</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+    <span class="n">monthly_result</span> <span class="o">=</span> <span class="n">supplementary_data</span><span class="o">.</span><span class="n">raw_costs</span><span class="p">[</span><span class="n">supplementary_data</span><span class="o">.</span><span class="n">raw_costs</span><span class="p">[</span><span class="s2">&quot;Real_income&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">year</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">monthly_result</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="p">[</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Year&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">year</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">monthly_result</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Real_income&quot;</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#0F5567&quot;</span><span class="p">),</span>
+            <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;tozeroy&quot;</span><span class="p">,</span>
+            <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;rgba(15,85,103,0.1)&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Income&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=-</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;External_cost&quot;</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#F0AA98&quot;</span><span class="p">),</span>
+            <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;tozeroy&quot;</span><span class="p">,</span>
+            <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;rgba(240,170,152,0.1)&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Costs&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Real_income&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;External_cost&quot;</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#C4C4C4&quot;</span><span class="p">),</span>
+            <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;tozeroy&quot;</span><span class="p">,</span>
+            <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;rgba(196,196,196,0.5)&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Result&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">monthly_result</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="p">[</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">day</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">DateOffset</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s2">&quot;1 day&quot;</span><span class="p">)</span>
+    <span class="n">monthly_sum_cost</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="s2">&quot;External_cost&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">monthly_sum_in</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="s2">&quot;Real_income&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Result&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">monthly_sum_in</span> <span class="o">-</span> <span class="n">monthly_sum_cost</span>
+    <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-01&quot;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">monthly_result</span><span class="p">)</span>
+
+    <span class="n">starting_bank</span> <span class="o">=</span> <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Starting_amount&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[:</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">starting_bank</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;First&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">])</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;First&quot;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Starting_amount&quot;</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines+markers&quot;</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;Green&quot;</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Bank&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">],</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">monthly_result</span><span class="p">[</span><span class="s2">&quot;Result&quot;</span><span class="p">],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines+markers&quot;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cumulative result&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">year</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;last 3 months&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">year</span>
+
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Financial numbers for </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Income/Cost/Result [ € ]&quot;</span><span class="p">,</span> <span class="n">hovermode</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Monthly&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">,</span> <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Normalised time (individual)</span>
+<span class="c1"># =========================================================</span>
+
+
+<div class="viewcode-block" id="figureNormalisedIndividual"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureNormalisedIndividual">[docs]</a><span class="k">def</span> <span class="nf">figureNormalisedIndividual</span><span class="p">(</span><span class="n">user_data</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">user_data</span><span class="p">[</span><span class="n">user_data</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ROLLING_DATE</span><span class="p">],</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;%-billable&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%-i</span><span class="s2">nternal&quot;</span><span class="p">],</span>
+        <span class="n">facet_col</span><span class="o">=</span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
+        <span class="n">facet_col_wrap</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">facet_row_spacing</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span>
+        <span class="n">color_discrete_sequence</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#8FBC8F&quot;</span><span class="p">,</span> <span class="s2">&quot;#FF7F50&quot;</span><span class="p">],</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">1600</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Normalised data, rolling 7 days&quot;</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Work time [%]&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Normalised time (team)</span>
+<span class="c1"># =========================================================</span>
+
+
+<div class="viewcode-block" id="figureNormalisedTeam"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureNormalisedTeam">[docs]</a><span class="k">def</span> <span class="nf">figureNormalisedTeam</span><span class="p">(</span><span class="n">team_data</span><span class="p">,</span> <span class="n">last_date</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">team_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;%-billable&quot;</span><span class="p">:</span> <span class="s2">&quot;Weekly Billable&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;</span><span class="si">%-i</span><span class="s2">nternal&quot;</span><span class="p">:</span> <span class="s2">&quot;Weekly Internal&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;%-billable30&quot;</span><span class="p">:</span> <span class="s2">&quot;Monthly Billable&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;</span><span class="si">%-i</span><span class="s2">nternal30&quot;</span><span class="p">:</span> <span class="s2">&quot;Monthly Internal&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Weekly Billable&quot;</span><span class="p">,</span> <span class="s2">&quot;Weekly Internal&quot;</span><span class="p">,</span> <span class="s2">&quot;Monthly Billable&quot;</span><span class="p">,</span> <span class="s2">&quot;Monthly Internal&quot;</span><span class="p">],</span>
+        <span class="n">color_discrete_sequence</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#8FBC8F&quot;</span><span class="p">,</span> <span class="s2">&quot;#FF7F50&quot;</span><span class="p">,</span> <span class="s2">&quot;#006400&quot;</span><span class="p">,</span> <span class="s2">&quot;#A52A2A&quot;</span><span class="p">],</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Normalised team data&quot;</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Work time [%]&quot;</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">xaxis_rangeslider_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">xaxis_range</span><span class="o">=</span><span class="p">[</span><span class="n">ROLLING_DATE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())],</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_vrect</span><span class="p">(</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">last_date</span><span class="p">,</span>
+        <span class="n">x1</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">team_data</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]),</span>
+        <span class="n">annotation_text</span><span class="o">=</span><span class="s2">&quot;Incomplete reported data ᐅ&quot;</span><span class="p">,</span>
+        <span class="n">annotation_position</span><span class="o">=</span><span class="s2">&quot;bottom left&quot;</span><span class="p">,</span>
+        <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;darkred&quot;</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span>
+        <span class="n">line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Rolling fractions&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">,</span> <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_hline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;darkslategrey&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Rolling income (individual)</span>
+<span class="c1"># =========================================================</span>
+
+
+<div class="viewcode-block" id="figureRollingIncomeIndividual"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureRollingIncomeIndividual">[docs]</a><span class="k">def</span> <span class="nf">figureRollingIncomeIndividual</span><span class="p">(</span><span class="n">df_user_income_rolling</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">df_user_income_rolling</span><span class="p">[</span><span class="n">df_user_income_rolling</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ROLLING_DATE</span><span class="p">],</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Income&quot;</span><span class="p">,</span>
+        <span class="n">facet_col</span><span class="o">=</span><span class="s2">&quot;User&quot;</span><span class="p">,</span>
+        <span class="n">facet_col_wrap</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">facet_row_spacing</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">1600</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Rolling 7 days (income)&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Rolling income (team)</span>
+<span class="c1"># =========================================================</span>
+
+
+<div class="viewcode-block" id="figureRollingIncomeTeam"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureRollingIncomeTeam">[docs]</a><span class="k">def</span> <span class="nf">figureRollingIncomeTeam</span><span class="p">(</span><span class="n">df_average_income_rolling_30</span><span class="p">,</span> <span class="n">last_date</span><span class="p">):</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">df_average_income_rolling_30</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Income&quot;</span><span class="p">,</span> <span class="s2">&quot;Income30&quot;</span><span class="p">],</span>
+        <span class="n">color_discrete_sequence</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#8FBC8F&quot;</span><span class="p">,</span> <span class="s2">&quot;#006400&quot;</span><span class="p">],</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Rolling weekly income (average/person)&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Income [ € ]&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">xaxis_rangeslider_visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">xaxis_range</span><span class="o">=</span><span class="p">[</span><span class="n">ROLLING_DATE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())],</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">,</span> <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.75</span><span class="p">))</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_vrect</span><span class="p">(</span>
+        <span class="n">x0</span><span class="o">=</span><span class="n">last_date</span><span class="p">,</span>
+        <span class="n">x1</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">df_average_income_rolling_30</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]),</span>
+        <span class="n">annotation_text</span><span class="o">=</span><span class="s2">&quot;Incomplete reported data ᐅ&quot;</span><span class="p">,</span>
+        <span class="n">annotation_position</span><span class="o">=</span><span class="s2">&quot;bottom left&quot;</span><span class="p">,</span>
+        <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;darkred&quot;</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span>
+        <span class="n">line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Rolling total</span>
+<span class="c1"># =========================================================</span>
+
+
+<div class="viewcode-block" id="figureRollingTotal"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureRollingTotal">[docs]</a><span class="k">def</span> <span class="nf">figureRollingTotal</span><span class="p">(</span><span class="n">df_team_rolling_total</span><span class="p">,</span> <span class="n">supplementary_data</span><span class="p">):</span>
+    <span class="n">df_raw_costs</span> <span class="o">=</span> <span class="n">supplementary_data</span><span class="o">.</span><span class="n">raw_costs</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">df_team_rolling_total</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Income&quot;</span><span class="p">,</span> <span class="s2">&quot;Income30&quot;</span><span class="p">],</span>
+        <span class="n">color_discrete_sequence</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;#B6B6B6&quot;</span><span class="p">,</span> <span class="s2">&quot;#81C784&quot;</span><span class="p">],</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">df_raw_costs</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+            <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">df_raw_costs</span><span class="p">[</span><span class="s2">&quot;Month&quot;</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">df_raw_costs</span><span class="p">[</span><span class="s2">&quot;WeeklyExtCost&quot;</span><span class="p">],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">scatter</span><span class="o">.</span><span class="n">Line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">),</span>
+                <span class="n">fill</span><span class="o">=</span><span class="s2">&quot;tozeroy&quot;</span><span class="p">,</span>
+                <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;rgba(250,128,114,0.1)&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Costs&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Rolling weekly income (total)&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Income [ € ]&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">,</span> <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.75</span><span class="p">))</span>
+    <span class="n">uncertain_area</span> <span class="o">=</span> <span class="n">supplementary_data</span><span class="o">.</span><span class="n">costs</span><span class="p">[</span><span class="n">supplementary_data</span><span class="o">.</span><span class="n">costs</span><span class="p">[</span><span class="s2">&quot;Real_income&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_vrect</span><span class="p">(</span>
+        <span class="n">x0</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">uncertain_area</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]),</span>
+        <span class="n">x1</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">uncertain_area</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">),</span>
+        <span class="n">annotation_text</span><span class="o">=</span><span class="s2">&quot;Uncertain ᐅ&quot;</span><span class="p">,</span>
+        <span class="n">annotation_position</span><span class="o">=</span><span class="s2">&quot;bottom left&quot;</span><span class="p">,</span>
+        <span class="n">fillcolor</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+        <span class="n">line_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># Figure: Spent time on; billable/verifriday/other</span>
+<span class="c1"># =========================================================</span>
+
+
+<span class="c1"># Requires config: rates</span>
+<div class="viewcode-block" id="figureSpentTimePercentage"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureSpentTimePercentage">[docs]</a><span class="k">def</span> <span class="nf">figureSpentTimePercentage</span><span class="p">(</span><span class="n">tempo_data</span><span class="p">):</span>
+    <span class="n">df_by_group</span> <span class="o">=</span> <span class="n">tempo_data</span><span class="o">.</span><span class="n">byTimeType</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Group&quot;</span><span class="p">)</span>
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span>
+        <span class="n">df_by_group</span><span class="p">[</span><span class="n">df_by_group</span><span class="p">[</span><span class="s2">&quot;Date&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ROLLING_DATE</span><span class="p">],</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;Date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Timetype&quot;</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+        <span class="n">barnorm</span><span class="o">=</span><span class="s2">&quot;percent&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">bargap</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Fractions [%]&quot;</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Project Key&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;top&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">figure</span></div>
+
+
+<span class="c1"># =================================</span>
+<span class="c1"># Figure: rates to EUR</span>
+<span class="c1"># =================================</span>
+<div class="viewcode-block" id="figureRatesToEUR"><a class="viewcode-back" href="../../metrics.html#metrics.tempo_figures.figureRatesToEUR">[docs]</a><span class="k">def</span> <span class="nf">figureRatesToEUR</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple plot to show € for rates in SEK and DKK&quot;&quot;&quot;</span>
+    <span class="n">df_rates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;Rates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">750</span><span class="p">,</span> <span class="mi">1500</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;SEK&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;Rates&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">EUR2SEK</span>
+    <span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;DKK&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;Rates&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">EUR2DKK</span>
+
+    <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;Rates&quot;</span><span class="p">],</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;SEK&quot;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SEK&quot;</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines+markers&quot;</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;DarkBlue&quot;</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;Rates&quot;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">df_rates</span><span class="p">[</span><span class="s2">&quot;DKK&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DKK&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines+markers&quot;</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_traces</span><span class="p">(</span><span class="n">hovertemplate</span><span class="o">=</span><span class="s2">&quot;EUR: %</span><span class="si">{y:.0f}</span><span class="s2">, RATE: %</span><span class="si">{x:.0f}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">showspikes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="n">showspikes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Rate converter&quot;</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;Rates [€]&quot;</span><span class="p">,</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;Hourly rates&quot;</span><span class="p">,</span>
+        <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">figure</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Verifa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

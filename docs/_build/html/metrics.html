@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>metrics package &mdash; metrics 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="metrics" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            metrics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Module specification:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">metrics</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">metrics package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.constants">metrics.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.date_utils">metrics.date_utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.lastMonthDay"><code class="docutils literal notranslate"><span class="pre">lastMonthDay()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.leapYear"><code class="docutils literal notranslate"><span class="pre">leapYear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.lookAhead"><code class="docutils literal notranslate"><span class="pre">lookAhead()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.lookBack"><code class="docutils literal notranslate"><span class="pre">lookBack()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.monthBegin"><code class="docutils literal notranslate"><span class="pre">monthBegin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.splitMonthTable"><code class="docutils literal notranslate"><span class="pre">splitMonthTable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.date_utils.weekdays"><code class="docutils literal notranslate"><span class="pre">weekdays()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#metrics-index-module">metrics.index module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.notion">metrics.notion module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.Allocations"><code class="docutils literal notranslate"><span class="pre">Allocations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.Crew"><code class="docutils literal notranslate"><span class="pre">Crew</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.Financials"><code class="docutils literal notranslate"><span class="pre">Financials</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.Notion"><code class="docutils literal notranslate"><span class="pre">Notion</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.RatesCurrency"><code class="docutils literal notranslate"><span class="pre">RatesCurrency</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.RatesDefault"><code class="docutils literal notranslate"><span class="pre">RatesDefault</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.RatesExceptions"><code class="docutils literal notranslate"><span class="pre">RatesExceptions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.RatesInternal"><code class="docutils literal notranslate"><span class="pre">RatesInternal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.notion.WorkingHours"><code class="docutils literal notranslate"><span class="pre">WorkingHours</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.supplementary_data">metrics.supplementary_data module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.supplementary_data.SupplementaryData"><code class="docutils literal notranslate"><span class="pre">SupplementaryData</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.tempo_config">metrics.tempo_config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.tempo_data">metrics.tempo_data module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_data.TempoData"><code class="docutils literal notranslate"><span class="pre">TempoData</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics.tempo_figures">metrics.tempo_figures module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureEarningsVersusWorkload"><code class="docutils literal notranslate"><span class="pre">figureEarningsVersusWorkload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureFinancialTotal"><code class="docutils literal notranslate"><span class="pre">figureFinancialTotal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureNormalisedIndividual"><code class="docutils literal notranslate"><span class="pre">figureNormalisedIndividual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureNormalisedTeam"><code class="docutils literal notranslate"><span class="pre">figureNormalisedTeam()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureRatesToEUR"><code class="docutils literal notranslate"><span class="pre">figureRatesToEUR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureRollingIncomeIndividual"><code class="docutils literal notranslate"><span class="pre">figureRollingIncomeIndividual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureRollingIncomeTeam"><code class="docutils literal notranslate"><span class="pre">figureRollingIncomeTeam()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureRollingTotal"><code class="docutils literal notranslate"><span class="pre">figureRollingTotal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics.tempo_figures.figureSpentTimePercentage"><code class="docutils literal notranslate"><span class="pre">figureSpentTimePercentage()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-metrics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">metrics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">metrics</a></li>
+      <li class="breadcrumb-item active">metrics package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/metrics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="metrics-package">
+<h1>metrics package<a class="headerlink" href="#metrics-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-metrics.constants">
+<span id="metrics-constants-module"></span><h2>metrics.constants module<a class="headerlink" href="#module-metrics.constants" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-metrics.date_utils">
+<span id="metrics-date-utils-module"></span><h2>metrics.date_utils module<a class="headerlink" href="#module-metrics.date_utils" title="Permalink to this heading"></a></h2>
+<p>Various date utility functions</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.lastMonthDay">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">lastMonthDay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">month</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/metrics/date_utils.html#lastMonthDay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.lastMonthDay" title="Permalink to this definition"></a></dt>
+<dd><p>expects YYYY-MM as input returns YYYY-MM-XX where XX is the last day for month MM</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.leapYear">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">leapYear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/metrics/date_utils.html#leapYear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.leapYear" title="Permalink to this definition"></a></dt>
+<dd><p>return True for leap years</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.lookAhead">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">lookAhead</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timestamp('2024-12-16</span> <span class="pre">07:47:24.571258')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/date_utils.html#lookAhead"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.lookAhead" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.lookBack">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">lookBack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timestamp('2024-12-16</span> <span class="pre">07:47:24.571301')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/date_utils.html#lookBack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.lookBack" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.monthBegin">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">monthBegin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Timestamp('2024-12-16</span> <span class="pre">07:47:24.571306')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/date_utils.html#monthBegin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.monthBegin" title="Permalink to this definition"></a></dt>
+<dd><p>Return with the first for the date</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.splitMonthTable">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">splitMonthTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/date_utils.html#splitMonthTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.splitMonthTable" title="Permalink to this definition"></a></dt>
+<dd><p>split the table into two entries per month</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.date_utils.weekdays">
+<span class="sig-prename descclassname"><span class="pre">metrics.date_utils.</span></span><span class="sig-name descname"><span class="pre">weekdays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/date_utils.html#weekdays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.date_utils.weekdays" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the number of weekdays between the dates using np</p>
+</dd></dl>
+
+</section>
+<section id="metrics-index-module">
+<h2>metrics.index module<a class="headerlink" href="#metrics-index-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-metrics.notion">
+<span id="metrics-notion-module"></span><h2>metrics.notion module<a class="headerlink" href="#module-metrics.notion" title="Permalink to this heading"></a></h2>
+<p>Notion related functions and classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.Allocations">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">Allocations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#Allocations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Allocations" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for allocations</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.Allocations.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.Allocations.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.Allocations.get_allocations">
+<span class="sig-name descname"><span class="pre">get_allocations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#Allocations.get_allocations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Allocations.get_allocations" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.Crew">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">Crew</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#Crew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Crew" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for crew data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.Crew.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.Crew.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.Crew.get_crew">
+<span class="sig-name descname"><span class="pre">get_crew</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#Crew.get_crew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Crew.get_crew" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.Financials">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">Financials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#Financials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Financials" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for finance data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.Financials.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.Financials.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.Financials.get_financials">
+<span class="sig-name descname"><span class="pre">get_financials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#Financials.get_financials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Financials.get_financials" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.Notion">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">Notion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#Notion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Notion" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>I’M A DOCSTRING SHORT AND STOUT</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.Notion.database_id">
+<span class="sig-name descname"><span class="pre">database_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#metrics.notion.Notion.database_id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.Notion.fetch_data">
+<span class="sig-name descname"><span class="pre">fetch_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">map</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#Notion.fetch_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.Notion.fetch_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.Notion.token">
+<span class="sig-name descname"><span class="pre">token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#metrics.notion.Notion.token" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.RatesCurrency">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">RatesCurrency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#RatesCurrency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesCurrency" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for Currency conversion data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.RatesCurrency.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.RatesCurrency.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.RatesCurrency.get_rates">
+<span class="sig-name descname"><span class="pre">get_rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#RatesCurrency.get_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesCurrency.get_rates" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.RatesDefault">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">RatesDefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#RatesDefault"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesDefault" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for Default Rates data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.RatesDefault.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.RatesDefault.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.RatesDefault.get_rates">
+<span class="sig-name descname"><span class="pre">get_rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#RatesDefault.get_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesDefault.get_rates" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.RatesExceptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">RatesExceptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#RatesExceptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesExceptions" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for Exceptional Rates data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.RatesExceptions.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.RatesExceptions.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.RatesExceptions.get_rates">
+<span class="sig-name descname"><span class="pre">get_rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#RatesExceptions.get_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesExceptions.get_rates" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.RatesInternal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">RatesInternal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#RatesInternal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesInternal" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for Exceptional Rates data</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.RatesInternal.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.RatesInternal.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.RatesInternal.get_rates">
+<span class="sig-name descname"><span class="pre">get_rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#RatesInternal.get_rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.RatesInternal.get_rates" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.notion.WorkingHours">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.notion.</span></span><span class="sig-name descname"><span class="pre">WorkingHours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/notion.html#WorkingHours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.WorkingHours" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#metrics.notion.Notion" title="metrics.notion.Notion"><code class="xref py py-class docutils literal notranslate"><span class="pre">Notion</span></code></a></p>
+<p>The class for working hour handling</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.notion.WorkingHours.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.notion.WorkingHours.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.notion.WorkingHours.get_workinghours">
+<span class="sig-name descname"><span class="pre">get_workinghours</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/notion.html#WorkingHours.get_workinghours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.notion.WorkingHours.get_workinghours" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-metrics.supplementary_data">
+<span id="metrics-supplementary-data-module"></span><h2>metrics.supplementary_data module<a class="headerlink" href="#module-metrics.supplementary_data" title="Permalink to this heading"></a></h2>
+<p>Tempo related functions and classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.supplementary_data.SupplementaryData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.supplementary_data.</span></span><span class="sig-name descname"><span class="pre">SupplementaryData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">financials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exceptional_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/supplementary_data.html#SupplementaryData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.supplementary_data.SupplementaryData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>SupplementaryData data class</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.supplementary_data.SupplementaryData.costs">
+<span class="sig-name descname"><span class="pre">costs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.supplementary_data.SupplementaryData.costs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.supplementary_data.SupplementaryData.financials">
+<span class="sig-name descname"><span class="pre">financials</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.supplementary_data.SupplementaryData.financials" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.supplementary_data.SupplementaryData.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">users</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/supplementary_data.html#SupplementaryData.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.supplementary_data.SupplementaryData.load" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.supplementary_data.SupplementaryData.working_hours">
+<span class="sig-name descname"><span class="pre">working_hours</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.supplementary_data.SupplementaryData.working_hours" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-metrics.tempo_config">
+<span id="metrics-tempo-config-module"></span><h2>metrics.tempo_config module<a class="headerlink" href="#module-metrics.tempo_config" title="Permalink to this heading"></a></h2>
+<p>Config module</p>
+</section>
+<section id="module-metrics.tempo_data">
+<span id="metrics-tempo-data-module"></span><h2>metrics.tempo_data module<a class="headerlink" href="#module-metrics.tempo_data" title="Permalink to this heading"></a></h2>
+<p>Tempo related functions and classes</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">metrics.tempo_data.</span></span><span class="sig-name descname"><span class="pre">TempoData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tempo_base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://api.tempo.io/4'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempo_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jira_base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://verifa.atlassian.net'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jira_user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jira_api_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Tempo data class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.allJiraIssues">
+<span class="sig-name descname"><span class="pre">allJiraIssues</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.allJiraIssues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.allJiraIssues" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches all the JIRA issues with IssueId and Key columns as DataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.allJiraUsers">
+<span class="sig-name descname"><span class="pre">allJiraUsers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.allJiraUsers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.allJiraUsers" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches all the JIRA users with UserId and User coloums as DataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.byDay">
+<span class="sig-name descname"><span class="pre">byDay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.byDay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.byDay" title="Permalink to this definition"></a></dt>
+<dd><p>returns aggregated time and billable time grouped by date, user and issue key</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.byEggBaskets">
+<span class="sig-name descname"><span class="pre">byEggBaskets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.byEggBaskets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.byEggBaskets" title="Permalink to this definition"></a></dt>
+<dd><p>returns aggregated billable income grouped by issue key group, user and time box (30, 60, 90)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.byGroup">
+<span class="sig-name descname"><span class="pre">byGroup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.byGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.byGroup" title="Permalink to this definition"></a></dt>
+<dd><p>returns aggregated time and billable time grouped by date, user and group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.byTimeType">
+<span class="sig-name descname"><span class="pre">byTimeType</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.byTimeType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.byTimeType" title="Permalink to this definition"></a></dt>
+<dd><p>returns aggregated time and time type grouped by date, user and group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.byTotalGroup">
+<span class="sig-name descname"><span class="pre">byTotalGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">days_back</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.byTotalGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.byTotalGroup" title="Permalink to this definition"></a></dt>
+<dd><p>returns aggregated billable time grouped by issue key group and user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.byUser">
+<span class="sig-name descname"><span class="pre">byUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.byUser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.byUser" title="Permalink to this definition"></a></dt>
+<dd><p>returns aggregated time and billable time grouped by user</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.client">
+<span class="sig-name descname"><span class="pre">client</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tempo</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.client" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.firstEntry">
+<span class="sig-name descname"><span class="pre">firstEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Timestamp</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.firstEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.firstEntry" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.getUsers">
+<span class="sig-name descname"><span class="pre">getUsers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Series</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.getUsers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.getUsers" title="Permalink to this definition"></a></dt>
+<dd><p>returns list of users</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.getYear">
+<span class="sig-name descname"><span class="pre">getYear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.getYear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.getYear" title="Permalink to this definition"></a></dt>
+<dd><p>returns a dataFrame with entries for the given year</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.injectRates">
+<span class="sig-name descname"><span class="pre">injectRates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.injectRates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.injectRates" title="Permalink to this definition"></a></dt>
+<dd><p>Modify data by merging in the given rates data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.jira_client">
+<span class="sig-name descname"><span class="pre">jira_client</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">JIRA</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.jira_client" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.lastEntry">
+<span class="sig-name descname"><span class="pre">lastEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Timestamp</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.lastEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.lastEntry" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.lastYear">
+<span class="sig-name descname"><span class="pre">lastYear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.lastYear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.lastYear" title="Permalink to this definition"></a></dt>
+<dd><p>returns a dataFrame with entries for the previous year</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.last_year">
+<span class="sig-name descname"><span class="pre">last_year</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.last_year" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_date:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'1970-01-01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_date:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'2024-12-16'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crew=Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.load" title="Permalink to this definition"></a></dt>
+<dd><p>Fetch and populate data from Tempo for the given date range</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.missingRatesTable">
+<span class="sig-name descname"><span class="pre">missingRatesTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fnTableHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'paleturquoise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lavender'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.missingRatesTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.missingRatesTable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.padTheData">
+<span class="sig-name descname"><span class="pre">padTheData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_hours</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.padTheData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.padTheData" title="Permalink to this definition"></a></dt>
+<dd><p>creates the self.padded_data padded with zero data
+for each User, an entry for the ZP group will be added for each date &gt;= min(Date) &amp;&amp; &lt;= max(Date)
+Key: ZP-1, Time: 0, Billable: 0, Group: ZP, Internal: 0, Currency: EUR, Rate: 0, Income: 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.padded_data">
+<span class="sig-name descname"><span class="pre">padded_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.padded_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.ratesTable">
+<span class="sig-name descname"><span class="pre">ratesTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fnTableHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'paleturquoise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lavender'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.ratesTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.ratesTable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.raw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.rawRatesTable">
+<span class="sig-name descname"><span class="pre">rawRatesTable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.rawRatesTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.rawRatesTable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.tableByUser">
+<span class="sig-name descname"><span class="pre">tableByUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">working_hours</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fnTableHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'paleturquoise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lavender'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Figure</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.tableByUser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.tableByUser" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.teamRolling7">
+<span class="sig-name descname"><span class="pre">teamRolling7</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_sum</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.teamRolling7"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.teamRolling7" title="Permalink to this definition"></a></dt>
+<dd><p>returns rolling 7 day sums for Billable and non Billable time grouped by user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.teamRolling7Relative">
+<span class="sig-name descname"><span class="pre">teamRolling7Relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">costs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.teamRolling7Relative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.teamRolling7Relative" title="Permalink to this definition"></a></dt>
+<dd><p>returns rolling 7 day sums for Billable and non Billable time grouped by user, relative to the costs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.thisYear">
+<span class="sig-name descname"><span class="pre">thisYear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.thisYear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.thisYear" title="Permalink to this definition"></a></dt>
+<dd><p>returns a dataFrame with entries for the current year</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.this_year">
+<span class="sig-name descname"><span class="pre">this_year</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#metrics.tempo_data.TempoData.this_year" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.totalHours">
+<span class="sig-name descname"><span class="pre">totalHours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.totalHours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.totalHours" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.userRolling7">
+<span class="sig-name descname"><span class="pre">userRolling7</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_sum</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.userRolling7"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.userRolling7" title="Permalink to this definition"></a></dt>
+<dd><p>returns rolling 7 day sums for Billable and non Billable time grouped by user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="metrics.tempo_data.TempoData.zeroOutBillableTime">
+<span class="sig-name descname"><span class="pre">zeroOutBillableTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/metrics/tempo_data.html#TempoData.zeroOutBillableTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_data.TempoData.zeroOutBillableTime" title="Permalink to this definition"></a></dt>
+<dd><p>Sets billable time to zero (0) and actual time to ‘internal’ for internal project keys</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-metrics.tempo_figures">
+<span id="metrics-tempo-figures-module"></span><h2>metrics.tempo_figures module<a class="headerlink" href="#module-metrics.tempo_figures" title="Permalink to this heading"></a></h2>
+<p>The figures module</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureEarningsVersusWorkload">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureEarningsVersusWorkload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureEarningsVersusWorkload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureEarningsVersusWorkload" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureFinancialTotal">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureFinancialTotal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supplementary_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureFinancialTotal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureFinancialTotal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureNormalisedIndividual">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureNormalisedIndividual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureNormalisedIndividual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureNormalisedIndividual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureNormalisedTeam">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureNormalisedTeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">team_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureNormalisedTeam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureNormalisedTeam" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureRatesToEUR">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureRatesToEUR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureRatesToEUR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureRatesToEUR" title="Permalink to this definition"></a></dt>
+<dd><p>Simple plot to show € for rates in SEK and DKK</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureRollingIncomeIndividual">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureRollingIncomeIndividual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_user_income_rolling</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureRollingIncomeIndividual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureRollingIncomeIndividual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureRollingIncomeTeam">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureRollingIncomeTeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_average_income_rolling_30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureRollingIncomeTeam"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureRollingIncomeTeam" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureRollingTotal">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureRollingTotal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_team_rolling_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supplementary_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureRollingTotal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureRollingTotal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="metrics.tempo_figures.figureSpentTimePercentage">
+<span class="sig-prename descclassname"><span class="pre">metrics.tempo_figures.</span></span><span class="sig-name descname"><span class="pre">figureSpentTimePercentage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tempo_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/metrics/tempo_figures.html#figureSpentTimePercentage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#metrics.tempo_figures.figureSpentTimePercentage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-metrics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-metrics" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="metrics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Verifa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
