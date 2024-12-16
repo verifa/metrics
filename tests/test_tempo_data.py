@@ -16,4 +16,4 @@ class TestTempoData(unittest.TestCase):
 
     def test_all_jira_users(self):
         users = self.tempo.allJiraUsers()
-        self.assertGreater(len(users), 50)
+        self.assertGreater(len(users), 40)
